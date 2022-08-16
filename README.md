@@ -37,13 +37,36 @@ Be sure to read the Read the [Documentation](#docs) for guidance on usage.
 
 Release used: **0.9.1**
 
-### Step 2: Use the skeleton project provided
+### Step 2a: Use the skeleton project provided
 
 [Follow the steps provided by the skeleton project](https://github.com/CraigglesO/worker-zig-template)
 
 ```bash
 git clone --recurse-submodules -j8 git@github.com:CraigglesO/worker-zig-template.git
 ```
+
+### Step 2b: Install the workers-zig package
+
+```bash
+# NPM
+npm install --save workers-zig
+# Yarn
+yarn add workers-zig
+# PNPM
+pnpm add workers-zig
+# BUN
+bun add workers-zig
+# Deno?
+echo "LOL too much effort."
+```
+
+### Step 3: Add workers-zig as a submodule to your project
+
+```bash
+git submodule add https://github.com/CraigglesO/workers-zig
+```
+
+### Step 4: Setup a **build.zig** script
 
 ## Example
 
