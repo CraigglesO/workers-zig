@@ -13,7 +13,7 @@ pub const Env = struct {
     jsFree(self.id);
   }
 
-  pub fn var (self: *const Env, name: []const u8) []const u8 {
+  pub fn key (self: *const Env, name: []const u8) []const u8 {
     const strPtr = getObjectValue(self.id, name);
     return getString(strPtr);
   }

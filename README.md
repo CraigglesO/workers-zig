@@ -35,21 +35,14 @@ Be sure to read the Read the [Documentation](#docs) for guidance on usage.
 
 [Follow the instructions to install Zig](https://ziglang.org/learn/getting-started/)
 
-Current Workers-Zig release used: **0.9.1**
+Release used: **0.9.1**
 
-### Step 2: Install the NPM Package
+### Step 2: Use the skeleton project provided
+
+[Follow the steps provided by the skeleton project](https://github.com/CraigglesO/worker-zig-template)
 
 ```bash
-# NPM
-npm install --save workers-zig
-# Yarn
-yarn add workers-zig
-# PNPM
-pnpm add workers-zig
-# BUN
-bun add workers-zig
-# Deno?
-echo "LOL too much effort."
+git clone --recurse-submodules -j8 git@github.com:CraigglesO/worker-zig-template.git
 ```
 
 ## Example
@@ -137,12 +130,13 @@ export default {
 
 ```ts
 import { Router } from 'itty-router'
-import { zigFunction } from 'workers-zig'
+import { zigFunction, zigAsyncFunction } from 'workers-zig'
 
 const router = Router()
-router.get('/', (req: Request) => {
+router.get('/', async (req: Request) => {
   const { a, b } = req.json()
-  const answer = zigFunction('add', a, b)
+  const answer = await zigFunction('add', a, b)
+  // use the zigAsyncFunction if your zig function is async
   new Response(`The answer is: ${answer}`)
 })
 

@@ -7,6 +7,7 @@
 /test
 /zig-cache
 /zig-out
+/.github
 build.zig
 esbuild.mjs
 *.http

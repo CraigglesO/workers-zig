@@ -16,6 +16,8 @@ export interface ScheduleContext {
 
 export type ZigFunction = (id: number) => number
 
+export type ZigUserFunction = (...args: any[]) => any
+
 class ZigWorker extends WASM {
   async fetch (
     name: string, // name of the function
@@ -37,6 +39,32 @@ class ZigWorker extends WASM {
     return new Promise<Response>(resolve => {
       context.resolve = resolve
       fetchFunc(id)
+    })
+  }
+
+  async function (
+    name: string, // name of the function
+    ...args: any[] // arguments to pass to the function
+  ): Promise<any> {
+    // ensure wasm has been build
+    await this._buildWASM()
+
+    // grab the zig function and build a promise
+    const fetchFunc = this.instance.exports[name] as ZigUserFunction
+    return fetchFunc(...args)
+  }
+
+  async asyncFunction (
+    name: string, // name of the function
+    ...args: any[] // arguments to pass to the function
+  ): Promise<any> {
+    // ensure wasm has been build
+    await this._buildWASM()
+
+    // grab the zig function and build a promise
+    const fetchFunc = this.instance.exports[name] as ZigUserFunction
+    return new Promise<Response>(resolve => {
+      fetchFunc(resolve, ...args)
     })
   }
 

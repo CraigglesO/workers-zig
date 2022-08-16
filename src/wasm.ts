@@ -26,7 +26,7 @@ export default class WASM {
   async _buildWASM () {
     if (this.instance !== undefined) return
     // @ts-ignore
-    this.instance = new WebAssembly.Instance(WORKER_ZIG_WASM, {
+    this.instance = new WebAssembly.Instance(__WORKER_ZIG_WASM, {
       env: {
         memoryBase: 0,
         tableBase: 0,

@@ -22,6 +22,14 @@ export function zigFetch<Env = {}> (name: string): Route<Env> {
   }
 }
 
+export function zigFunction (name: string, ...args: any[]): Promise<any> {
+  return zigWorker.function(name, ...args)
+}
+
+export function zigAsyncFunction (name: string, ...args: any[]): Promise<any> {
+  return zigWorker.asyncFunction(name, ...args)
+}
+
 export function zigSchedule<Env = {}> (): Event<Env> {
   return async (
     event: ScheduledEvent,

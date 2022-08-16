@@ -17,6 +17,6 @@ esbuild
   .then(() => {
     const code = fs.readFileSync('./dist/worker.js', 'utf8')
 
-    fs.writeFileSync('./dist/worker.js', 'import WORKER_ZIG_WASM from "./zig.wasm";' + code, 'utf8')
+    fs.writeFileSync('./dist/worker.js', 'import __WORKER_ZIG_WASM from "./zig.wasm";' + code, 'utf8')
   })
   .catch(() => process.exit(1))

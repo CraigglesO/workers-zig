@@ -2,7 +2,7 @@
   "name": "workers-zig",
   "description": "Write Cloudflare Workers in Zig via WebAssembly",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.3",
   "keywords": [
     "cloudflare",
     "worker",
@@ -16,7 +16,7 @@
     "esm",
     "typed"
   ],
-  "author": "Craig O'Connor <craigggles@s2maps.io>",
+  "author": "Craig O'Connor <craiggles@s2maps.io>",
   "license": "MIT",
   "homepage": "https://github.com/CraigglesO/workers-zig",
   "repository": {
@@ -30,7 +30,7 @@
     "dev": "wrangler dev",
     "local": "wrangler dev --local --experimental-enable-local-persistence --ip 127.0.0.1 --port 8789",
     "esbuild": "node esbuild.mjs",
-    "publish": "wrangler publish"
+    "wrangler:publish": "wrangler publish"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.14.1",
