@@ -1,0 +1,17 @@
+name = "test-r2"
+main = "dist/worker.js"
+compatibility_date = "2022-07-29"
+usage_model = "bundled"
+account_id = "83d7ad8b566f26c651ce745168a65a04"
+
+r2_buckets = [
+  { binding = 'BUCKET', bucket_name = 'test-bucket', preview_bucket_name = 'dev-test' },
+]
+
+[build]
+command = "zig build && npm run esbuild"
+watch_dir = [
+  "test",
+  "src",
+  "lib"
+] # Defaults to "test" if command set

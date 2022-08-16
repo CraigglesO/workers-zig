@@ -1,0 +1,14 @@
+@baseURL=http://127.0.0.1:8789
+
+# Test ping
+GET {{baseURL}}
+
+###
+
+# Test basic example
+GET {{baseURL}}/basic
+content-type: text/plain
+
+"Hello Ziggy"
+
+###

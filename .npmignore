@@ -1,0 +1,13 @@
+/cache
+/dist/zig.o
+/dist/zig.wasm
+/lib
+/node_modules
+/src
+/test
+/zig-cache
+/zig-out
+build.zig
+esbuild.mjs
+*.http
+wrangler.toml
