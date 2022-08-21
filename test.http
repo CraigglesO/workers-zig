@@ -6,7 +6,7 @@ GET {{baseURL}}
 ###
 
 # Test basic example
-GET {{baseURL}}/basic
+POST {{baseURL}}/basic
 content-type: text/plain
 
 "Hello Ziggy"

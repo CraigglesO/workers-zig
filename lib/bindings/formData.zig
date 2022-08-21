@@ -1,9 +1,10 @@
 const jsFree = @import("common.zig").jsFree;
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L655
-pub const FormEntry = enum {
-  Field,
-  File
+// TODO: add "isField" and "isFile"
+pub const FormEntry = union(enum) {
+  field: []const u8,
+  file: File,
 };
 
 pub const File = struct {

@@ -1,13 +1,30 @@
+const std = @import("std");
+const mem = std.mem;
+const allocator = std.heap.page_allocator;
 const common = @import("common.zig");
+const jsFree = common.jsFree;
 const Null = common.Null;
+const True = common.True;
+const Undefined = common.Undefined;
+const Classes = common.Classes;
+const jsCreateClass = common.jsCreateClass;
 const BodyInit = @import("body.zig").BodyInit;
-const Array = @import("array.zig").Array;
+const Function = @import("function.zig").Function;
+const AsyncFunction = @import("function.zig").AsyncFunction;
+const Cf = @import("cf.zig");
 const Headers = @import("headers.zig").Headers;
+const Method = @import("../http/common.zig").Method;
 const Object = @import("object.zig").Object;
+const String = @import("string.zig").String;
+const Array = @import("array.zig").Array;
+const getString = @import("string.zig").getString;
+const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
+const FormData = @import("formdata.zig").FormData;
+const Blob = @import("blob.zig").Blob;
+const getObjectValue = @import("object.zig").getObjectValue;
+const getObjectValueNum = @import("object.zig").getObjectValueNum;
 const WebSocket = @import("../apis/websocket.zig").WebSocket;
-
-// https://developers.cloudflare.com/workers/runtime-apis/response/
-// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1461
+const StatusCode = @import("../http/common.zig").StatusCode;
 
 pub const EncodeBody = enum {
   auto,
@@ -40,6 +57,8 @@ pub const ResponseInit = struct {
   }
 };
 
+// https://developers.cloudflare.com/workers/runtime-apis/response/
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1461
 pub const Response = struct {
   id: u32,
 
@@ -51,23 +70,13 @@ pub const Response = struct {
     common.jsFree(self.id);
   }
   
-  // TODO:
   pub fn new (bodyInit: BodyInit, responseInit: ResponseInit) Response {
     // prep arguments
     const jsResOptions = responseInit.toObject();
     defer jsResOptions.free();
     const jsArgs = Array.new();
     defer jsArgs.free();
-    var bodyID: u32 = Null;
-    switch (bodyInit) {
-      .readableStream => |rs| bodyID = rs.id,
-      .string => |s| bodyID = s.id,
-      .arrayBuffer => |ab| bodyID = ab.id,
-      .blob => |blob| bodyID = blob.id,
-      .urlSearchParams => |params| bodyID = params.id,
-      .formData => |formData| bodyID = formData.id,
-      .none => {},
-    }
+    const bodyID = bodyInit.getID();
     jsArgs.push(bodyID);
     jsArgs.push(jsResOptions.id);
     // create the class
@@ -76,60 +85,163 @@ pub const Response = struct {
     return Response{ .id = jsPtr };
   }
 
-  // pub fn fromString (string: []const u8, responseInit: ?ResponseInit) *Response {
+  pub fn fromResponse (bodyInit: BodyInit, response: *const Response) Response {
+    // prep arguments
+    const jsArgs = Array.new();
+    defer jsArgs.free();
+    const bodyID = bodyInit.getID();
+    jsArgs.push(bodyID);
+    jsArgs.push(response.id);
+    // create the class
+    const jsPtr = common.jsCreateClass(common.Classes.Response.toInt(), jsArgs.id);
 
-  // }
-
-  // pub fn fromBytes (bytes: []u8, responseInit: ?ResponseInit) *Response {
-
-  // }
-
-  // pub fn fromResponse(body: ?Body, response: Response) *Response {
-
-  // }
+    return Response{ .id = jsPtr };
+  }
   
+  // ** CONST **
 
-  // CONST
+  pub fn ok (self: *const Response) bool {
+    const body = getObjectValue(self.id, "ok");
+    defer jsFree(body);
+    return body == True;
+  }
 
-  // pub fn body () ?Body {
+  pub fn status (self: *const Response) StatusCode {
+    const code = getObjectValueNum(self.id, "status");
+    return StatusCode.fromInt(code);
+  }
 
-  // }
+  // NOTE: the returned string is a pointer to a string in memory that must be freed
+  pub fn statusText (self: *const Response) []const u8 {
+    const methodStr = String.init(getObjectValue(self.id, "statusText"));
+    defer methodStr.free();
+    return methodStr.value();
+  }
 
-  // pub fn ok () bool {
+  pub fn webSocket (self: *const Response) ?WebSocket {
+    const value = getObjectValue(self.id, "webSocket");
+    if (value == Null) return null;
+    return WebSocket.init(value);
+  }
 
-  // }
+  pub fn method (self: *const Response) Method {
+    // grab the method var
+    const methodStr = String.init(getObjectValue(self.id, "method"));
+    defer methodStr.free();
+    const str = methodStr.value();
+    defer allocator.free(str);
+    // return the method
+    return Method.fromString(str);
+  }
 
-  // pub fn status () u16 {
+  // NOTE: the returned string is a pointer to a string in memory that must be freed
+  pub fn url (self: *const Response) []const u8 {
+    // grab the url var
+    const urlStr = String.init(getObjectValue(self.id, "url"));
+    defer urlStr.free();
+    // return the url
+    return urlStr.value();
+  }
 
-  // }
+  pub fn headers (self: *const Response) Headers {
+    return Headers.init(getObjectValue(self.id, "headers"));
+  }
 
-  // pub fn statusText () []u8 {
+  // "follow", "error", or "manual"
+  pub fn redirected (self: *const Response) bool {
+    const body = getObjectValue(self.id, "redirected");
+    defer jsFree(body);
+    return body == True;
+  }
 
-  // }
+  // ** FUNCTIONS **
 
-  // pub fn headers () Headers {
+  pub fn redirect(self: *const Response, newURL: []const u8, newStatus: ?u16) Response {
+    // grab the redirect function
+    const func = Function{ .id = getObjectValue(self.id, "redirect") };
+    defer func.free();
+    // add arguments
+    const args = Array.new();
+    defer args.free();
+    // build string
+    const urlStr = String.new(newURL);
+    defer urlStr.free();
+    args.push(urlStr.id);
+    args.push(newStatus orelse Undefined);
+    // call the clone function and return the resultant pointer
+    return Response.init(func.callArgs(args));
+  }
 
-  // }
+  pub fn clone (self: *const Response) Response {
+    // grab the clone function
+    const func = Function{ .id = getObjectValue(self.id, "clone") };
+    defer func.free();
+    // call the clone function and return the resultant pointer
+    return Response.init(func.call());
+  }
 
-  // pub fn url () []u8 {
+  // ** BODY **
+  // body is ReadableStream | null
 
-  // }
+  // check that body is ReadableStream
+  pub fn hasBody (self: *const Response) bool {
+    const body = getObjectValue(self.id, "body");
+    defer jsFree(body);
+    return body != Null;
+  }
 
-  // pub fn redirected () bool {
+  pub fn bodyUsed (self: *const Response) bool {
+    const bUsed = getObjectValue(self.id, "bodyUsed");
+    defer jsFree(bUsed);
+    return bUsed == True;
+  }
 
-  // }
+  pub fn arrayBuffer (self: *const Response) callconv(.Async) ?ArrayBuffer {
+    if (!self.hasBody()) return undefined;
+    const aFunc = AsyncFunction.init(getObjectValue(self.id, "arrayBuffer"));
+    defer aFunc.free();
+    const abID = await async aFunc.call();
+    return ArrayBuffer.init(abID);
+  }
 
-  // pub fn webSocket () ?WebSocket {
+  // NOTE: the returned string is a pointer to a string in memory that must be freed
+  pub fn text (self: *const Response) callconv(.Async) ?[]const u8 {
+    if (!self.hasBody()) return undefined;
+    const aFunc = AsyncFunction.init(getObjectValue(self.id, "text"));
+    defer aFunc.free();
+    return await async getString(aFunc.call());
+  }
 
-  // }
+  pub fn json (self: *const Response, comptime T: type) callconv(.Async) ?T {
+    if (!self.hasBody()) return undefined;
+    // get the "string" and then parse it locally
+    const str = await async self.text();
+    defer allocator.free(str);
+    const stream = std.json.TokenStream.init(str);
+    return try std.json.parse(T, &stream, .{});
+  }
 
-  // FUNCTIONS
+  pub fn formData (self: *const Response) callconv(.Async) ?FormData {
+    if (!self.hasBody()) return undefined;
+    const aFunc = AsyncFunction.init(getObjectValue(self.id, "formData"));
+    defer aFunc.free();
+    const formID = await async aFunc.call();
+    return FormData.init(formID);
+  }
 
-  // pub fn redirect(url: []u8, status: ?u16) *Response {
+  pub fn blob (self: *const Response) callconv(.Async) ?Blob {
+    if (!self.hasBody()) return undefined;
+    const aFunc = AsyncFunction.init(getObjectValue(self.id, "blob"));
+    defer aFunc.free();
+    const blobID = await async aFunc.call();
+    return Blob.init(blobID);
+  }
 
-  // }
-
-  // fn clone() *Response {
-
-  // }
+  // fast track arrayBuffer->toOwned
+  pub fn bytes (self: *const Response) callconv(.Async) ?[]u8 {
+    if (!self.hasBody()) return undefined;
+    const ab = await async self.arrayBuffer();
+    defer ab.free();
+    return ab.bytes();
+  }
 };

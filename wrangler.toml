@@ -1,4 +1,4 @@
-name = "test-r2"
+name = "zig-worker-example"
 main = "dist/worker.js"
 compatibility_date = "2022-07-29"
 usage_model = "bundled"

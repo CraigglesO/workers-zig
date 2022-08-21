@@ -2,10 +2,10 @@ const std = @import("std");
 const allocator = std.heap.page_allocator;
 const common = @import("common.zig");
 
-extern fn jsStringSet (ptr: [*]const u8, len: u32) u32;
-extern fn jsStringGet (ptr: u32) [*:0]const u8;
-extern fn jsStringLog (ptr: u32) void;
-extern fn jsStringThrow (ptr: u32) void;
+pub extern fn jsStringSet (ptr: [*]const u8, len: u32) u32;
+pub extern fn jsStringGet (ptr: u32) [*:0]const u8;
+pub extern fn jsStringLog (ptr: u32) void;
+pub extern fn jsStringThrow (ptr: u32) void;
 // NOTE: the returned string is a pointer to a string in memory that must be freed
 pub fn getString (jsPtr: u32) []const u8 {
   const ptr = jsStringGet(jsPtr);

@@ -2,12 +2,12 @@ const std = @import("std");
 const Function = @import("function.zig").Function;
 const jsFree = @import("common.zig").jsFree;
 
-pub const WaitUntilFn = fn wait() callconv(.Async) anyerror!void;
+pub const WaitUntilFn = fn wait() callconv(.Async) void;
 
 // returns a pointer to the resolve function
-extern fn jsWaitUntil (ctxPtr: u32) u32;
-extern fn jsWaitUntilResolve (resolvePtr: u32) void;
-extern fn jsPassThroughOnException (ctxPtr: u32) void;
+pub extern fn jsWaitUntil (ctxPtr: u32) u32;
+pub extern fn jsWaitUntilResolve (resolvePtr: u32) void;
+pub extern fn jsPassThroughOnException (ctxPtr: u32) void;
 
 pub const ExecutionContext = struct {
   id: u32,

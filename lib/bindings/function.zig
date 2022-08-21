@@ -4,8 +4,8 @@ const Undefined = common.Undefined;
 const Array = @import("array.zig").Array;
 const String = @import("string.zig").String;
 
-extern fn jsFnCall(fnPtr: u32, argsPtr: u32) u32;
-extern fn jsAsyncFnCall(frame: *anyopaque, funcPtr: u32, argsPtr: u32, resPtr: *u32) void;
+pub extern fn jsFnCall(fnPtr: u32, argsPtr: u32) u32;
+pub extern fn jsAsyncFnCall(frame: *anyopaque, funcPtr: u32, argsPtr: u32, resPtr: *u32) void;
 pub fn jsAsync(funcPtr: u32, argsPtr: u32) u32 {
   var res: u32 = 0;
   suspend {
@@ -25,7 +25,11 @@ pub const Function = struct {
     common.jsFree(self.id);
   }
 
-  pub fn call (self: *const Function, argsPtr: u32) u32 {
+  pub fn call (self: *const Function) u32 {
+    return jsFnCall(self.id, Undefined);
+  }
+
+  pub fn callArgs (self: *const Function, argsPtr: u32) u32 {
     return jsFnCall(self.id, argsPtr);
   }
 };
@@ -41,7 +45,11 @@ pub const AsyncFunction = struct {
     common.jsFree(self.id);
   }
 
-  pub fn call (self: *const AsyncFunction, argsPtr: u32) callconv(.Async) u32 {
+  pub fn call (self: *const AsyncFunction) callconv(.Async) u32 {
+    return await async jsAsync(self.id, Undefined);
+  }
+
+  pub fn callArgs (self: *const AsyncFunction, argsPtr: u32) callconv(.Async) u32 {
     return await async jsAsync(self.id, argsPtr);
   }
 };

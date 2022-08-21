@@ -10,7 +10,7 @@ export interface Env {
 
 const router = Router()
 router.get('/', () => new Response('Hello from JS!'))
-router.get('/basic', zigFetch<Env>('basicFetch'))
+router.post('/basic', zigFetch<Env>('basicFetch'))
 
 // default methodology
 export default {

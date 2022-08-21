@@ -43,7 +43,7 @@ pub const Headers = struct {
     jsArray.push(jsName.id);
     jsArray.push(jsValue.id);
     // call the function
-    const res = JSValue.init(func.call(jsArray.id));
+    const res = JSValue.init(func.callArgs(jsArray.id));
     defer res.free();
   }
 
@@ -55,7 +55,7 @@ pub const Headers = struct {
     const func = Function{ .id = getObjectValue(self.id, "get") };
     defer func.free();
     // call the function
-    const result = func.call(jsName.id);
+    const result = func.callArgs(jsName.id);
     // return the result
     if (result == Undefined) {
       return;
@@ -63,7 +63,8 @@ pub const Headers = struct {
     return String.init(result);
   }
 
-  // pub fn getAll (name: []u8) ?[]String {
+  // TODO:
+  // pub fn getAll (name: []const u8) ?[]const u8 {
 
   // }
 
@@ -75,7 +76,7 @@ pub const Headers = struct {
     const func = Function{ .id = getObjectValue(self.id, "has") };
     defer func.free();
     // call the function
-    const result = func.call(jsName.id);
+    const result = func.callArgs(jsName.id);
     return result == True;
   }
   
@@ -94,7 +95,7 @@ pub const Headers = struct {
     jsArray.push(jsName.id);
     jsArray.push(jsValue.id);
     // call the function
-    const res = JSValue.init(func.call(jsArray.id));
+    const res = JSValue.init(func.callArgs(jsArray.id));
     defer res.free();
   }
 
@@ -106,17 +107,20 @@ pub const Headers = struct {
     const func = Function{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
     // call the function
-    const res = JSValue.init(func.call(jsName.id));
+    const res = JSValue.init(func.callArgs(jsName.id));
     defer res.free();
   }
 
+  // TODO:
   // pub fn keys () ?[]String {
 
   // }
 
+  // TODO:
   // pub fn values () ?[]String {
 
   // }
 
+  // TODO:
   // pub fn entries () { key: []u8, value: []u8 }
 };

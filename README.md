@@ -5,12 +5,14 @@
 **Workers Zig** is a light weight [**Zig**](https://ziglang.org/) bindings for the [**Cloudflare Workers**](https://workers.cloudflare.com/) environment via [**WebAssembly**](https://webassembly.org/).
 
 Why Zig?
-* Zig is a language that is designed to be a small, fast, and portable language that already supports WASM and WASI. To expound on this, the basic example provided here is `5.0Kb` of WASM code and `5.5Kb` javascript code.
-* I wanted a tool that supported both WASM and JS code to work in tandem.
-* I prefer [**Zigs memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
+* Zig is a language that is designed to be a small, fast, and portable.
+* The language already supports WASM and WASI.
+* Small builds are easy to achieve. To expound on this, the basic example provided here is `5.0Kb` of WASM code and `5.5Kb` javascript code.
+* I wanted a tool that made it easy for both WASM and JS code to work in tandem.
+* I prefer [**Zig's memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
 
 
-Be sure to read the Read the [Documentation](#docs) for guidance on usage.
+Be sure to read the [Documentation](#docs) for guidance on usage.
 
 ## Features
 
@@ -18,15 +20,15 @@ Be sure to read the Read the [Documentation](#docs) for guidance on usage.
 - 🗿 WASI support (coming soon)
 - 🎮 JS bindings with support to write your own - [List of supported bindings here](#docs/bindings)
 - 📨 Fetch bindings
-- ⏰ Scheduled bindings
-- 🔑 Supports Variables and Secrets from wrangler `env`
+- ⏰ Scheduled bindings (coming soon)
+- 🔑 Supports Variables and Secrets from `env`
+- ✨ Cache bindings
 - 📦 KV bindings
 - 🪣 R2 bindings
 - 💾 D1 bindings (coming soon)
-- 🔐 Web-Crypto bindings (coming soon)
-- ✨ Cache bindings
-- 📌 Durable Objects bindings (coming soon)
 - ✉️ WebSockets bindings (coming soon)
+- 🔐 Web-Crypto bindings (coming soon)
+- 📌 Durable Objects bindings (coming soon)
 - 💪 Uses TypeScript
 
 ## Install
@@ -67,6 +69,17 @@ git submodule add https://github.com/CraigglesO/workers-zig
 ```
 
 ### Step 4: Setup a **build.zig** script
+
+### Step 5: Recommended wrangler configuration
+
+```toml
+[build]
+command = "zig build && npm run esbuild"
+watch_dir = [
+  "src",
+  "lib"
+]
+```
 
 ## Example
 
@@ -116,6 +129,10 @@ fn basicHandler(ctx: *Context) callconv(.Async) void {
 }
 
 export fn add(a: u32, b: u32) u32 {
+    return a + b;
+}
+
+fn asyncAdd(resolvePtr: u32, a: u32, b: u32) callconv(.Async) u32 {
     return a + b;
 }
 ```

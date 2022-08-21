@@ -1,89 +1,382 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 const getString = @import("string").getString;
-const jsFree = @import("common.zig").jsFree;
 const getObjectValue = @import("object.zig").getObjectValue;
+const getObjectValueNum = @import("object.zig").getObjectValueNum;
 const Request = @import("request").Request;
+const common = @import("common.zig");
+const jsFree = common.jsFree;
+const Null = common.Null;
+const True = common.True;
 // The `Cf` struct on an inbound Request contains information
 // about the request provided by Cloudflare’s edge.
 // [Details](https://developers.cloudflare.com/workers/runtime-apis/request#incomingrequestcfproperties)
 
-// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L744
-pub const IncomingRequestCfProperties = struct {
-  // (e.g. 395747)
-  asn: u32 = undefined,
-  // The organisation which owns the ASN of the incoming request. (e.g. Google Cloud)
-  asOrganization: []const u8 = undefined,
-  botManagement: ?BotManagement = null,
-  city: ?[]const u8 = null,
-  clientAcceptEncoding: ?[]const u8 = null,
-  clientTcpRtt: u32 = undefined,
-  clientTrustScore: ?u32 = null,
-  // The three-letter airport code of the data center that the request (e.g. "DFW")
-  colo: []const u8 = undefined,
-  continent: ?[]const u8 = null,
-  // The two-letter country code in the request. This is the same value
-  // as that provided in the CF-IPCountry header. (e.g. "US")
-  country: []const u8 = undefined,
-  httpProtocol: []const u8 = undefined,
-  latitude: ?f32 = null,
-  longitude: ?f32 = null,
-  // DMA metro code from which the request was issued, e.g. "635"
-  metroCode: ?[]const u8 = null,
-  postalCode: ?[]const u8 = null,
-  // e.g. "Texas"
-  region: ?[]const u8 = null,
-  // e.g. "TX"
-  regionCode: ?[]const u8 = null,
-  // e.g. "weight=256;exclusive=1"
-  requestPriority: []const u8 = undefined,
-  timezone: ?[]const u8 = null,
-  tlsVersion: []const u8 = undefined,
-  tlsCipher: []const u8 = undefined,
-  tlsClientAuth: TlsClientAuth = undefined,
+// Bot managment
+// [Details](https://developers.cloudflare.com/bots/reference/bot-management-variables)
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L799
+pub const IncomingRequestCfPropertiesBotManagement = struct {
+  id: u32,
 
-  // Bot managment
-  // [Details](https://developers.cloudflare.com/bots/reference/bot-management-variables)
-  // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L799
-  pub const BotManagement = struct {
-    score: u8 = 0,
-    staticResource: bool = false,
-    verifiedBot: bool = false,
-  };
+  pub fn init (ptr: u32) IncomingRequestCfPropertiesBotManagement {
+    return IncomingRequestCfPropertiesBotManagement{ .id = ptr };
+  }
 
-  // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L805
-  pub const TlsClientAuth = struct {
-    certIssuerDNLegacy: []const u8 = undefined,
-    certIssuerDN: []const u8 = undefined,
-    // "0" | "1"
-    certPresented: []const u8 = undefined,
-    certSubjectDNLegacy: []const u8 = undefined,
-    certSubjectDN: []const u8 = undefined,
-    // In format "Dec 22 19:39:00 2018 GMT"
-    certNotBefore: []const u8 = undefined,
-    // In format "Dec 22 19:39:00 2018 GMT"
-    certNotAfter: []const u8 = undefined,
-    certSerial: []const u8 = undefined,
-    certFingerprintSHA1: []const u8 = undefined,
-    // "SUCCESS", "FAILED:reason", "NONE"
-    certVerified: []const u8 = undefined
-  };
+  pub fn score (self: *const IncomingRequestCfPropertiesTLSClientAuth) u8 {
+    return @floatToInt(u8, getObjectValueNum(self.id, "score"));
+  }
 
-  pub fn init (req: Request) !IncomingRequestCfProperties {
-    const jsPtr = getObjectValue(req.id, "cf");
-    defer jsFree(jsPtr);
-    const str = getString(jsPtr);
-    defer allocator.free(str);
-    const stream = std.json.TokenStream.init(str);
-    return try std.json.parse(IncomingRequestCfProperties, &stream, .{});
+  pub fn staticResource (self: *const IncomingRequestCfPropertiesTLSClientAuth) bool {
+    const jsPtr = getObjectValue(self.id, "staticResource");
+    return jsPtr == True;
+  }
+
+  pub fn verifiedBot (self: *const IncomingRequestCfPropertiesTLSClientAuth) bool {
+    const jsPtr = getObjectValue(self.id, "verifiedBot");
+    return jsPtr == True;
   }
 };
+
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L805
+pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
+  id: u32,
+
+  pub fn init (ptr: u32) IncomingRequestCfPropertiesTLSClientAuth {
+    return IncomingRequestCfPropertiesTLSClientAuth{ .id = ptr };
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certIssuerDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certIssuerDNLegacy");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certIssuerSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certIssuerSKI");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certSubjectDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certSubjectDNRFC2253");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certSubjectDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certSubjectDNLegacy");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certFingerprintSHA256 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certFingerprintSHA256");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certNotBefore (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certNotBefore");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certSKI");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certSerial");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certIssuerDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certIssuerDN");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certVerified (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certVerified");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certNotAfter (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certNotAfter");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certSubjectDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certSubjectDN");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certPresented (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certPresented");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certRevoked (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certRevoked");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certIssuerSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certIssuerSerial");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certIssuerDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certIssuerDNRFC2253");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn certFingerprintSHA1 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "certFingerprintSHA1");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+};
+
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L744
+pub const IncomingRequestCfProperties = struct {
+  id: u32,
+
+  pub fn init (ptr: u32) IncomingRequestCfProperties {
+    return IncomingRequestCfProperties{ .id = ptr };
+  }
+
+  // (e.g. 395747)
+  pub fn asn (self: *const IncomingRequestCfProperties) u32 {
+    return @floatToInt(u32, getObjectValueNum(self.id, "asn"));
+  }
+
+  // The organisation which owns the ASN of the incoming request. (e.g. Google Cloud)
+  pub fn asOrganization (self: *const IncomingRequestCfProperties) []const u8 {
+    const jsPtr = getObjectValue(self.id, "asOrganization");
+    defer jsFree(jsPtr);
+    return getString(jsPtr);
+  }
+
+  pub fn botManagement (self: *const IncomingRequestCfProperties) ?IncomingRequestCfPropertiesBotManagement {
+    const jsPtr = getObjectValue(self.id, "botManagement");
+    if (jsPtr <= 6) return;
+    return IncomingRequestCfPropertiesBotManagement.init(getObjectValue(self.id, "botManagement"));
+  }
+
+  pub fn city (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "city");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn clientAcceptEncoding (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "clientAcceptEncoding");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn clientTcpRtt (self: *const IncomingRequestCfProperties) u32 {
+    return @floatToInt(u32, getObjectValueNum(self.id, "clientTcpRtt"));
+  }
+
+  // NOTE: If clientTrustScore was undefined, 0 is returned.
+  pub fn clientTrustScore (self: *const IncomingRequestCfProperties) u32 {
+    return @floatToInt(u32, getObjectValueNum(self.id, "clientTrustScore"));
+  }
+
+  // The three-letter airport code of the data center that the request (e.g. "DFW")
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn colo (self: *const IncomingRequestCfProperties) []const u8 {
+    const jsPtr = getObjectValue(self.id, "colo");
+    defer jsFree(jsPtr);
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn continent (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "continent");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // The two-letter country code in the request. This is the same value
+  // as that provided in the CF-IPCountry header. (e.g. "US")
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn country (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "country");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn httpProtocol (self: *const IncomingRequestCfProperties) []const u8 {
+    const jsPtr = getObjectValue(self.id, "httpProtocol");
+    defer jsFree(jsPtr);
+    return getString(jsPtr);
+  }
+
+  // NOTE: If latitude was undefined, this will return 0
+  pub fn latitude (self: *const IncomingRequestCfProperties) f32 {
+    return getObjectValueNum(self.id, "latitude");
+  }
+
+  // NOTE: If latitude was undefined, this will return 0
+  pub fn longitude (self: *const IncomingRequestCfProperties) f32 {
+    return getObjectValueNum(self.id, "longitude");
+  }
+
+  // DMA metro code from which the request was issued, e.g. "635"
+  // NOTE: Be sure to free the memory returned by this function.
+  pub fn metroCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "metroCode");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn postalCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "postalCode");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // e.g. "Texas"
+  pub fn region (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "region");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // e.g. "TX"
+  pub fn regionCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "regionCode");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // e.g. "weight=256;exclusive=1"
+  pub fn requestPriority (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "requestPriority");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn timezone (self: *const IncomingRequestCfProperties) ?[]const u8 {
+    const jsPtr = getObjectValue(self.id, "timezone");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  // TODO: Use http/common/tlsVersion
+  pub fn tlsVersion (self: *const IncomingRequestCfProperties) []const u8 {
+    const jsPtr = getObjectValue(self.id, "tlsVersion");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn tlsCipher (self: *const IncomingRequestCfProperties) []const u8 {
+    const jsPtr = getObjectValue(self.id, "tlsCipher");
+    defer jsFree(jsPtr);
+    if (jsPtr <= 6) return;
+    return getString(jsPtr);
+  }
+
+  pub fn tlsClientAuth (self: *const IncomingRequestCfProperties) IncomingRequestCfPropertiesTLSClientAuth {
+    return IncomingRequestCfPropertiesTLSClientAuth.init(getObjectValue(self.id, "tlsClientAuth"));
+  }
+};
+
+// "cf": {
+//         "longitude": "-78.45030",
+//         "latitude": "35.63530",
+//         "tlsCipher": "AEAD-AES128-GCM-SHA256",
+//         "continent": "NA",
+//         "asn": 11426,
+//         "clientAcceptEncoding": "gzip, deflate, br",
+//         "country": "US",
+//         "tlsExportedAuthenticator": {
+//           "clientFinished": "0d52b026d8e6a94e6c2fe14879076aadf8fdd397c098e06fdc7c5ad4e1a94086",
+//           "clientHandshake": "71f05fbcdeaefdefc0fb9f8900292d8ee178d612f776c689b5febd2231f84f16",
+//           "serverHandshake": "f59e9dc65da572544f0517ecc617be884b11316a3ef7e8f932891052f5534a68",
+//           "serverFinished": "17482eb549da9c2f82b9b0ad287a7ea0615ae213cc4264d075852683b8df2434"
+//         },
+//         "tlsVersion": "TLSv1.3",
+//         "colo": "IAD",
+//         "timezone": "America/New_York",
+//         "city": "Clayton",
+//         "edgeRequestKeepAliveStatus": 1,
+//         "requestPriority": "",
+//         "httpProtocol": "HTTP/3",
+//         "region": "North Carolina",
+//         "regionCode": "NC",
+//         "asOrganization": "Spectrum",
+//         "metroCode": "560",
+//         "postalCode": "27520"
+//       }
+//     },
 
 // In addition to the properties you can set in the RequestInit dict
 // that you pass as an argument to the Request constructor, you can
 // set certain properties of a `cf` object to control how Cloudflare
 // features are applied to that new Request.
 
+// TODO: This is a lot of work.. worry about it later.
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1290
 pub const RequestInitCfProperties = struct {
   cacheEverything: bool = false,
   // A request's cache key is what determines if two requests are
@@ -100,11 +393,9 @@ pub const RequestInitCfProperties = struct {
   cacheTtl: ?u32 = null,
   // Force response to be cached for a given number of seconds based on the Origin status code.
   // (e.g. { '200-299': 86400, '404': 1, '500-599': 0 })
-  // TODO: FOR NOW THIS IS NOT IMPLEMENTED because it is a pain to implement.
-  cacheTtlByStatus: ?[]const u8 = null,
+  cacheTtlByStatus: ?[]const u8 = null, // this isn't correct, relook at it later
   scrapeShield: bool = false,
   apps: bool = false,
-  // TODO: This is a lot of work.. worry about it later.
   // image: ?RequestInitCfPropertiesImage = null,
   // minify: ?RequestInitCfPropertiesImageMinify,
   image: ?[]const u8 = null,
@@ -129,5 +420,15 @@ pub const RequestInitCfProperties = struct {
 pub const CfRequestInit = union(enum) {
   incomingRequestCfProperties: *const IncomingRequestCfProperties,
   requestInitCfProperties: *const RequestInitCfProperties,
-  none
+  none,
+
+  pub fn getID (self: *const CfRequestInit) u32 {
+    var cfID: u32 = Null;
+    switch (self.*) {
+      .incomingRequestCfProperties => |crp| cfID = crp.id,
+      .requestInitCfProperties => |rip| cfID = rip.id,
+      .none => {},
+    }
+    return cfID;
+  }
 };

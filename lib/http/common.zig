@@ -158,6 +158,7 @@ pub const Method = enum {
     Options,
     Trace,
     Patch,
+    Unknown,
 
     const methods = [_][]const u8 {
         "GET",
@@ -169,19 +170,20 @@ pub const Method = enum {
         "OPTIONS",
         "TRACE",
         "PATCH",
+        "UNKNOWN",
     };
 
     pub fn toString(self: Method) []const u8 {
         return methods[@enumToInt(self)];
     }
 
-    pub fn fromString(str: []const u8) !Method {
+    pub fn fromString(str: []const u8) Method {
         for (methods) |v, i| {
             if (mem.eql(u8, v, str)) {
                 return @intToEnum(Method, @truncate(u3, i));
             }
         }
-        return error.Unsupported;
+        return Method.Unknown;
     }
 };
 

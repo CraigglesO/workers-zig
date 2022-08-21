@@ -1,0 +1,1 @@
+usingnamespace @import("tests/basic.zig");

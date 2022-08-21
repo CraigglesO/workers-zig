@@ -6,6 +6,8 @@ const jsFree = common.jsFree;
 const Null = common.Null;
 const True = common.True;
 const Undefined = common.Undefined;
+const Classes = common.Classes;
+const jsCreateClass = common.jsCreateClass;
 const BodyInit = @import("body.zig").BodyInit;
 const Function = @import("function.zig").Function;
 const AsyncFunction = @import("function.zig").AsyncFunction;
@@ -14,6 +16,7 @@ const Headers = @import("headers.zig").Headers;
 const Method = @import("../http/common.zig").Method;
 const Object = @import("object.zig").Object;
 const String = @import("string.zig").String;
+const Array = @import("array.zig").Array;
 const getString = @import("string.zig").getString;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
 const FormData = @import("formdata.zig").FormData;
@@ -48,41 +51,65 @@ pub const Redirect = enum {
 // https://developers.cloudflare.com/workers/runtime-apis/request#requestinit
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1260
 pub const RequestInit = struct {
+  body: ?BodyInit = null, // can be empty
   method: ?Method = null,
   headers: ?Headers = null,
-  body: ?BodyInit = null,
   redirect: ?Redirect = null,
   cf: ?Cf.CfRequestInit = null,
 
   pub fn toObject (self: *const RequestInit) Object {
     const obj = Object.new();
+    if (self.body != null) {
+      const bodyID = self.body.?.getID();
+      if (bodyID != Null) obj.set("body", bodyID);
+    }
     if (self.method != null) obj.setString("method", self.method.?.toString());
     if (self.headers != null) obj.set("headers", self.headers.?.id);
-    var bodyID: u32 = Undefined;
-    if (self.body != null) {
-      switch (self.body.?) {
-        .readableStream => |*rs| bodyID = rs.id,
-        .string => |*s| bodyID = s.id,
-        .arrayBuffer => |*ab| bodyID = ab.id,
-        .blob => |*blob| bodyID = blob.id,
-        .urlSearchParams => |*usp| bodyID = usp.id,
-        .formData => |*fd| bodyID = fd.id,
-        .none => {},
-      }
-    }
-    if (bodyID != Undefined) obj.set("body", bodyID);
     if (self.redirect != null) obj.setString("redirect", self.redirect.?.toString());
-    var cfID: u32 = Undefined;
     if (self.cf != null) {
-      switch (self.cf.?) {
-        .incomingRequestCfProperties => |*crp| cfID = crp.id,
-        .requestInitCfProperties => |*rip| cfID = rip.id,
-        .none => {},
-      }
+      const cfID = self.cf.?.getID();
+      if (cfID != Null) obj.set("cf", cfID);
     }
-    if (cfID != Undefined) obj.set("cf", cfID);
 
     return obj;
+  }
+};
+
+pub const RequestInfo = union(enum) {
+  string: []const u8,
+  jsString: *const String,
+  request: *const Request,
+
+  // NOTE: Since the option may be a string, be sure to `jsFree(id)`
+  pub fn toID (self: *const RequestInfo) u32 {
+    var requestPtr: u32 = Undefined;
+    switch (self.*) {
+      .string => |str| {
+        const jsString = String.new(str);
+        requestPtr = jsString.id;
+      },
+      .jsString => |jsString| {
+        requestPtr = jsString.id;
+      },
+      .request => |req| requestPtr = req.id,
+    }
+    return requestPtr;
+  }
+};
+
+pub const RequestOptions = union(enum) {
+  requestInit: *const RequestInit,
+  request: *const Request,
+  none,
+
+  pub fn toID(self: *const RequestOptions) u32 {
+    var reqInitID: u32 = Undefined;
+    switch (self.*) {
+      .requestInit => |ri| reqInitID = ri.id,
+      .request => |req| reqInitID = req.id,
+      .none => {},
+    }
+    return reqInitID;
   }
 };
 
@@ -97,10 +124,21 @@ pub const Request = struct {
     return Request{ .id = ptr };
   }
 
-  // TODO:
-  // pub fn new (requestStr: []const u8 | Request, requestInit: RequestInit | Request | Undefined) Request {
+  pub fn new (requestStr: RequestInfo, requestInit: RequestOptions) Request {
+    // prepare arguments
+    const reqID = requestStr.toID();
+    defer jsFree(reqID);
+    const reqInitID = requestInit.toID();
+    defer jsFree(reqInitID);
 
-  // }
+    // setup arg array
+    const args = Array.new();
+    defer args.free();
+    args.push(reqID);
+    args.push(reqInitID);
+    
+    return Request{ .id = jsCreateClass(Classes.Request.toInt(), args.id) };
+  }
 
   pub fn free (self: *const Request) void {
     jsFree(self.id);
@@ -116,7 +154,7 @@ pub const Request = struct {
 
   // ** VARS **
 
-  pub fn method (self: *const Request) !Method {
+  pub fn method (self: *const Request) Method {
     // grab the method var
     const methodStr = String.init(getObjectValue(self.id, "method"));
     defer methodStr.free();
@@ -146,8 +184,8 @@ pub const Request = struct {
     return Redirect.fromString(getObjectValue(self.id, "redirect"));
   }
 
-  pub fn cf (self: *const Request) !Cf.IncomingRequestCfProperties {
-    return Cf.IncomingRequestCfProperties.init(self);
+  pub fn cf (self: *const Request) Cf.IncomingRequestCfProperties {
+    return Cf.IncomingRequestCfProperties.init(getObjectValue(self.id, "cf"));
   }
 
   // ** BODY **
@@ -178,7 +216,7 @@ pub const Request = struct {
     if (!self.hasBody()) return undefined;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "text"));
     defer aFunc.free();
-    return await async getString(aFunc.call(Undefined));
+    return await async getString(aFunc.call());
   }
 
   pub fn json (self: *const Request, comptime T: type) callconv(.Async) ?T {

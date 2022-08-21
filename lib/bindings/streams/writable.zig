@@ -1,6 +1,15 @@
-const jsFree = @import("../common.zig").jsFree;
+const common = @import("../common.zig");
+const jsFree = common.jsFree;
+const jsCreateClass = common.jsCreateClass;
+const Classes = common.Classes;
+const Undefined = common.Undefined;
+const True = common.True;
+const object = @import("../object.zig");
+const Object = object.Object;
+const getObjectValue = object.getObjectValue;
+const AsyncFunction = @import("../function.zig").AsyncFunction;
 
-// 
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1914
 pub const WritableStream = struct {
   id: u32,
 
@@ -8,29 +17,29 @@ pub const WritableStream = struct {
     return WritableStream{ .id = ptr };
   }
 
+  // TODO: Supprt inputs
+  pub fn new () WritableStream {
+    return WritableStream{ .id = jsCreateClass(Classes.WritableStream.toInt(), Undefined) };
+  }
+
   pub fn free (self: WritableStream) void {
     jsFree(self.id);
   }
 
-  fn from(id: u32) void {
-    id = id;
+  pub fn locked (self: *const WritableStream) bool {
+    const jsPtr = getObjectValue(self.id, "locked");
+    return jsPtr == True;
+  }
+
+  pub fn abort (self: *const WritableStream) callconv(.Async) void {
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "abort") };
+    defer func.free();
+    await async func.call();
+  }
+
+  pub fn close (self: *const WritableStream) callconv(.Async) void {
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "close") };
+    defer func.free();
+    await async func.call();
   }
 };
-
-// call an object fn callObject(objectID: u32, )
-// get a string input from an object as number/string
-
-const File = struct {
-  name: []u8,
-  size: u64
-};
-
-pub const FormEntry = enum {
-  field,
-  file
-};
-
-// // if string returned
-// const FormUnion = union(FormEntry) { field: []u8, file: File };
-// // if file returned
-// const result = FormUnion{ .field = "example" };

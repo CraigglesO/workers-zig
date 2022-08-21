@@ -1,11 +1,50 @@
+const std = @import("std");
+const allocator = std.heap.page_allocator;
+const common = @import("common.zig");
+const jsCreateClass = common.jsCreateClass;
+const Classes = common.Classes;
+const Undefined = common.Undefined;
+const jsFree = common.jsFree;
 const String = @import("string.zig").String;
-const jsFree = @import("common.zig").jsFree;
 
-pub extern fn jsObjectNew() u32;
 pub extern fn jsObjectSet(obj: u32, key: u32, value: u32) void;
 pub extern fn jsObjectSetNum(obj: u32, key: u32, value: f32) void;
 pub extern fn jsObjectGet(obj: u32, key: u32) u32;
-pub extern fn jsStringify() u32;
+pub extern fn jsObjectGetNum(obj: u32, key: u32) f64;
+pub extern fn jsStringify(obj: u32) u32;
+pub extern fn jsParse(str: u32) u32;
+
+pub fn getObjectValue (obj: u32, key: []const u8) u32 {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  return jsObjectGet(obj, jsKey.id);
+}
+
+pub fn getObjectValueNum (obj: u32, key: []const u8) f64 {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  return jsObjectGetNum(obj, jsKey.id);
+}
+
+pub fn setObjectValue (obj: u32, key: []const u8, value: u32) void {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  jsObjectSet(obj, jsKey.id, value);
+}
+
+pub fn setObjectValueNum (obj: u32, key: []const u8, value: f32) void {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  jsObjectSetNum(obj, jsKey.id, value);
+}
+
+pub fn setObjectString (obj: u32, key: []const u8, value: []const u8) void {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  const jsValue = String.new(value);
+  defer jsValue.free();
+  return jsObjectSet(obj, jsKey.id, jsValue.id);
+}
 
 pub const Object = struct {
   id: u32,
@@ -15,8 +54,7 @@ pub const Object = struct {
   }
 
   pub fn new () Object {
-    const ptr = jsObjectNew();
-    return Object{ .id = ptr };
+    return Object{ .id = jsCreateClass(Classes.Object.toInt(), Undefined) };
   }
 
   // fn fromStruct (comptime T: type) Object {
@@ -29,6 +67,10 @@ pub const Object = struct {
   //   const ptr = jsObjectFromString(string.ptr, string.len);
   //   return Object{ .id = ptr };
   // }
+
+  // TODO: pub fn keys ()
+  // TODO: pub fn values ()
+  // TODO: pub fn entries ()
 
   pub fn free (self: *const Object) void {
     jsFree(self.id);
@@ -58,36 +100,13 @@ pub const Object = struct {
     const ptr = jsStringify(self.id);
     return String{ .id = ptr };
   }
+
+  pub fn parse (self: *const Object, comptime T: type) !T {
+    const str = self.stringify();
+    defer str.free();
+    const strValue = str.value();
+    defer allocator.free(strValue);
+    var stream = std.json.TokenStream.init(strValue);
+    return try std.json.parse(T, &stream, .{});
+  }
 };
-
-pub fn getObjectValue (obj: u32, key: []const u8) u32 {
-  const jsKey = String.new(key);
-  defer jsKey.free();
-  return jsObjectGet(obj, jsKey.id);
-}
-
-pub fn getObjectValueNum (obj: u32, key: []const u8) f32 {
-  const jsKey = String.new(key);
-  defer jsKey.free();
-  return jsObjectGet(obj, jsKey.id);
-}
-
-pub fn setObjectValue (obj: u32, key: []const u8, value: u32) void {
-  const jsKey = String.new(key);
-  defer jsKey.free();
-  jsObjectSet(obj, jsKey.id, value);
-}
-
-pub fn setObjectValueNum (obj: u32, key: []const u8, value: f32) void {
-  const jsKey = String.new(key);
-  defer jsKey.free();
-  jsObjectSetNum(obj, jsKey.id, value);
-}
-
-pub fn setObjectString (obj: u32, key: []const u8, value: []const u8) void {
-  const jsKey = String.new(key);
-  defer jsKey.free();
-  const jsValue = String.new(value);
-  defer jsValue.free();
-  return jsObjectSet(obj, jsKey.id, jsValue.id);
-}

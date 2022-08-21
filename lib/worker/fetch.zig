@@ -8,12 +8,11 @@ const Response = @import("../bindings/response.zig").Response;
 const StatusCode = @import("../http/common.zig").StatusCode;
 const String = @import("../bindings/string.zig").String;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
+const jsResolve = @import("main.zig").jsResolve;
 
-extern fn jsResolve(ctx: u32, response: u32) void;
+pub const HandlerFn = fn handle(*FetchContext) callconv(.Async) void;
 
-pub const HandlerFn = fn handle(*Context) callconv(.Async) void;
-
-pub const Context = struct {
+pub const FetchContext = struct {
   id: u32,
   req: Request,
   env: Env,
@@ -23,8 +22,8 @@ pub const Context = struct {
 
   pub fn init(
     id: u32
-  ) !*Context {
-    var ctx = try allocator.create(Context);
+  ) !*FetchContext {
+    var ctx = try allocator.create(FetchContext);
     errdefer allocator.destroy(ctx);
 
     ctx.* = .{
@@ -38,7 +37,7 @@ pub const Context = struct {
     return ctx;
   }
 
-  pub fn deinit (self: *Context) void {
+  pub fn deinit (self: *FetchContext) void {
     self.req.free();
     self.env.free();
     self.exeContext.free();
@@ -47,7 +46,7 @@ pub const Context = struct {
     allocator.destroy(self);
   }
 
-  pub fn throw (self: *Context, status: u16, msg: []const u8) void {
+  pub fn throw (self: *FetchContext, status: u16, msg: []const u8) void {
     const statusText = @intToEnum(StatusCode, status).toString();
 
     // body
@@ -63,7 +62,7 @@ pub const Context = struct {
     self.send(&res);
   }
 
-  pub fn send (self: *Context, res: *const Response) void {
+  pub fn send (self: *FetchContext, res: *const Response) void {
     defer self.deinit();
     // call the resolver.
     jsResolve(self.id, res.id);

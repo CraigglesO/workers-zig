@@ -3,7 +3,16 @@ import type { FetchContext, ScheduleContext } from "./worker"
 // All functions accessable to wasm go here.
 
 const CLASSES = [
+  Array,
+  Object,
+  Map,
+  Set,
+  WeakMap,
+  WeakSet,
   Uint8Array,
+  ArrayBuffer,
+  SharedArrayBuffer,
+  DataView,
   Request,
   Response,
   Headers,
@@ -11,10 +20,15 @@ const CLASSES = [
   File,
   Blob,
   URL,
+  URLPattern,
   URLSearchParams,
   ReadableStream,
   WritableStream,
   TransformStream,
+  CompressionStream,
+  DecompressionStream,
+  DigestStream,
+  FixedLengthStream,
   WebSocketPair
 ]
 
@@ -55,10 +69,6 @@ export function jsStringThrow (wasm: WASM, stringPtr: number): void {
 /** __STRING__ **/
 
 /** ARRAY */
-export function jsArrayNew (wasm: WASM): number {
-  return wasm.heap.put(new Array())
-}
-
 export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
   const array = wasm.heap.get(arrayPtr) as Array<any>
   const item = wasm.heap.get(itemPtr)
@@ -67,10 +77,6 @@ export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
 /** __ARRAY__ */
 
 /** OBJECT */
-export function jsObjectNew (wasm: WASM): number {
-  return wasm.heap.put(new Object())
-}
-
 export function jsObjectSet (wasm: WASM, objPtr: number, keyPtr: number, valuePtr: number) {
   const obj = wasm.heap.get(objPtr) as { [key: string]: any }
   const key = wasm.heap.get(keyPtr)
@@ -90,9 +96,22 @@ export function jsObjectGet (wasm: WASM, objPtr: number, keyPtr: number): number
   return wasm.heap.put(typeof obj[key] === 'function' ? obj[key].bind(obj) : obj[key])
 }
 
+export function jsObjectGetNum (wasm: WASM, objPtr: number, keyPtr: number): number {
+  const obj = wasm.heap.get(objPtr) as { [key: string]: any }
+  const key = wasm.heap.get(keyPtr)
+  const val = +obj[key]
+  if (isNaN(val)) return 0
+  return val
+}
+
 export function jsStringify (wasm: WASM, objPtr: number): number {
   const obj = wasm.heap.get(objPtr) as { [key: string]: any }
   return wasm.heap.put(JSON.stringify(obj))
+}
+
+export function jsParse (wasm: WASM, strPtr: number): number {
+  const str = wasm.heap.get(strPtr) as string
+  return wasm.heap.put(JSON.parse(str))
 }
 /** __OBJECT__ */
 
@@ -119,28 +138,39 @@ export async function jsAsyncFnCall (
   wasm.resume(frame)
 }
 
-export function jsCreateClass (wasm: WASM, className: number, argsPtr: number): number {
-  const ClassFunc = CLASSES[className]
+export function jsCreateClass (wasm: WASM, classPos: number, argsPtr: number): number {
+  const Class = CLASSES[classPos]
   const args = wasm.heap.get(argsPtr) as Array<any> | undefined
   // @ts-ignore
-  return wasm.heap.put(args !== undefined ? new ClassFunc(...args) : new ClassFunc())
+  return wasm.heap.put(args !== undefined ? new Class(...args) : new Class())
+}
+
+export function jsEqual (wasm: WASM, aPtr: number, bPtr: number): number {
+  const a = wasm.heap.get(aPtr)
+  const b = wasm.heap.get(bPtr)
+  return wasm.heap.put(a === b)
+}
+
+export function jsDeepEqual (wasm: WASM, aPtr: number, bPtr: number): number {
+  const a = wasm.heap.get(aPtr)
+  const b = wasm.heap.get(bPtr)
+  try {
+    return wasm.heap.put(JSON.stringify(a) == JSON.stringify(b))
+  } catch (_) { return wasm.heap.put(false) }
+}
+
+export function jsInstanceOf (wasm: WASM, classPos: number, classPrt: number): number {
+  const Class = CLASSES[classPos]
+  const classPtr = wasm.heap.get(classPrt)
+  return classPtr instanceof Class ? wasm.heap.put(true) : wasm.heap.put(false)
 }
 
 export function jsResolve (wasm: WASM, ctxPtr: number, resPtr: number): void {
   const ctx = wasm.heap.get(ctxPtr) as FetchContext | ScheduleContext
   const res = wasm.heap.get(resPtr) as Response // undefined if ScheduleContext
   ctx.resolve?.(res)
-  logHeap(wasm)
 }
 
-async function logHeap(wasm: WASM): Promise<void> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      console.log(wasm.heap)
-      resolve()
-    }, 1_000)
-  })
-}
 /** __FUNCTION__ */
 
 /** UTIL **/
@@ -160,6 +190,11 @@ export function jsToBytes (wasm: WASM, ptr: number): number {
     throw new Error('jsToBytes: data is not an array buffer or uint8 array')
   }
   return wasm.put(bytes)
+}
+
+export function jsToBuffer (wasm: WASM, ptr: number, len: number): number {
+  const data = wasm.get(ptr, len)
+  return wasm.heap.put(data.buffer)
 }
 /** __UTIL__ **/
 
@@ -181,8 +216,8 @@ export function jsWaitUntil (wasm: WASM, ctxPtr: number): number {
 export async function jsCacheGet (
   wasm: WASM,
   frame: number,
-  resPtr: number,
-  keyPtr: number
+  keyPtr: number,
+  resPtr: number
 ): Promise<void> {
   const key = wasm.heap.get(keyPtr) as string | undefined
   // @ts-ignore: caches.default isn't working in my VS Code currently.
@@ -197,9 +232,9 @@ export async function jsCacheGet (
 export async function jsFetch (
   wasm: WASM,
   frame: number,
-  resPtr: number,
   urlPtr: number,
-  initPtr: number
+  initPtr: number,
+  resPtr: number,
 ): Promise<void> {
   const url = wasm.heap.get(urlPtr) as string | Request
   const init = wasm.heap.get(initPtr) as RequestInit | Request | undefined
