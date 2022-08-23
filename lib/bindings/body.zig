@@ -9,7 +9,9 @@ const Null = @import("common.zig").Null;
 pub const BodyInit = union(enum) {
   readableStream: *const ReadableStream,
   string: *const String,
+  text: []const u8,
   arrayBuffer: *const ArrayBuffer,
+  bytes: []const u8,
   blob: *const Blob,
   urlSearchParams: *const URLSearchParams,
   formData: *const FormData,
@@ -20,7 +22,9 @@ pub const BodyInit = union(enum) {
     switch (self.*) {
       .readableStream => |rs| bodyID = rs.id,
       .string => |s| bodyID = s.id,
+      .text => |t| bodyID = String.new(t).id,
       .arrayBuffer => |ab| bodyID = ab.id,
+      .bytes => |b| bodyID = ArrayBuffer.new(b).id,
       .blob => |blob| bodyID = blob.id,
       .urlSearchParams => |params| bodyID = params.id,
       .formData => |formData| bodyID = formData.id,

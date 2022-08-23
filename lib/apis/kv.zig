@@ -3,13 +3,13 @@ const allocator = std.heap.page_allocator;
 const common = @import("../bindings/common.zig");
 const jsFree = common.jsFree;
 const Undefined = common.Undefined;
+const DefaultValueSize = common.DefaultValueSize;
 const object = @import("../bindings/object.zig");
 const Object = object.Object;
 const jsStringify = object.jsStringify;
 const getObjectValue = object.getObjectValue;
 const ArrayBuffer = @import("../bindings/arraybuffer.zig").ArrayBuffer;
 const String = @import("../bindings/string.zig").String;
-const getString = @import("../bindings/string.zig").getString;
 const Array = @import("../bindings/array.zig").Array;
 const ReadableStream = @import("../bindings/streams/readable.zig").ReadableStream;
 const AsyncFunction = @import("../bindings/function.zig").AsyncFunction;
@@ -20,13 +20,10 @@ pub const MAX_SIZE = 25 * 1000 * 1000; // 25MiB
 // Note: To simplify, we getX rather than applying type to the options.
 pub const GetOptions = struct {
   cacheTtl: ?u64 = null,
-  metadata: ?*const Object = null,
 
-  pub fn toObject (self: *const PutOptions) Object {
+  pub fn toObject (self: *const GetOptions) Object {
     const obj = Object.new();
-
-    if (self.cacheTtl != null) obj.setNum("cacheTtl", self.cacheTtl.?);
-    if (self.metadata != null) obj.set("metadata", self.metadata.?.id);
+    if (self.cacheTtl != null) obj.setNum("cacheTtl", @intToFloat(f64, self.cacheTtl.?));
 
     return obj;
   }
@@ -34,8 +31,9 @@ pub const GetOptions = struct {
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L890
 pub const PutValue = union(enum) {
-  string: []const u8,
-  jsString: *const String,
+  text: []const u8,
+  string: *const String,
+  object: *const Object,
   bytes: []const u8,
   arrayBuffer: *const ArrayBuffer,
   readableStream: *const ReadableStream,
@@ -43,8 +41,9 @@ pub const PutValue = union(enum) {
   pub fn toID (self: *const PutValue) u32 {
     var id: u32 = Undefined;
     switch (self.*) {
-      .string => |str| id = String.new(str).id,
-      .jsString => |str| id = str.id,
+      .text => |str| id = String.new(str).id,
+      .string => |str| id = str.id,
+      .object => |obj| id = obj.stringify().id,
       .bytes => |bytes| id = ArrayBuffer.new(bytes).id,
       .arrayBuffer => |ab| id = ab.id,
       .readableStream => |rStream| id = rStream.id,
@@ -63,8 +62,8 @@ pub const PutOptions = struct {
   pub fn toObject (self: *const PutOptions) Object {
     const obj = Object.new();
 
-    if (self.expiration != null) obj.setNum("expiration", self.expiration.?);
-    if (self.expirationTtl != null) obj.setNum("expirationTtl", self.expirationTtl.?);
+    if (self.expiration != null) obj.setNum("expiration", @intToFloat(f64, self.expiration.?));
+    if (self.expirationTtl != null) obj.setNum("expirationTtl", @intToFloat(f64, self.expirationTtl.?));
     if (self.metadata != null) obj.set("metadata", self.metadata.?.id);
 
     return obj;
@@ -82,7 +81,7 @@ pub const ListOptions = struct {
   pub fn toObject (self: *const ListOptions) Object {
     const obj = Object.new();
 
-    obj.setNum("limit", self.limit);
+    obj.setNum("limit", @intToFloat(f64, self.limit));
     if (self.prefix != null) obj.setString("prefix", self.prefix.?);
     if (self.jsPrefix != null) obj.set("prefix", self.jsPrefix.?.id);
     if (self.cursor != null) obj.setString("cursor", self.cursor.?);
@@ -166,10 +165,10 @@ pub const KVNamespace = struct {
     const args = Array.new();
     defer args.free();
     args.push(str.id);
-    args.push(val.id);
+    args.push(val);
     args.push(opts.id);
 
-    await async func.callArgs(args.id);
+    _ = await async func.callArgs(args.id);
   }
 
   pub fn getString (
@@ -183,7 +182,7 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.set("type", "string");
+    opts.setString("type", "text");
     // grab the function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
     defer func.free();
@@ -194,7 +193,7 @@ pub const KVNamespace = struct {
     args.push(opts.id);
 
     const result = await async func.callArgs(args.id);
-    if (result <= 6) return;
+    if (result <= DefaultValueSize) return null;
     return String{ .id = result };
   }
 
@@ -202,8 +201,8 @@ pub const KVNamespace = struct {
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?String {
-    const str = await self.getString(key, options) orelse return;
+  ) callconv(.Async) ?[]const u8 {
+    const str = await async self.getString(key, options) orelse return null;
     defer str.free();
     return str.value();
   }
@@ -219,7 +218,7 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.set("type", "json");
+    opts.setString("type", "json");
     // grab the function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
     defer func.free();
@@ -230,24 +229,26 @@ pub const KVNamespace = struct {
     args.push(opts.id);
 
     const result = await async func.callArgs(args.id);
-    if (result <= 6) return;
+    if (result <= DefaultValueSize) return null;
     return Object{ .id = result };
   }
 
   // NOTE: data must be freed by the caller
   pub fn getJSON (
     self: *const KVNamespace,
+    comptime T: type,
     key: []const u8,
-    options: GetOptions,
-    comptime T: type
+    options: GetOptions
   ) callconv(.Async) ?T {
-    const string = await self.getString(key, options) orelse return;
+    _ = T;
+    // grab the data as a string
+    const string = await async self.getString(key, options) orelse return null;
     defer string.free();
     const strValue = string.value();
     defer allocator.free(strValue);
     // parse the result
     var stream = std.json.TokenStream.init(strValue);
-    var value = std.json.parse(T, &stream, .{}) catch return;
+    var value = std.json.parse(T, &stream, .{}) catch return null;
     return value;
   }
 
@@ -262,7 +263,7 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.set("type", "arrayBuffer");
+    opts.setString("type", "arrayBuffer");
     // grab the function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
     defer func.free();
@@ -273,7 +274,7 @@ pub const KVNamespace = struct {
     args.push(opts.id);
 
     const result = await async func.callArgs(args.id);
-    if (result <= 6) return;
+    if (result <= DefaultValueSize) return null;
     return ArrayBuffer{ .id = result };
   }
 
@@ -283,7 +284,7 @@ pub const KVNamespace = struct {
     key: []const u8,
     options: GetOptions
   ) ?[]const u8 {
-    const ab = await self.getArrayBuffer(key, options) orelse return;
+    const ab = await async self.getArrayBuffer(key, options) orelse return null;
     defer ab.free();
     return ab.bytes();
   }
@@ -299,7 +300,7 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.set("type", "stream");
+    opts.setString("type", "stream");
     // grab the function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
     defer func.free();
@@ -310,11 +311,14 @@ pub const KVNamespace = struct {
     args.push(opts.id);
 
     const result = await async func.callArgs(args.id);
-    if (result <= 6) return;
+    if (result <= DefaultValueSize) return null;
     return ReadableStream{ .id = result };
   }
 
-  pub fn delete (self: *const KVNamespace, key: []const u8) callconv(.Async) void {
+  pub fn delete (
+    self: *const KVNamespace,
+    key: []const u8
+  ) callconv(.Async) void {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -322,7 +326,7 @@ pub const KVNamespace = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
 
-    await async func.callArgs(str.id);
+    _ = await async func.callArgs(str.id);
   }
 
   // pub fn list (options: ?ListOptions) ListResponse {

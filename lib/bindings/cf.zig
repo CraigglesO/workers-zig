@@ -8,6 +8,7 @@ const common = @import("common.zig");
 const jsFree = common.jsFree;
 const Null = common.Null;
 const True = common.True;
+const DefaultValueSize = common.DefaultValueSize;
 // The `Cf` struct on an inbound Request contains information
 // about the request provided by Cloudflare’s edge.
 // [Details](https://developers.cloudflare.com/workers/runtime-apis/request#incomingrequestcfproperties)
@@ -49,7 +50,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certIssuerDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDNLegacy");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -57,7 +58,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certIssuerSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerSKI");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -65,7 +66,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certSubjectDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDNRFC2253");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -73,7 +74,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certSubjectDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDNLegacy");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -81,7 +82,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certFingerprintSHA256 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certFingerprintSHA256");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -89,7 +90,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certNotBefore (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certNotBefore");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -97,7 +98,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSKI");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -105,7 +106,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSerial");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -113,7 +114,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certIssuerDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDN");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -121,7 +122,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certVerified (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certVerified");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -129,7 +130,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certNotAfter (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certNotAfter");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -137,7 +138,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certSubjectDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDN");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -145,7 +146,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certPresented (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certPresented");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -153,7 +154,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certRevoked (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certRevoked");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -161,7 +162,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certIssuerSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerSerial");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -169,7 +170,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certIssuerDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDNRFC2253");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -177,7 +178,7 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   pub fn certFingerprintSHA1 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certFingerprintSHA1");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 };
@@ -204,21 +205,21 @@ pub const IncomingRequestCfProperties = struct {
 
   pub fn botManagement (self: *const IncomingRequestCfProperties) ?IncomingRequestCfPropertiesBotManagement {
     const jsPtr = getObjectValue(self.id, "botManagement");
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return IncomingRequestCfPropertiesBotManagement.init(getObjectValue(self.id, "botManagement"));
   }
 
   pub fn city (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "city");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
   pub fn clientAcceptEncoding (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "clientAcceptEncoding");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -243,7 +244,7 @@ pub const IncomingRequestCfProperties = struct {
   pub fn continent (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "continent");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -253,7 +254,7 @@ pub const IncomingRequestCfProperties = struct {
   pub fn country (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "country");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -279,14 +280,14 @@ pub const IncomingRequestCfProperties = struct {
   pub fn metroCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "metroCode");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
   pub fn postalCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "postalCode");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -294,7 +295,7 @@ pub const IncomingRequestCfProperties = struct {
   pub fn region (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "region");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -302,7 +303,7 @@ pub const IncomingRequestCfProperties = struct {
   pub fn regionCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "regionCode");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -310,14 +311,14 @@ pub const IncomingRequestCfProperties = struct {
   pub fn requestPriority (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "requestPriority");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
   pub fn timezone (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "timezone");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
@@ -325,14 +326,14 @@ pub const IncomingRequestCfProperties = struct {
   pub fn tlsVersion (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "tlsVersion");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 
   pub fn tlsCipher (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "tlsCipher");
     defer jsFree(jsPtr);
-    if (jsPtr <= 6) return;
+    if (jsPtr <= DefaultValueSize) return;
     return getString(jsPtr);
   }
 

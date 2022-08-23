@@ -15,17 +15,17 @@ pub fn build(b: *Builder) void {
     b.cache_root = "cache";
     b.global_cache_root = "cache";
 
-    const wasm_build = b.addSharedLibrary("zig", "lib/main.zig", .unversioned);
-    wasm_build.setOutputDir("dist");
-    wasm_build.setTarget(std.zig.CrossTarget {
-        .cpu_arch = .wasm32,
-        .os_tag = .freestanding,
-    });
-    wasm_build.build_mode = std.builtin.Mode.ReleaseSmall;
-    wasm_build.strip = true;
-    wasm_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
-    // wasm_build.verbose_link = true;
-    wasm_build.install();
+    // const wasm_build = b.addSharedLibrary("zig", "lib/main.zig", .unversioned);
+    // wasm_build.setOutputDir("dist");
+    // wasm_build.setTarget(std.zig.CrossTarget {
+    //     .cpu_arch = .wasm32,
+    //     .os_tag = .freestanding,
+    // });
+    // wasm_build.build_mode = std.builtin.Mode.ReleaseSmall;
+    // wasm_build.strip = true;
+    // wasm_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
+    // // wasm_build.verbose_link = true;
+    // wasm_build.install();
     // const wasm_build_step = b.step("wasm", "Full Build without tests");
     // wasm_build_step.dependOn(&wasm_build.run().step);
 

@@ -1,17 +1,31 @@
 name = "zig-worker-example"
-main = "dist/worker.js"
+main = "dist/worker.mjs"
 compatibility_date = "2022-07-29"
 usage_model = "bundled"
 account_id = ""
 
+[env]
+KEY = "VALUE"
+
+kv_namespaces = [
+  { binding = "TEST_NAMESPACE", id = "", preview_id = "testid" }
+]
+
 r2_buckets = [
-  { binding = 'BUCKET', bucket_name = 'test-bucket', preview_bucket_name = 'dev-test' },
+  { binding = 'TEST_BUCKET', bucket_name = 'test-bucket', preview_bucket_name = 'dev-test' }
 ]
 
 [build]
-command = "zig build && npm run esbuild"
+command = "npm run build:zig && npm run build:esm"
 watch_dir = [
   "test",
   "src",
   "lib"
 ] # Defaults to "test" if command set
+
+[[build.upload.rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+[[build.upload.rules]]
+type = "ESModule"
+globs = ["**/*.mjs"]

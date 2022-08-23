@@ -1,7 +1,7 @@
 pub extern fn jsFree (ptr: u32) void;
 pub extern fn jsSize (ptr: u32) u32;
 pub extern fn jsToBytes (ptr: u32) [*]u8;
-pub extern fn jsToBuffer (ptr: [*]u8, len: usize) u32;
+pub extern fn jsToBuffer (ptr: [*]const u8, len: usize) u32;
 pub extern fn jsCreateClass (classPos: u8, argsPtr: u32) u32;
 pub extern fn jsEqual (aPtr: u8, bPtr: u32) u32; 
 pub fn equal (aPtr: *u8, bPtr: *u32) bool {
@@ -25,6 +25,7 @@ pub const True: u32 = 3;
 pub const False: u32 = 4;
 pub const Infinity: u32 = 5;
 pub const NaN: u32 = 6;
+pub const DefaultValueSize = 6;
 
 pub const Classes = enum(u8) {
   Array = 0,
@@ -51,7 +52,7 @@ pub const Classes = enum(u8) {
   TransformStream,
   CompressionStream,
   DecompressionStream,
-  // DigestStream,
+  DigestStream,
   FixedLengthStream,
   WebSocketPair,
 

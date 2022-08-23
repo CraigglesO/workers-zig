@@ -10,11 +10,11 @@ pub usingnamespace @import("worker/main.zig");
 
 // ALLOCATION
 pub export fn alloc (size: usize) ?[*]u8 {
-    const data = allocator.alloc(u8, size) catch return undefined;
+    const data = allocator.alloc(u8, size) catch return null;
     return data.ptr;
 }
 pub export fn allocSentinel (size: usize) ?[*:0]u8 {
-    const data = allocator.allocSentinel(u8, size, 0) catch return undefined;
+    const data = allocator.allocSentinel(u8, size, 0) catch return null;
     return data.ptr;
 }
 pub export fn free (ptr: [*]u8) void {

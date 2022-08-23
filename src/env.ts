@@ -1,3 +1,4 @@
+import { DEFAULT_HEAP_SIZE } from './heap'
 import type WASM from "./wasm"
 import type { FetchContext, ScheduleContext } from "./worker"
 // All functions accessable to wasm go here.
@@ -27,7 +28,8 @@ const CLASSES = [
   TransformStream,
   CompressionStream,
   DecompressionStream,
-  DigestStream,
+  // @ts-ignore: no idea why vscode is doing this again
+  crypto.DigestStream,
   FixedLengthStream,
   WebSocketPair
 ]
@@ -40,7 +42,7 @@ function u32ToU8 (num: number): Uint8Array {
 /** HEAP **/
 export function jsFree (wasm: WASM, ptr: number): void {
   // leave default values alone
-  if (ptr <= 4) return
+  if (ptr <= DEFAULT_HEAP_SIZE) return
   wasm.heap.delete(ptr)
 }
 /** __HEAP__ **/

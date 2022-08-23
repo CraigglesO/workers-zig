@@ -1,3 +1,5 @@
+export const DEFAULT_HEAP_SIZE = 6
+
 export default class Heap extends Map<number, any> {
   counter: number = 7
   constructor () {

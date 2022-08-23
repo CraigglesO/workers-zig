@@ -54,7 +54,10 @@ export default class WASM {
 
   get (ptr: number, len: number): Uint8Array {
     const view = this.getMemory()
-    return view.subarray(ptr, ptr + len)
+    const slice = view.subarray(ptr, ptr + len)
+    const copy = new Uint8Array(slice.byteLength)
+    copy.set(slice)
+    return copy
   }
 
   put (buf: Uint8Array, ptr?: number): number {

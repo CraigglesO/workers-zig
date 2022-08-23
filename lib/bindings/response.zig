@@ -7,6 +7,7 @@ const Null = common.Null;
 const True = common.True;
 const Undefined = common.Undefined;
 const Classes = common.Classes;
+const DefaultValueSize = common.DefaultValueSize;
 const jsCreateClass = common.jsCreateClass;
 const BodyInit = @import("body.zig").BodyInit;
 const Function = @import("function.zig").Function;
@@ -77,6 +78,7 @@ pub const Response = struct {
     const jsArgs = Array.new();
     defer jsArgs.free();
     const bodyID = bodyInit.getID();
+    defer jsFree(bodyID);
     jsArgs.push(bodyID);
     jsArgs.push(jsResOptions.id);
     // create the class
@@ -90,6 +92,7 @@ pub const Response = struct {
     const jsArgs = Array.new();
     defer jsArgs.free();
     const bodyID = bodyInit.getID();
+    defer jsFree(bodyID);
     jsArgs.push(bodyID);
     jsArgs.push(response.id);
     // create the class
@@ -197,7 +200,7 @@ pub const Response = struct {
   }
 
   pub fn arrayBuffer (self: *const Response) callconv(.Async) ?ArrayBuffer {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "arrayBuffer"));
     defer aFunc.free();
     const abID = await async aFunc.call();
@@ -206,14 +209,17 @@ pub const Response = struct {
 
   // NOTE: the returned string is a pointer to a string in memory that must be freed
   pub fn text (self: *const Response) callconv(.Async) ?[]const u8 {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "text"));
     defer aFunc.free();
-    return await async getString(aFunc.call());
+    const strPtr = aFunc.call();
+    if (strPtr <= DefaultValueSize) return;
+    defer jsFree(strPtr);
+    return await async getString(strPtr);
   }
 
   pub fn json (self: *const Response, comptime T: type) callconv(.Async) ?T {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     // get the "string" and then parse it locally
     const str = await async self.text();
     defer allocator.free(str);
@@ -222,7 +228,7 @@ pub const Response = struct {
   }
 
   pub fn formData (self: *const Response) callconv(.Async) ?FormData {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "formData"));
     defer aFunc.free();
     const formID = await async aFunc.call();
@@ -230,7 +236,7 @@ pub const Response = struct {
   }
 
   pub fn blob (self: *const Response) callconv(.Async) ?Blob {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "blob"));
     defer aFunc.free();
     const blobID = await async aFunc.call();
@@ -239,7 +245,7 @@ pub const Response = struct {
 
   // fast track arrayBuffer->toOwned
   pub fn bytes (self: *const Response) callconv(.Async) ?[]u8 {
-    if (!self.hasBody()) return undefined;
+    if (!self.hasBody()) return null;
     const ab = await async self.arrayBuffer();
     defer ab.free();
     return ab.bytes();

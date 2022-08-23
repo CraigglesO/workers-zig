@@ -1,6 +1,7 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 const common = @import("common.zig");
+const jsFree = common.jsFree;
 
 pub extern fn jsStringSet (ptr: [*]const u8, len: u32) u32;
 pub extern fn jsStringGet (ptr: u32) [*:0]const u8;
@@ -25,7 +26,7 @@ pub const String = struct {
   }
 
   pub fn free (self: *const String) void {
-    common.jsFree(self.id);
+    jsFree(self.id);
   }
 
   // NOTE: the returned string is a pointer to a string in memory that must be freed

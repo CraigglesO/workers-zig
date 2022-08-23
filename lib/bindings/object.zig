@@ -8,7 +8,7 @@ const jsFree = common.jsFree;
 const String = @import("string.zig").String;
 
 pub extern fn jsObjectSet(obj: u32, key: u32, value: u32) void;
-pub extern fn jsObjectSetNum(obj: u32, key: u32, value: f32) void;
+pub extern fn jsObjectSetNum(obj: u32, key: u32, value: f64) void;
 pub extern fn jsObjectGet(obj: u32, key: u32) u32;
 pub extern fn jsObjectGetNum(obj: u32, key: u32) f64;
 pub extern fn jsStringify(obj: u32) u32;
@@ -32,7 +32,7 @@ pub fn setObjectValue (obj: u32, key: []const u8, value: u32) void {
   jsObjectSet(obj, jsKey.id, value);
 }
 
-pub fn setObjectValueNum (obj: u32, key: []const u8, value: f32) void {
+pub fn setObjectValueNum (obj: u32, key: []const u8, value: f64) void {
   const jsKey = String.new(key);
   defer jsKey.free();
   jsObjectSetNum(obj, jsKey.id, value);
@@ -80,7 +80,7 @@ pub const Object = struct {
     return getObjectValue(self.id, key);
   }
 
-  pub fn getNum (self: *const Object, key: []const u8) f32 {
+  pub fn getNum (self: *const Object, key: []const u8) f64 {
     return getObjectValueNum(self.id, key);
   }
 
@@ -88,7 +88,7 @@ pub const Object = struct {
     return setObjectValue(self.id, key, value);
   }
 
-  pub fn setNum (self: *const Object, key: []const u8, value: f32) void {
+  pub fn setNum (self: *const Object, key: []const u8, value: f64) void {
     return setObjectValueNum(self.id, key, value);
   } 
 

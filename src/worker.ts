@@ -18,7 +18,7 @@ export type ZigFunction = (id: number) => number
 
 export type ZigUserFunction = (...args: any[]) => any
 
-class ZigWorker extends WASM {
+export class ZigWorker extends WASM {
   async fetch (
     name: string, // name of the function
     req: Request,

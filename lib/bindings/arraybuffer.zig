@@ -13,7 +13,7 @@ pub const ArrayBuffer = struct {
   }
 
   pub fn new (data: []const u8) ArrayBuffer {
-    return ArrayBuffer{ .id = jsToBuffer(data.ptr, data.len()) };
+    return ArrayBuffer{ .id = jsToBuffer(data.ptr, data.len) };
   }
 
   pub fn free (self: *const ArrayBuffer) void {

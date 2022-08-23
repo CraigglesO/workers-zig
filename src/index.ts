@@ -1,5 +1,7 @@
 import zigWorker from './worker'
 
+import type { ZigWorker } from './worker'
+
 export type Route<Env> = (
   request: Request,
   env: Env,
@@ -38,4 +40,9 @@ export function zigSchedule<Env = {}> (): Event<Env> {
   ): Promise<void> => {
     return zigWorker.schedule(event, env, executionCtx)
   }
+}
+
+/** @internal */
+export function getZigWorker (): ZigWorker {
+  return zigWorker
 }

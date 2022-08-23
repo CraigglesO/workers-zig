@@ -1,6 +1,9 @@
 const getString = @import("string.zig").getString;
 const getObjectValue = @import("object.zig").getObjectValue;
-const jsFree = @import("common.zig").jsFree;
+const common = @import("common.zig");
+const jsFree = common.jsFree;
+const DefaultValueSize = common.DefaultValueSize;
+const KVNamespace = @import("../apis/kv.zig").KVNamespace;
 
 pub const Env = struct {
   id: u32,
@@ -13,13 +16,17 @@ pub const Env = struct {
     jsFree(self.id);
   }
 
-  pub fn key (self: *const Env, name: []const u8) []const u8 {
+  pub fn key (self: *const Env, name: []const u8) ?[]const u8 {
     const strPtr = getObjectValue(self.id, name);
+    if (strPtr <= DefaultValueSize) return null;
+    defer jsFree(strPtr);
     return getString(strPtr);
   }
 
-  pub fn secret (self: *const Env, name: []const u8) []const u8 {
+  pub fn secret (self: *const Env, name: []const u8) ?[]const u8 {
     const strPtr = getObjectValue(self.id, name);
+    if (strPtr <= DefaultValueSize) return null;
+    defer jsFree(strPtr);
     return getString(strPtr);
   }
 
@@ -31,8 +38,10 @@ pub const Env = struct {
 
   }
 
-  pub fn kv () void {
-
+  pub fn kv (self: *const Env, name: []const u8) ?KVNamespace {
+    const kvPtr = getObjectValue(self.id, name);
+    if (kvPtr <= DefaultValueSize) return null;
+    return KVNamespace.init(kvPtr);
   }
 
   pub fn r2 () void {

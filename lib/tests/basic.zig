@@ -15,12 +15,14 @@ const Headers = workersZig.Headers;
 pub export fn basicFetch (ctxID: u32) void {
     // build the ctx
     const ctx = FetchContext.init(ctxID) catch {
-        // TODO: throw a js error
+        const err = String.new("Unable to prepare a FetchContext.");
+        defer err.free();
+        err.throw();
         return undefined;
     };
     // build / keep a frame alive
     const frame = allocator.create(@Frame(basicHandler)) catch {
-        // TODO: throw a js error
+        ctx.throw(500, "Unable to prepare the kvStringHandler handler.");
         return undefined;
     };
     frame.* = async basicHandler(ctx);

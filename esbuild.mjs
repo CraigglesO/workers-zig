@@ -12,11 +12,11 @@ esbuild
     treeShaking: true,
     bundle: true,
     minify: true,
-    outfile: './dist/worker.js',
+    outfile: './dist/worker.mjs',
   })
   .then(() => {
-    const code = fs.readFileSync('./dist/worker.js', 'utf8')
+    const code = fs.readFileSync('./dist/worker.mjs', 'utf8')
 
-    fs.writeFileSync('./dist/worker.js', 'import __WORKER_ZIG_WASM from "./tests.wasm";' + code, 'utf8')
+    fs.writeFileSync('./dist/worker.mjs', 'import __WORKER_ZIG_WASM from "./tests.wasm";' + code, 'utf8')
   })
   .catch(() => process.exit(1))
