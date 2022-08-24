@@ -55,17 +55,17 @@ pub const ReadableStream = struct {
     return jsPtr == True;
   }
 
-  pub fn cancel (self: *const ReadableStream) callconv(.Async) void {
+  pub fn cancel (self: *const ReadableStream) void {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "cancel") };
     defer func.free();
-    await async func.call();
+    func.call();
   }
 
   pub fn pipeTo (
     self: *const ReadableStream,
     destination: *const WritableStream,
     options: PipeToOptions
-  ) callconv(.Async) void {
+  ) void {
     const optObj = options.toObject();
     defer optObj.free();
     const func = AsyncFunction{ .id = getObjectValue(self.id, "pipeTo") };
@@ -77,6 +77,6 @@ pub const ReadableStream = struct {
     args.push(destination.id);
     args.push(optObj.id);
 
-    await async func.call(args.id);
+    func.call(args.id);
   }
 };

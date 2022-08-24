@@ -4,15 +4,24 @@ const common = @import("common.zig");
 const jsCreateClass = common.jsCreateClass;
 const Classes = common.Classes;
 const Undefined = common.Undefined;
+const True = common.True;
 const jsFree = common.jsFree;
 const String = @import("string.zig").String;
 
+pub extern fn jsObjectHas(obj: u32, key: u32) u32;
 pub extern fn jsObjectSet(obj: u32, key: u32, value: u32) void;
 pub extern fn jsObjectSetNum(obj: u32, key: u32, value: f64) void;
 pub extern fn jsObjectGet(obj: u32, key: u32) u32;
 pub extern fn jsObjectGetNum(obj: u32, key: u32) f64;
 pub extern fn jsStringify(obj: u32) u32;
 pub extern fn jsParse(str: u32) u32;
+
+pub fn hasObject (obj: u32, key: []const u8) bool {
+  const jsKey = String.new(key);
+  defer jsKey.free();
+  const res = jsObjectHas(obj, jsKey.id);
+  return res == True;
+}
 
 pub fn getObjectValue (obj: u32, key: []const u8) u32 {
   const jsKey = String.new(key);
@@ -76,6 +85,10 @@ pub const Object = struct {
     jsFree(self.id);
   }
 
+  pub fn has (self: *const Object, key: []const u8) bool {
+    return hasObject(self.id, key);
+  }
+
   pub fn get (self: *const Object, key: []const u8) u32 {
     return getObjectValue(self.id, key);
   }
@@ -107,6 +120,10 @@ pub const Object = struct {
     const strValue = str.value();
     defer allocator.free(strValue);
     var stream = std.json.TokenStream.init(strValue);
-    return try std.json.parse(T, &stream, .{});
+    return try std.json.parse(T, &stream, .{
+      .ignore_unknown_fields = true,
+      .allow_trailing_data = true,
+      .allocator = allocator,
+    });
   }
 };

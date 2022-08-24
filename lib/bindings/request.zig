@@ -61,14 +61,14 @@ pub const RequestInit = struct {
   pub fn toObject (self: *const RequestInit) Object {
     const obj = Object.new();
     if (self.body != null) {
-      const bodyID = self.body.?.getID();
+      const bodyID = self.body.?.toID();
       if (bodyID != Null) obj.set("body", bodyID);
     }
     if (self.method != null) obj.setString("method", self.method.?.toString());
     if (self.headers != null) obj.set("headers", self.headers.?.id);
     if (self.redirect != null) obj.setString("redirect", self.redirect.?.toString());
     if (self.cf != null) {
-      const cfID = self.cf.?.getID();
+      const cfID = self.cf.?.toID();
       if (cfID != Null) obj.set("cf", cfID);
     }
 
@@ -77,21 +77,16 @@ pub const RequestInit = struct {
 };
 
 pub const RequestInfo = union(enum) {
-  string: []const u8,
-  jsString: *const String,
+  text: []const u8,
+  string: *const String,
   request: *const Request,
 
   // NOTE: Since the option may be a string, be sure to `jsFree(id)`
   pub fn toID (self: *const RequestInfo) u32 {
     var requestPtr: u32 = Undefined;
     switch (self.*) {
-      .string => |str| {
-        const jsString = String.new(str);
-        requestPtr = jsString.id;
-      },
-      .jsString => |jsString| {
-        requestPtr = jsString.id;
-      },
+      .text => |t| requestPtr = String.new(t).id,
+      .string => |s| requestPtr = s.id,
       .request => |req| requestPtr = req.id,
     }
     return requestPtr;
@@ -204,51 +199,51 @@ pub const Request = struct {
     return bUsed == True;
   }
 
-  pub fn arrayBuffer (self: *const Request) callconv(.Async) ?ArrayBuffer {
+  pub fn arrayBuffer (self: *const Request) ?ArrayBuffer {
     if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "arrayBuffer"));
     defer aFunc.free();
-    return ArrayBuffer.init(await async aFunc.call());
+    return ArrayBuffer.init(aFunc.call());
   }
 
   // NOTE: the returned string is a pointer to a string in memory that must be freed
-  pub fn text (self: *const Request) callconv(.Async) ?[]const u8 {
+  pub fn text (self: *const Request) ?[]const u8 {
     if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "text"));
     defer aFunc.free();
     const strPtr = aFunc.call();
     if (strPtr <= DefaultValueSize) return null;
     defer jsFree(strPtr);
-    return await async getString(strPtr);
+    return getString(strPtr);
   }
 
-  pub fn json (self: *const Request, comptime T: type) callconv(.Async) ?T {
+  pub fn json (self: *const Request, comptime T: type) ?T {
     if (!self.hasBody()) return null;
     // get the "string" and then parse it locally
-    const str = await async self.text();
+    const str = self.text();
     defer allocator.free(str);
     const stream = std.json.TokenStream.init(str);
     return try std.json.parse(T, &stream, .{});
   }
 
-  pub fn formData (self: *const Request) callconv(.Async) ?FormData {
+  pub fn formData (self: *const Request) ?FormData {
     if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "formData"));
     defer aFunc.free();
-    return FormData.init(await async aFunc.call());
+    return FormData.init(aFunc.call());
   }
 
-  pub fn blob (self: *const Request) callconv(.Async) ?Blob {
+  pub fn blob (self: *const Request) ?Blob {
     if (!self.hasBody()) return null;
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "blob"));
     defer aFunc.free();
-    return Blob.init(await async aFunc.call());
+    return Blob.init(aFunc.call());
   }
 
   // fast track arrayBuffer->toOwned
-  pub fn bytes (self: *const Request) callconv(.Async) ?[]u8 {
+  pub fn bytes (self: *const Request) ?[]u8 {
     if (!self.hasBody()) return null;
-    const ab = await async self.arrayBuffer();
+    const ab = self.arrayBuffer();
     defer ab.free();
     return ab.bytes();
   }

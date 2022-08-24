@@ -6,7 +6,6 @@ const Undefined = common.Undefined;
 const DefaultValueSize = common.DefaultValueSize;
 const object = @import("../bindings/object.zig");
 const Object = object.Object;
-const jsStringify = object.jsStringify;
 const getObjectValue = object.getObjectValue;
 const ArrayBuffer = @import("../bindings/arraybuffer.zig").ArrayBuffer;
 const String = @import("../bindings/string.zig").String;
@@ -14,7 +13,7 @@ const Array = @import("../bindings/array.zig").Array;
 const ReadableStream = @import("../bindings/streams/readable.zig").ReadableStream;
 const AsyncFunction = @import("../bindings/function.zig").AsyncFunction;
 
-pub const MAX_SIZE = 25 * 1000 * 1000; // 25MiB
+pub const KV_MAX_SIZE = 25 * 1_000 * 1_000; // 25MiB
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L932
 // Note: To simplify, we getX rather than applying type to the options.
@@ -148,7 +147,7 @@ pub const KVNamespace = struct {
     key: []const u8,
     value: PutValue,
     options: PutOptions
-  ) callconv(.Async) void {
+  ) void {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -168,14 +167,14 @@ pub const KVNamespace = struct {
     args.push(val);
     args.push(opts.id);
 
-    _ = await async func.callArgs(args.id);
+    _ = func.callArgs(args.id);
   }
 
   pub fn getString (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?String {
+  ) ?String {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -192,7 +191,7 @@ pub const KVNamespace = struct {
     args.push(str.id);
     args.push(opts.id);
 
-    const result = await async func.callArgs(args.id);
+    const result = func.callArgs(args.id);
     if (result <= DefaultValueSize) return null;
     return String{ .id = result };
   }
@@ -201,8 +200,8 @@ pub const KVNamespace = struct {
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?[]const u8 {
-    const str = await async self.getString(key, options) orelse return null;
+  ) ?[]const u8 {
+    const str = self.getString(key, options) orelse return null;
     defer str.free();
     return str.value();
   }
@@ -211,7 +210,7 @@ pub const KVNamespace = struct {
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?Object {
+  ) ?Object {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -228,7 +227,7 @@ pub const KVNamespace = struct {
     args.push(str.id);
     args.push(opts.id);
 
-    const result = await async func.callArgs(args.id);
+    const result = func.callArgs(args.id);
     if (result <= DefaultValueSize) return null;
     return Object{ .id = result };
   }
@@ -239,24 +238,24 @@ pub const KVNamespace = struct {
     comptime T: type,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?T {
-    _ = T;
+  ) ?T {
     // grab the data as a string
-    const string = await async self.getString(key, options) orelse return null;
-    defer string.free();
-    const strValue = string.value();
-    defer allocator.free(strValue);
+    const text = self.getText(key, options) orelse return null;
+    defer allocator.free(text);
     // parse the result
-    var stream = std.json.TokenStream.init(strValue);
-    var value = std.json.parse(T, &stream, .{}) catch return null;
-    return value;
+    var stream = std.json.TokenStream.init(text);
+    return std.json.parse(T, &stream, .{
+      .ignore_unknown_fields = true,
+      .allow_trailing_data = true,
+      .allocator = allocator,
+    }) catch return null;
   }
 
   pub fn getArrayBuffer (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) callconv(.Async) ?ArrayBuffer {
+  ) ?ArrayBuffer {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -273,7 +272,7 @@ pub const KVNamespace = struct {
     args.push(str.id);
     args.push(opts.id);
 
-    const result = await async func.callArgs(args.id);
+    const result = func.callArgs(args.id);
     if (result <= DefaultValueSize) return null;
     return ArrayBuffer{ .id = result };
   }
@@ -284,7 +283,7 @@ pub const KVNamespace = struct {
     key: []const u8,
     options: GetOptions
   ) ?[]const u8 {
-    const ab = await async self.getArrayBuffer(key, options) orelse return null;
+    const ab = self.getArrayBuffer(key, options) orelse return null;
     defer ab.free();
     return ab.bytes();
   }
@@ -293,7 +292,7 @@ pub const KVNamespace = struct {
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
-  ) ReadableStream {
+  ) ?ReadableStream {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -310,7 +309,7 @@ pub const KVNamespace = struct {
     args.push(str.id);
     args.push(opts.id);
 
-    const result = await async func.callArgs(args.id);
+    const result = func.callArgs(args.id);
     if (result <= DefaultValueSize) return null;
     return ReadableStream{ .id = result };
   }
@@ -318,7 +317,7 @@ pub const KVNamespace = struct {
   pub fn delete (
     self: *const KVNamespace,
     key: []const u8
-  ) callconv(.Async) void {
+  ) void {
     // prep the string
     const str = String.new(key);
     defer str.free();
@@ -326,7 +325,7 @@ pub const KVNamespace = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
 
-    _ = await async func.callArgs(str.id);
+    _ = func.callArgs(str.id);
   }
 
   // pub fn list (options: ?ListOptions) ListResponse {

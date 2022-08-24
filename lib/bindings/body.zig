@@ -7,7 +7,7 @@ const FormData = @import("formData.zig").FormData;
 const Null = @import("common.zig").Null;
 
 pub const BodyInit = union(enum) {
-  readableStream: *const ReadableStream,
+  stream: *const ReadableStream,
   string: *const String,
   text: []const u8,
   arrayBuffer: *const ArrayBuffer,
@@ -17,10 +17,10 @@ pub const BodyInit = union(enum) {
   formData: *const FormData,
   none,
 
-  pub fn getID (self: *const BodyInit) u32 {
+  pub fn toID (self: *const BodyInit) u32 {
     var bodyID: u32 = Null;
     switch (self.*) {
-      .readableStream => |rs| bodyID = rs.id,
+      .stream => |rs| bodyID = rs.id,
       .string => |s| bodyID = s.id,
       .text => |t| bodyID = String.new(t).id,
       .arrayBuffer => |ab| bodyID = ab.id,

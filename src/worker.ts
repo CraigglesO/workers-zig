@@ -1,6 +1,7 @@
 import WASM from './wasm'
 
 export interface FetchContext {
+  path: string,
   req: Request,
   env: any,
   ctx: ExecutionContext,
@@ -14,58 +15,44 @@ export interface ScheduleContext {
   resolve?: () => void
 }
 
-export type ZigFunction = (id: number) => number
+export type ZigHandleReq = (routerPtr: number, id: number) => number
+export type ZigSchedule = (id: number) => number
 
 export type ZigUserFunction = (...args: any[]) => any
 
 export class ZigWorker extends WASM {
-  async fetch (
-    name: string, // name of the function
-    req: Request,
-    env: any,
-    ctx: ExecutionContext
-  ): Promise<Response> {
+  async fetch (context: FetchContext): Promise<Response> {
     // pull in the heap
     const { heap } = this
     // ensure wasm has been build
     await this._buildWASM()
-
-    // build a context
-    const context: FetchContext = { req, env, ctx }
-    const id = heap.put(context)
+    // pull in routerPtr, if it's undefined, throw
+    const { routerPtr } = this
+    if (routerPtr === undefined) throw new Error('fetch was never initialized. Please create a "main" function.');
 
     // grab the zig function and build a promise
-    const fetchFunc = this.instance.exports[name] as ZigFunction
+    const handleRequest = this.instance.exports.handleRequest as ZigHandleReq
     return new Promise<Response>(resolve => {
       context.resolve = resolve
-      fetchFunc(id)
+      handleRequest(routerPtr, heap.put(context))
     })
   }
 
   async function (
     name: string, // name of the function
-    ...args: any[] // arguments to pass to the function
+    args?: { [key: string]: any } // arguments to pass to the function
   ): Promise<any> {
+    // pull in the heap
+    const { heap } = this
     // ensure wasm has been build
     await this._buildWASM()
 
-    // grab the zig function and build a promise
-    const fetchFunc = this.instance.exports[name] as ZigUserFunction
-    return fetchFunc(...args)
-  }
-
-  async asyncFunction (
-    name: string, // name of the function
-    ...args: any[] // arguments to pass to the function
-  ): Promise<any> {
-    // ensure wasm has been build
-    await this._buildWASM()
+    // store the args
+    const argsID = heap.put(args)
 
     // grab the zig function and build a promise
     const fetchFunc = this.instance.exports[name] as ZigUserFunction
-    return new Promise<Response>(resolve => {
-      fetchFunc(resolve, ...args)
-    })
+    return fetchFunc(argsID)
   }
 
   async schedule (
@@ -82,7 +69,7 @@ export class ZigWorker extends WASM {
     const id = heap.put(context)
 
     // grab the zig function
-    const zigSchedule = this.instance.exports.schedule as ZigFunction
+    const zigSchedule = this.instance.exports.schedule as ZigSchedule
 
     return new Promise<void>(resolve => {
       context.resolve = resolve

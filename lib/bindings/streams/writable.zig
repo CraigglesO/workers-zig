@@ -31,15 +31,15 @@ pub const WritableStream = struct {
     return jsPtr == True;
   }
 
-  pub fn abort (self: *const WritableStream) callconv(.Async) void {
+  pub fn abort (self: *const WritableStream) void {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "abort") };
     defer func.free();
-    await async func.call();
+    func.call();
   }
 
-  pub fn close (self: *const WritableStream) callconv(.Async) void {
+  pub fn close (self: *const WritableStream) void {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "close") };
     defer func.free();
-    await async func.call();
+    func.call();
   }
 };

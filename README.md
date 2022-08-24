@@ -108,8 +108,8 @@ export fn basicFetch(ctxID: u32) void {
 }
 fn basicHandler(ctx: *Context) callconv(.Async) void {
     // get body from request
-    // const text = await async ctx.req.text() orelse "failed";
-    const text = await async ctx.req.text() orelse return ctx.throw(500, "Failed to get body.");
+    // const text = ctx.req.text() orelse "failed";
+    const text = ctx.req.text() orelse return ctx.throw(500, "Failed to get body.");
     defer allocator.free(text);
     // headers
     const headers = Headers.new();

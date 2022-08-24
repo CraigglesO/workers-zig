@@ -4,6 +4,7 @@ const common = @import("common.zig");
 const jsFree = common.jsFree;
 const DefaultValueSize = common.DefaultValueSize;
 const KVNamespace = @import("../apis/kv.zig").KVNamespace;
+const R2Bucket = @import("../apis/r2.zig").R2Bucket;
 
 pub const Env = struct {
   id: u32,
@@ -44,7 +45,9 @@ pub const Env = struct {
     return KVNamespace.init(kvPtr);
   }
 
-  pub fn r2 () void {
-
+  pub fn r2 (self: *const Env, name: []const u8) ?R2Bucket {
+    const r2Ptr = getObjectValue(self.id, name);
+    if (r2Ptr <= DefaultValueSize) return null;
+    return R2Bucket.init(r2Ptr);
   }
 };

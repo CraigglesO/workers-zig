@@ -12,6 +12,11 @@ pub fn getString (jsPtr: u32) []const u8 {
   const ptr = jsStringGet(jsPtr);
   return std.mem.span(ptr);
 }
+pub fn getStringFree (jsPtr: u32) []const u8 {
+  const ptr = jsStringGet(jsPtr);
+  defer jsFree(jsPtr);
+  return std.mem.span(ptr);
+}
 
 pub const String = struct {
   id: u32,

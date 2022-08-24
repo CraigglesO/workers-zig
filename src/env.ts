@@ -79,6 +79,12 @@ export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
 /** __ARRAY__ */
 
 /** OBJECT */
+export function jsObjectHas (wasm: WASM, objPtr: number, keyPtr: number): number {
+  const obj = wasm.heap.get(objPtr) as { [key: string]: any }
+  const key = wasm.heap.get(keyPtr) as any | undefined
+  return wasm.heap.put(obj[key] !== undefined)
+}
+
 export function jsObjectSet (wasm: WASM, objPtr: number, keyPtr: number, valuePtr: number) {
   const obj = wasm.heap.get(objPtr) as { [key: string]: any }
   const key = wasm.heap.get(keyPtr)

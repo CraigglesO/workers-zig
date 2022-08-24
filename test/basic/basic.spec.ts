@@ -26,15 +26,16 @@ test.beforeEach((t: ExecutionContext<Context>) => {
 test.afterEach(async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
-  // Dispatch a fetch event to our worker
-  const res = await mf.dispatchFetch("http://localhost:8787/heap")
-  t.deepEqual(await res.json(), [
+  // grab exports
+  const { zigHeap } = await mf.getModuleExports()
+  // Check that the heap is empty
+  t.deepEqual(zigHeap(), [
     [1, null],
-    [2, null], // undefined resolves to null
+    [2, undefined],
     [3, true],
     [4, false],
-    [5, null], // Infinity resolves to null
-    [6, null] // NaN resolves to null
+    [5, Infinity],
+    [6, NaN] // NaN resolves to null
   ])
 })
 

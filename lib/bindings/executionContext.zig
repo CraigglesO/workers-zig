@@ -20,9 +20,9 @@ pub const ExecutionContext = struct {
     jsFree(self.id);
   }
 
-  pub fn waitUntil (self: *const ExecutionContext, waitFn: WaitUntilFn) callconv(.Async) void {
+  pub fn waitUntil (self: *const ExecutionContext, waitFn: WaitUntilFn) void {
     const resolveFn = Function.init(jsWaitUntil(self.id));
-    await async waitFn();
+    waitFn();
     resolveFn.call();
   }
 

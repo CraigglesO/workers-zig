@@ -3,6 +3,7 @@ const allocator = std.heap.page_allocator;
 const common = @import("../bindings/common.zig");
 const jsFree = common.jsFree;
 const Undefined = common.Undefined;
+const jsResolve = common.jsResolve;
 const ExecutionContext = @import("../bindings/executionContext.zig").ExecutionContext;
 const Env = @import("../bindings/env.zig").Env;
 const Request = @import("../bindings/request.zig").Request;
@@ -13,9 +14,8 @@ const Function = @import("../bindings/function.zig").Function;
 const getString = @import("../bindings/string.zig").getString;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
 const getObjectValueNum = @import("../bindings/object.zig").getObjectValueNum;
-const jsResolve = @import("main.zig").jsResolve;
 
-pub const ScheduleFn = fn handle(*ScheduledContext) callconv(.Async) void;
+pub const ScheduleFn = fn handle(*ScheduledContext) void;
 
 pub const ScheduledEvent = struct {
   id: u32,

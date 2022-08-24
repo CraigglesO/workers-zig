@@ -16,7 +16,7 @@ pub fn fetchResp(urlPtr: u32, initPtr: u32) u32 {
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1972
 pub fn fetch (request: RequestInfo, requestInit: RequestOptions) callconv(.Async) Response {
-  const urlID = request.getID();
+  const urlID = request.toID();
   defer jsFetch(urlID);
   const reqInitID = requestInit.toID();
   defer jsFree(reqInitID);

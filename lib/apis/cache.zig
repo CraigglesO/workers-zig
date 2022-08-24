@@ -25,7 +25,7 @@ pub const CacheOptions = union(enum) {
   string: []const u8,
   none,
 
-  pub fn getID (self: *const CacheOptions) u32 {
+  pub fn toID (self: *const CacheOptions) u32 {
     var key: u32 = Undefined;
     switch (self.*) {
       .string => |str| {
@@ -62,10 +62,10 @@ pub const Cache = struct {
     return Cache{ .id = ptr };
   }
 
-  pub fn new (options: CacheOptions) callconv(.Async) Cache {
-    const key = options.getID();
+  pub fn new (options: CacheOptions) Cache {
+    const key = options.toID();
     defer jsFree(key);
-    return Cache{ .id = await async getCache(key) };
+    return Cache{ .id = getCache(key) };
   }
 
   pub fn free (self: *const Cache) void {
@@ -76,9 +76,9 @@ pub const Cache = struct {
     self: *const Cache,
     request: RequestInfo,
     options: *const CacheQueryOptions
-  ) callconv(.Async) bool {
+  ) bool {
     // prep arguments
-    const reqID = request.getID();
+    const reqID = request.toID();
     defer jsFree(reqID);
     const opts = options.toObject();
     defer jsFree(opts);
@@ -89,7 +89,7 @@ pub const Cache = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
     // call async function
-    const result = await async func.callArgs(arr.id);
+    const result = func.callArgs(arr.id);
     return result == True;
   }
 
@@ -97,9 +97,9 @@ pub const Cache = struct {
     self: *const Cache,
     request: RequestInfo,
     options: *const CacheQueryOptions
-  ) callconv(.Async) ?Response {
+  ) ?Response {
     // prep arguments
-    const reqID = request.getID();
+    const reqID = request.toID();
     defer jsFree(reqID);
     const opts = options.toObject();
     defer jsFree(opts);
@@ -110,7 +110,7 @@ pub const Cache = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "match") };
     defer func.free();
     // call async function
-    const result = await async func.callArgs(arr.id);
+    const result = func.callArgs(arr.id);
     if (result == Undefined) {
       return;
     }
@@ -121,11 +121,11 @@ pub const Cache = struct {
     self: *const Cache,
     request: RequestInfo,
     response: *const Response
-  ) callconv(.Async) void {
+  ) void {
     // prep arguments
-    const reqID = request.getID();
+    const reqID = request.toID();
     defer jsFree(reqID);
-    const resID = response.getID();
+    const resID = response.toID();
     defer jsFree(resID);
     const arr = Array.new();
     arr.push(reqID);
@@ -134,6 +134,6 @@ pub const Cache = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
     defer func.free();
     // call async function
-    await async func.callArgs(arr.id);
+    func.callArgs(arr.id);
   }
 };

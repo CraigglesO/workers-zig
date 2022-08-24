@@ -26,7 +26,7 @@ pub export fn kvString (ctxID: u32) void {
     // tell the context about the frame for later destruction
     ctx.frame.* = frame;
 }
-fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
+fn kvStringHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -36,8 +36,8 @@ fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
     // create a js string to use
     const jsStr = String.new("value");
     defer jsStr.free();
-    await async kv.put("key", .{ .string = &jsStr }, .{});
-    const text = await async kv.getString("key", .{}) orelse {
+    kv.put("key", .{ .string = &jsStr }, .{});
+    const text = kv.getString("key", .{}) orelse {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
@@ -80,8 +80,8 @@ fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
       return;
     };
     defer kv.free();
-    await async kv.put("key2", .{ .text = "value2" }, .{});
-    const text = await async kv.getText("key2", .{}) orelse {
+    kv.put("key2", .{ .text = "value2" }, .{});
+    const text = kv.getText("key2", .{}) orelse {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
@@ -142,8 +142,8 @@ fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     const obj = TestObj{ .a = 1, .b = "test" };
     const jsObj = obj.toObject();
     defer jsObj.free();
-    await async kv.put("obj", .{ .object = &jsObj }, .{});
-    const getObj = await async kv.getObject("obj", .{}) orelse {
+    kv.put("obj", .{ .object = &jsObj }, .{});
+    const getObj = kv.getObject("obj", .{}) orelse {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
@@ -165,62 +165,65 @@ fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-// pub export fn kvJSON (ctxID: u32) void {
-//     // build the ctx
-//     const ctx = FetchContext.init(ctxID) catch {
-//         const err = String.new("Unable to prepare a FetchContext.");
-//         defer err.free();
-//         err.throw();
-//         return;
-//     };
-//     // build / keep a frame alive
-//     const frame = allocator.create(@Frame(kvJSONHandler)) catch {
-//         ctx.throw(500, "Unable to prepare the kvJSONHandler handler.");
-//         return;
-//     };
-//     frame.* = async kvJSONHandler(ctx);
-//     // tell the context about the frame for later destruction
-//     ctx.frame.* = frame;
-// }
-// fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
-//     // get the kvinstance from env
-//     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
-//       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
-//       return;
-//     };
-//     defer kv.free();
+pub export fn kvJSON (ctxID: u32) void {
+    // build the ctx
+    const ctx = FetchContext.init(ctxID) catch {
+        const err = String.new("Unable to prepare a FetchContext.");
+        defer err.free();
+        err.throw();
+        return;
+    };
+    // build / keep a frame alive
+    const frame = allocator.create(@Frame(kvJSONHandler)) catch {
+        ctx.throw(500, "Unable to prepare the kvJSONHandler handler.");
+        return;
+    };
+    frame.* = async kvJSONHandler(ctx);
+    // tell the context about the frame for later destruction
+    ctx.frame.* = frame;
+}
+fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
 
-//     // build the object
-//     const obj = TestObj{ .a = 1, .b = "test" };
-//     const jsObj = obj.toObject();
-//     defer jsObj.free();
-//     await async kv.put("obj", .{ .jsObject = &jsObj }, .{});
-//     // const getObj = await async kv.getJSON(TestObj, "obj", .{}) orelse {
-//     //     ctx.throw(500, "Could not find KV key's value");
-//     //     return;
-//     // };
-//     const getObj = await async kv.getJSON(TestObj, "obj", .{}) orelse {
-//         ctx.throw(500, "Could not find KV key's value");
-//         return;
-//     };
-//     const getObjJS = getObj.toObject();
-//     defer getObjJS.free();
-//     // get obj as string
-//     const body = getObjJS.stringify();
-//     defer body.free();
-//     // headers
-//     const headers = Headers.new();
-//     defer headers.free();
-//     headers.set("Content-Type", "application/json");
-//     // response
-//     const res = Response.new(
-//         .{ .string = &body },
-//         .{ .status = 200, .statusText = "ok", .headers = &headers }
-//     );
-//     defer res.free();
+    // build the object
+    const obj = TestObj{ .a = 1, .b = "test" };
+    const jsObj = obj.toObject();
+    defer jsObj.free();
+    kv.put("obj", .{ .object = &jsObj }, .{});
+    const getObj = kv.getJSON(TestObj, "obj", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer allocator.free(getObj.b);
+    // defer getObj.free();
+    // const testObj = getObj.parse(TestObj) catch {
+    //     ctx.throw(500, "Could not convert object to \"TestObj\"");
+    //     return;
+    // };
+    defer allocator.free(getObj.b);
+    const getObjJS = getObj.toObject();
+    defer getObjJS.free();
+    // get obj as string
+    const body = getObjJS.stringify();
+    defer body.free();
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .string = &body },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
 
-//     ctx.send(&res);
-// }
+    ctx.send(&res);
+}
 
 pub export fn kvArraybuffer (ctxID: u32) void {
     // build the ctx
@@ -251,8 +254,8 @@ fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     const bytes = [_]u8{ 0, 1, 2, 3};
     const ab = ArrayBuffer.new(bytes[0..]);
     defer ab.free();
-    await async kv.put("ab", .{ .arrayBuffer = &ab }, .{});
-    const getAB = await async kv.getArrayBuffer("ab", .{}) orelse {
+    kv.put("ab", .{ .arrayBuffer = &ab }, .{});
+    const getAB = kv.getArrayBuffer("ab", .{}) orelse {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
@@ -264,6 +267,53 @@ fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     // response
     const res = Response.new(
         .{ .arrayBuffer = &getAB },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub export fn kvStream (ctxID: u32) void {
+    // build the ctx
+    const ctx = FetchContext.init(ctxID) catch {
+        const err = String.new("Unable to prepare a FetchContext.");
+        defer err.free();
+        err.throw();
+        return;
+    };
+    // build / keep a frame alive
+    const frame = allocator.create(@Frame(kvStreamHandler)) catch {
+        ctx.throw(500, "Unable to prepare the kvStreamHandler handler.");
+        return;
+    };
+    frame.* = async kvStreamHandler(ctx);
+    // tell the context about the frame for later destruction
+    ctx.frame.* = frame;
+}
+fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+
+    // build the object
+    const arr = [_]u8{ 0, 1, 2, 3};
+    kv.put("stream", .{ .bytes = arr[0..] }, .{});
+    const getStream = kv.getStream("stream", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer getStream.free();
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .stream = &getStream },
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();
@@ -298,8 +348,8 @@ fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
 
     // build the object
     const arr = [_]u8{ 0, 1, 2, 3};
-    await async kv.put("bytes", .{ .bytes = arr[0..] }, .{});
-    const getBytes = await async kv.getBytes("bytes", .{}) orelse {
+    kv.put("bytes", .{ .bytes = arr[0..] }, .{});
+    const getBytes = kv.getBytes("bytes", .{}) orelse {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
@@ -343,9 +393,9 @@ fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     };
     defer kv.free();
     // create a js string to use
-    await async kv.put("key", .{ .text = "value" }, .{});
-    await async kv.delete("key");
-    const text = await async kv.getText("key", .{}) orelse "deleted";
+    kv.put("key", .{ .text = "value" }, .{});
+    kv.delete("key");
+    const text = kv.getText("key", .{}) orelse "deleted";
     defer allocator.free(text);
     // headers
     const headers = Headers.new();

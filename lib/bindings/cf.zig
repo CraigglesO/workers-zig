@@ -423,7 +423,7 @@ pub const CfRequestInit = union(enum) {
   requestInitCfProperties: *const RequestInitCfProperties,
   none,
 
-  pub fn getID (self: *const CfRequestInit) u32 {
+  pub fn toID (self: *const CfRequestInit) u32 {
     var cfID: u32 = Null;
     switch (self.*) {
       .incomingRequestCfProperties => |crp| cfID = crp.id,

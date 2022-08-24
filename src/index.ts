@@ -1,6 +1,6 @@
 import zigWorker from './worker'
 
-import type { ZigWorker } from './worker'
+import type { ZigWorker, FetchContext } from './worker'
 
 export type Route<Env> = (
   request: Request,
@@ -14,22 +14,20 @@ export type Event<Env> = (
   ctx: ExecutionContext
 ) => Promise<void>
 
-export function zigFetch<Env = {}> (name: string): Route<Env> {
+// Uses zig's FetchMap. Future: FetchMap will also include a trie-router.
+export function zigFetch<Env = {}> (path: string): Route<Env> {
   return async (
-    request: Request,
+    req: Request,
     env: Env,
-    executionCtx: ExecutionContext
+    ctx: ExecutionContext
   ): Promise<Response> => {
-    return zigWorker.fetch(name, request, env, executionCtx)
+    const fetchCtx: FetchContext = { path, req, env, ctx }
+    return zigWorker.fetch(fetchCtx)
   }
 }
 
 export function zigFunction (name: string, ...args: any[]): Promise<any> {
   return zigWorker.function(name, ...args)
-}
-
-export function zigAsyncFunction (name: string, ...args: any[]): Promise<any> {
-  return zigWorker.asyncFunction(name, ...args)
 }
 
 export function zigSchedule<Env = {}> (): Event<Env> {
