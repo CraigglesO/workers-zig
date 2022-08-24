@@ -28,7 +28,7 @@ export class ZigWorker extends WASM {
     await this._buildWASM()
     // pull in routerPtr, if it's undefined, throw
     const { routerPtr } = this
-    if (routerPtr === undefined) throw new Error('fetch was never initialized. Please create a "main" function.');
+    if (routerPtr === undefined) throw new Error('fetch was never initialized. Please create a "fetchEvent" function.');
 
     // grab the zig function and build a promise
     const handleRequest = this.instance.exports.handleRequest as ZigHandleReq

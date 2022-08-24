@@ -28,7 +28,7 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
     resume @ptrCast(anyframe, @alignCast(4, frame));
 }
 
-pub export fn handleRequest (routerPtr: *anyopaque, ctxID: u32) void {
+pub export fn handleRequest (routerPtr: *anyopaque, ctxID: u32) callconv(.C) void {
     // Grab the router
     const router = @ptrCast(*worker.Router, @alignCast(4, routerPtr));
     // build the fetchContext

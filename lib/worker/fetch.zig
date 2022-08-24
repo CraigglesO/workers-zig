@@ -8,6 +8,7 @@ const Env = @import("../bindings/env.zig").Env;
 const Request = @import("../bindings/request.zig").Request;
 const Response = @import("../bindings/response.zig").Response;
 const StatusCode = @import("../http/common.zig").StatusCode;
+const Method = @import("../http/common.zig").Method;
 const String = @import("../bindings/string.zig").String;
 const getStringFree = @import("../bindings/string.zig").getStringFree;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
@@ -20,7 +21,7 @@ pub const HandlerFn = fn (ctx: *FetchContext) void;
 
 pub const Route = struct {
   path: []const u8,
-  method: ?[]const u8 = null,
+  method: ?Method = null,
   handle: HandlerFn,
 };
 
@@ -87,8 +88,8 @@ pub const Router = struct {
   routes: []const Route,
 
   pub fn init (comptime routes: anytype) !*Router {
-    var fetchMap = try allocator.create(Router);
-    errdefer allocator.destroy(fetchMap);
+    var router = try allocator.create(Router);
+    errdefer allocator.destroy(router);
 
     comptime var rs: []const Route = &[_]Route{};
     inline for (routes) |handler| {
@@ -100,9 +101,9 @@ pub const Router = struct {
       }
     }
 
-    fetchMap.* = .{ .routes = rs };
+    router.* = .{ .routes = rs };
 
-    return fetchMap;
+    return router;
   }
 
   pub fn deinit (self: *const Router) void {
@@ -113,10 +114,11 @@ pub const Router = struct {
     for (self.routes) |route| {
       if (std.mem.eql(u8, route.path, ctx.path)) {
         // const obj = Object.new();
+        // defer obj.free();
         // obj.setNum("a", @intToFloat(f64, @ptrToInt(route.handle)));
         // jsStringLog(obj.id);
-        return basicHandler(ctx);
-        // return route.handle(ctx);
+        // return basicHandler(ctx);
+        return route.handle(ctx);
       }
     }
 
@@ -124,18 +126,54 @@ pub const Router = struct {
   }
 };
 
-pub fn get(path: []const u8, handler: HandlerFn) Route {
+pub fn createRoute(method: Method, path: []const u8, handler: HandlerFn) Route {
   return Route{
     .path = path,
-    .method = "GET",
+    .method = method,
     .handle = @ptrCast(HandlerFn, handler),
   };
 }
 
-pub fn post(path: []const u8, handler: HandlerFn) Route {
-  return Route{
-    .path = path,
-    .method = "POST",
-    .handle = @ptrCast(HandlerFn, handler),
-  };
+pub fn all (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(null, path, handler);
+}
+
+pub fn get (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Get, path, handler);
+}
+
+pub fn head (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Head, path, handler);
+}
+
+pub fn post (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Post, path, handler);
+}
+
+pub fn put (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Put, path, handler);
+}
+
+pub fn delete (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Delete, path, handler);
+}
+
+pub fn connect (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Connect, path, handler);
+}
+
+pub fn options (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Options, path, handler);
+}
+
+pub fn trace (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Trace, path, handler);
+}
+
+pub fn patch (path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.Patch, path, handler);
+}
+
+pub fn custom (method: []const u8, path: []const u8, handler: HandlerFn) Route {
+    return createRoute(Method.fromString(method), path, handler);
 }

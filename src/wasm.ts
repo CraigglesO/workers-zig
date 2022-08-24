@@ -37,8 +37,8 @@ export default class WASM {
     })
 
     // If there is a main function, run it
-    const main = this.instance.exports.main as Function | undefined
-    if (main !== undefined) this.routerPtr = main()
+    const fetchEvent = this.instance.exports.fetchEvent as Function | undefined
+    if (fetchEvent !== undefined) this.routerPtr = fetchEvent()
   }
 
   /* HELPERS */

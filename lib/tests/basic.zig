@@ -1,11 +1,11 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 
-const workersZig = @import("workers-zig");
-const FetchContext = workersZig.FetchContext;
-const Response = workersZig.Response;
-const String = workersZig.String;
-const Headers = workersZig.Headers;
+const worker = @import("workers-zig");
+const FetchContext = worker.FetchContext;
+const Response = worker.Response;
+const String = worker.String;
+const Headers = worker.Headers;
 
 pub fn basicHandler (ctx: *FetchContext) void {
     // get body from request

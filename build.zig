@@ -14,6 +14,7 @@ pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
     b.cache_root = "cache";
     b.global_cache_root = "cache";
+    b.use_stage1 = true;
 
     // const wasm_build = b.addSharedLibrary("zig", "lib/main.zig", .unversioned);
     // wasm_build.setOutputDir("dist");

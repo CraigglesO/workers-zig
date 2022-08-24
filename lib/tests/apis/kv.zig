@@ -9,24 +9,7 @@ const Headers = workersZig.Headers;
 const Object = workersZig.Object;
 const ArrayBuffer = workersZig.ArrayBuffer;
 
-pub export fn kvString (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvStringHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvStringHandler handler.");
-        return;
-    };
-    frame.* = async kvStringHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvStringHandler (ctx: *FetchContext) void {
+pub fn kvStringHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -56,24 +39,7 @@ fn kvStringHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub export fn kvText (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvTextHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvTextHandler handler.");
-        return;
-    };
-    frame.* = async kvTextHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvTextHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -113,24 +79,7 @@ const TestObj = struct {
     }
 };
 
-pub export fn kvObject (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvObjectHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvObjectHandler handler.");
-        return;
-    };
-    frame.* = async kvObjectHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvObjectHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -165,24 +114,7 @@ fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-pub export fn kvJSON (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvJSONHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvJSONHandler handler.");
-        return;
-    };
-    frame.* = async kvJSONHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvJSONHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -225,24 +157,7 @@ fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-pub export fn kvArraybuffer (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvArraybufferHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvArraybufferHandler handler.");
-        return;
-    };
-    frame.* = async kvArraybufferHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvArraybufferHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -274,24 +189,7 @@ fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-pub export fn kvStream (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvStreamHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvStreamHandler handler.");
-        return;
-    };
-    frame.* = async kvStreamHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvStreamHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -321,24 +219,7 @@ fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-pub export fn kvBytes (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvBytesHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvBytesHandler handler.");
-        return;
-    };
-    frame.* = async kvBytesHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvBytesHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -368,24 +249,7 @@ fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
-pub export fn kvDelete (ctxID: u32) void {
-    // build the ctx
-    const ctx = FetchContext.init(ctxID) catch {
-        const err = String.new("Unable to prepare a FetchContext.");
-        defer err.free();
-        err.throw();
-        return;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(kvDeleteHandler)) catch {
-        ctx.throw(500, "Unable to prepare the kvDeleteHandler handler.");
-        return;
-    };
-    frame.* = async kvDeleteHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
+pub fn kvDeleteHandler (ctx: *FetchContext) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
