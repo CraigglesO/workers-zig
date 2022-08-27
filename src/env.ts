@@ -10,7 +10,15 @@ const CLASSES = [
   Set,
   WeakMap,
   WeakSet,
+  Int8Array,
   Uint8Array,
+  Uint8ClampedArray,
+  Int16Array,
+  Uint16Array,
+  Int32Array,
+  Uint32Array,
+  BigInt64Array,
+  BigUint64Array,
   ArrayBuffer,
   SharedArrayBuffer,
   DataView,
@@ -76,6 +84,11 @@ export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
 export function jsArrayGet (wasm: WASM, arrayPtr: number, pos: number): number {
   const array = wasm.heap.get(arrayPtr) as Array<any>
   return wasm.heap.put(array[pos])
+}
+
+export function jsArrayGetNum (wasm: WASM, arrayPtr: number, pos: number): number {
+  const array = wasm.heap.get(arrayPtr) as Array<any>
+  return array[pos]
 }
 /** __ARRAY__ */
 
@@ -259,6 +272,16 @@ export async function jsFetch (
 /** __FETCH__ **/
 
 /** CRYPTO **/
+export function jsRandomUUID (wasm: WASM): number {
+  const uuid = crypto.randomUUID()
+  return wasm.putString(uuid)
+}
+
+export function jsGetRandomValues (wasm: WASM, bufPtr: number): void {
+  const buffer = wasm.heap.get(bufPtr) as ArrayBufferView
+  crypto.getRandomValues(buffer)
+}
+
 export async function jsCrypto (
   wasm: WASM,
   frame: number,

@@ -1,7 +1,7 @@
 const common = @import("../bindings/common.zig");
 const Undefined = common.Undefined;
 const True = common.True;
-const False = common.False;
+const toJSBool = common.toJSBool;
 const jsFree = common.jsFree;
 const String = @import("../bindings/string.zig").String;
 const Request = @import("../bindings/request.zig").Request;
@@ -48,11 +48,7 @@ pub const CacheQueryOptions = struct {
 
   pub fn toObject (self: *const CacheQueryOptions) Object {
     const obj = Object.new();
-    if (self.ignoreMethod != null) {
-      var ignoreID = False;
-      if (self.ignoreMethod.? == true) ignoreID = True;
-      obj.set("ignoreMethod", ignoreID);
-    }
+    if (self.ignoreMethod != null) obj.set("ignoreMethod", toJSBool(self.ignoreMethod.?));
     return obj;
   }
 };

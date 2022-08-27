@@ -8,6 +8,7 @@ const String = @import("string.zig").String;
 
 pub extern fn jsArrayPush(arrID: u32, args: u32) void;
 pub extern fn jsArrayGet(arrID: u32, pos: u32) u32;
+pub extern fn jsArrayGetNum(arrID: u32, pos: u32) f64;
 
 pub const Array = struct {
   id: u32,
@@ -30,6 +31,18 @@ pub const Array = struct {
 
   pub fn get (self: *const Array, pos: u32) u32 {
     return jsArrayGet(self.id, pos);
+  }
+
+  pub fn getNum (self: *const Array, pos: u32, comptime T: type) T {
+    const num = jsArrayGetNum(self.id, pos);
+    switch(@typeInfo(T)) {
+      .Int => return @floatToInt(T, num),
+      .Float => return @floatCast(T, num),
+      else => {
+        String.new("Can't cast f64 to " ++ @typeName(T)).throw();
+        return @as(T, 0);
+      },
+    }
   }
 
   pub fn getType (self: *const Array, comptime T: type, pos: u32) T {

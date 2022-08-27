@@ -36,7 +36,15 @@ pub const Classes = enum(u8) {
   Set,
   WeakMap,
   WeakSet,
+  Int8Array,
   Uint8Array,
+  Uint8ClampedArray,
+  Int16Array,
+  Uint16Array,
+  Int32Array,
+  Uint32Array,
+  BigInt64Array,
+  BigUint64Array,
   ArrayBuffer,
   SharedArrayBuffer,
   DataView,
@@ -81,4 +89,9 @@ pub fn toJSBool (b: bool) u32 {
   } else {
     return False;
   }
+}
+
+pub fn fromJSBool (b: u32) bool {
+  if (b == True) return true
+  else return false;
 }
