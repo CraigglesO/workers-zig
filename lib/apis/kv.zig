@@ -132,10 +132,14 @@ pub const ListResult = struct {
       };
     }
 
+    pub fn free (self: *const ListKeys) void {
+      self.arr.free();
+    }
+
     pub fn next (self: *const ListKeys) ?ListKey {
-      if (self.pos == len) return null;
-      const listkey = arr.getType(ListKey, pos);
-      pos += 1;
+      if (self.pos == self.len) return null;
+      const listkey = self.arr.getType(ListKey, self.pos);
+      self.pos += 1;
       return listkey;
     }
   };

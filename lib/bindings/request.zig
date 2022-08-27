@@ -20,7 +20,7 @@ const String = @import("string.zig").String;
 const Array = @import("array.zig").Array;
 const getString = @import("string.zig").getString;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
-const FormData = @import("formdata.zig").FormData;
+const FormData = @import("formData.zig").FormData;
 const Blob = @import("blob.zig").Blob;
 const getObjectValue = @import("object.zig").getObjectValue;
 

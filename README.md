@@ -9,6 +9,7 @@ Why Zig?
 * The language already supports WASM and WASI.
 * Small builds are easy to achieve. To expound on this, the basic example provided here is `5.0Kb` of WASM code and `5.5Kb` javascript code.
 * I wanted a tool that made it easy for both WASM and JS code to work in tandem.
+* I didn't like that rust wasm bindings would grow the more code you wrote. I came up with a strategy that covers 90% use cases, JS glue doesn't grow, and you can add the 10% as needed.
 * I prefer [**Zig's memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
 
 
@@ -37,7 +38,7 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 
 [Follow the instructions to install Zig](https://ziglang.org/learn/getting-started/)
 
-Release used: **0.9.1**
+Release used: **0.10.0-dev.3685+dae7aeb33**
 
 ### Step 2a: Use the skeleton project provided
 
