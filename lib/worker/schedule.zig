@@ -25,7 +25,7 @@ pub const ScheduledEvent = struct {
   }
 
   pub fn scheduledTime (self: *const ScheduledEvent) u64 {
-    return @floatToInt(u64, getObjectValueNum(self.id, "scheduledTime"));
+    return getObjectValueNum(self.id, "scheduledTime", u64);
   }
 
   // NOTE: user must free the returned string from the allocator heap

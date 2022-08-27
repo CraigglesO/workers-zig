@@ -24,7 +24,7 @@ pub const IncomingRequestCfPropertiesBotManagement = struct {
   }
 
   pub fn score (self: *const IncomingRequestCfPropertiesTLSClientAuth) u8 {
-    return @floatToInt(u8, getObjectValueNum(self.id, "score"));
+    return getObjectValueNum(self.id, "score", u8);
   }
 
   pub fn staticResource (self: *const IncomingRequestCfPropertiesTLSClientAuth) bool {
@@ -176,7 +176,7 @@ pub const IncomingRequestCfProperties = struct {
 
   // (e.g. 395747)
   pub fn asn (self: *const IncomingRequestCfProperties) u32 {
-    return @floatToInt(u32, getObjectValueNum(self.id, "asn"));
+    return getObjectValueNum(self.id, "asn", u32);
   }
 
   // The organisation which owns the ASN of the incoming request. (e.g. Google Cloud)
@@ -204,12 +204,12 @@ pub const IncomingRequestCfProperties = struct {
   }
 
   pub fn clientTcpRtt (self: *const IncomingRequestCfProperties) u32 {
-    return @floatToInt(u32, getObjectValueNum(self.id, "clientTcpRtt"));
+    return getObjectValueNum(self.id, "clientTcpRtt", u32);
   }
 
   // NOTE: If clientTrustScore was undefined, 0 is returned.
   pub fn clientTrustScore (self: *const IncomingRequestCfProperties) u32 {
-    return @floatToInt(u32, getObjectValueNum(self.id, "clientTrustScore"));
+    return getObjectValueNum(self.id, "clientTrustScore", u32);
   }
 
   // The three-letter airport code of the data center that the request (e.g. "DFW")
@@ -243,12 +243,12 @@ pub const IncomingRequestCfProperties = struct {
 
   // NOTE: If latitude was undefined, this will return 0
   pub fn latitude (self: *const IncomingRequestCfProperties) f32 {
-    return getObjectValueNum(self.id, "latitude");
+    return getObjectValueNum(self.id, "latitude", f32);
   }
 
   // NOTE: If latitude was undefined, this will return 0
   pub fn longitude (self: *const IncomingRequestCfProperties) f32 {
-    return getObjectValueNum(self.id, "longitude");
+    return getObjectValueNum(self.id, "longitude", f32);
   }
 
   // DMA metro code from which the request was issued, e.g. "635"

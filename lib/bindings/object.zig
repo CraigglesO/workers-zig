@@ -29,10 +29,18 @@ pub fn getObjectValue (obj: u32, key: []const u8) u32 {
   return jsObjectGet(obj, jsKey.id);
 }
 
-pub fn getObjectValueNum (obj: u32, key: []const u8) f64 {
+pub fn getObjectValueNum (obj: u32, key: []const u8, comptime T: type) T {
   const jsKey = String.new(key);
   defer jsKey.free();
-  return jsObjectGetNum(obj, jsKey.id);
+  const input: f64 = jsObjectGetNum(obj, jsKey.id);
+  switch(@typeInfo(T)) {
+    .Int => return @floatToInt(T, input),
+    .Float => return @floatCast(T, input),
+    else => {
+      String.new("Can't cast f64 to " ++ @typeName(T)).throw();
+      return @as(T, 0);
+    },
+  }
 }
 
 pub fn setObjectValue (obj: u32, key: []const u8, value: u32) void {
@@ -41,10 +49,16 @@ pub fn setObjectValue (obj: u32, key: []const u8, value: u32) void {
   jsObjectSet(obj, jsKey.id, value);
 }
 
-pub fn setObjectValueNum (obj: u32, key: []const u8, value: f64) void {
+pub fn setObjectValueNum (obj: u32, key: []const u8, comptime T: type, value: T) void {
   const jsKey = String.new(key);
   defer jsKey.free();
-  jsObjectSetNum(obj, jsKey.id, value);
+  var fValue: f64 = 0;
+  switch(@typeInfo(T)) {
+    .Int => fValue = @intToFloat(f64, value),
+    .Float => fValue = @floatCast(f64, value),
+    else => String.new("Can't cast f64 to " ++ @typeName(T)).throw(),
+  }
+  jsObjectSetNum(obj, jsKey.id, fValue);
 }
 
 pub fn setObjectString (obj: u32, key: []const u8, value: []const u8) void {
@@ -93,16 +107,16 @@ pub const Object = struct {
     return getObjectValue(self.id, key);
   }
 
-  pub fn getNum (self: *const Object, key: []const u8) f64 {
-    return getObjectValueNum(self.id, key);
+  pub fn getNum (self: *const Object, key: []const u8, comptime T: type) f64 {
+    return getObjectValueNum(self.id, key, T);
   }
 
   pub fn set (self: *const Object, key: []const u8, value: u32) void {
     return setObjectValue(self.id, key, value);
   }
 
-  pub fn setNum (self: *const Object, key: []const u8, value: f64) void {
-    return setObjectValueNum(self.id, key, value);
+  pub fn setNum (self: *const Object, key: []const u8, comptime T: type, value: T) void {
+    return setObjectValueNum(self.id, key, T, value);
   } 
 
   pub fn setString (self: *const Object, key: []const u8, value: []const u8) void {

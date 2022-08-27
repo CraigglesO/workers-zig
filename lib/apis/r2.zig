@@ -129,7 +129,7 @@ pub const R2Object = struct {
 
   // readonly size: number;
   pub fn size (self: *const R2Object) u64 {
-    return @floatToInt(u64, getObjectValueNum(self.id, "size"));
+    return getObjectValueNum(self.id, "size", u64);
   }
 
   pub fn etag (self: *const R2Object) []const u8 {

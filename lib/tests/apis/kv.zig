@@ -75,7 +75,7 @@ const TestObj = struct {
 
     pub fn toObject (self: *const TestObj) Object {
         const obj = Object.new();
-        obj.setNum("a", @intToFloat(f64, self.a));
+        obj.setNum("a", u32, self.a);
         obj.setString("b", self.b);
 
         return obj;

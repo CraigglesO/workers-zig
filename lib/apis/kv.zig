@@ -26,7 +26,7 @@ pub const GetOptions = struct {
 
   pub fn toObject (self: *const GetOptions) Object {
     const obj = Object.new();
-    if (self.cacheTtl != null) obj.setNum("cacheTtl", @intToFloat(f64, self.cacheTtl.?));
+    if (self.cacheTtl != null) obj.setNum("cacheTtl", u64, self.cacheTtl.?);
 
     return obj;
   }
@@ -71,8 +71,8 @@ pub const PutOptions = struct {
   pub fn toObject (self: *const PutOptions) Object {
     const obj = Object.new();
 
-    if (self.expiration != null) obj.setNum("expiration", @intToFloat(f64, self.expiration.?));
-    if (self.expirationTtl != null) obj.setNum("expirationTtl", @intToFloat(f64, self.expirationTtl.?));
+    if (self.expiration != null) obj.setNum("expiration", u64, self.expiration.?);
+    if (self.expirationTtl != null) obj.setNum("expirationTtl", u64, self.expirationTtl.?);
     if (self.metadata != null) obj.set("metadata", self.metadata.?.id);
 
     return obj;
@@ -90,7 +90,7 @@ pub const ListOptions = struct {
   pub fn toObject (self: *const ListOptions) Object {
     const obj = Object.new();
 
-    obj.setNum("limit", @intToFloat(f64, self.limit));
+    obj.setNum("limit", u16, self.limit);
     if (self.prefix != null) obj.setString("prefix", self.prefix.?);
     if (self.jsPrefix != null) obj.set("prefix", self.jsPrefix.?.id);
     if (self.cursor != null) obj.setString("cursor", self.cursor.?);
@@ -166,9 +166,9 @@ pub const ListResult = struct {
     }
 
     pub fn expiration (self: *const ListKey) ?u64 {
-      const num = getObjectValueNum(self.id, "expiration");
+      const num = getObjectValueNum(self.id, "expiration", u64);
       if (num <= DefaultValueSize) return null;
-      return @floatToInt(u64, num);
+      return num;
     }
 
     pub fn metadata (self: *const ListKey, comptime T: type) ?T {

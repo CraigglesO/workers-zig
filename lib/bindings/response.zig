@@ -48,7 +48,7 @@ pub const ResponseInit = struct {
 
   pub fn toObject (self: *const ResponseInit) Object {
     const obj = Object.new();
-    if (self.status != null) obj.setNum("status", @intToFloat(f32, self.status.?));
+    if (self.status != null) obj.setNum("status", u16, self.status.?);
     if (self.statusText != null) obj.setString("statusText", self.statusText.?);
     if (self.headers != null) obj.set("headers", self.headers.?.id);
     if (self.webSocket != null) obj.set("webSocket", self.webSocket.?.id);
@@ -110,7 +110,7 @@ pub const Response = struct {
   }
 
   pub fn status (self: *const Response) StatusCode {
-    const code = getObjectValueNum(self.id, "status");
+    const code = getObjectValueNum(self.id, "status", u16);
     return StatusCode.fromInt(code);
   }
 
