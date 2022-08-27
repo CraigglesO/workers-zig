@@ -31,6 +31,7 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 // ? PART 1
 // * crypto
 // * KV getMetadata
+// * KV test getMeta & expire
 // * R2
 
 // * zigFunction with input args (for lone bindings like string)
