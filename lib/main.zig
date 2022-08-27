@@ -30,10 +30,11 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 
 // ? PART 1
 // * crypto
-// * KV list
+// * KV getMetadata
 // * R2
 
 // * zigFunction with input args (for lone bindings like string)
+// * allow user to set own zig + js
 // * build skeleton
 // * DOCS
 // * share

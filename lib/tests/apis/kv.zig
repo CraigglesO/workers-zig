@@ -9,6 +9,7 @@ const Headers = worker.Headers;
 const Object = worker.Object;
 const ArrayBuffer = worker.ArrayBuffer;
 const Array = worker.Array;
+const Undefined = worker.Undefined;
 const True = worker.True;
 const False = worker.False;
 
@@ -272,6 +273,11 @@ pub fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
+const MetaTest = struct {
+    name: []const u8,
+    input: u32,
+};
+
 pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
@@ -285,7 +291,8 @@ pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     kv.put("list2", .{ .text = "value2" }, .{});
     kv.put("list3", .{ .text = "value3" }, .{});
     kv.put("list4", .{ .text = "value4" }, .{});
-    kv.put("list5", .{ .text = "value5" }, .{});
+    const metaObj = MetaTest{ .name = "test", .input = 5 };
+    kv.putMetadata("list5", .{ .text = "value5" }, MetaTest, metaObj, .{});
 
     // list kv
     const listResult = kv.list(.{});
@@ -293,7 +300,7 @@ pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     const listComplete = listResult.listComplete();
     const cursor = listResult.cursor();
     defer allocator.free(cursor);
-    const keys = listResult.keys();
+    var keys = listResult.keys();
     defer keys.free();
 
     // build an object explaining what we see
@@ -304,15 +311,24 @@ pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     obj.setString("cursor", cursor);
     const arr = Array.new();
     defer arr.free();
-    // for (keys.listKeys) |key| {
-    //     const name = key.name();
-    //     defer allocator.free(name);
-    //     const keyObj = Object.new();
-    //     defer keyObj.free();
-    //     keyObj.setString("name", name);
-    //     arr.push(keyObj.id);
-    // }
-    // obj.set("keys", arr.id);
+    while (keys.next()) |*key| {
+        defer key.free();
+        // name
+        const name = key.name();
+        defer allocator.free(name);
+        // meta
+        const metadata = key.metaObject();
+        defer metadata.?.free();
+        // prep obj
+        const keyObj = Object.new();
+        defer keyObj.free();
+        // set values
+        keyObj.setString("name", name);
+        keyObj.set("metadata", (if (metadata) |m| m.id else Undefined));
+        // store
+        arr.push(keyObj.id);
+    }
+    obj.set("keys", arr.id);
     
     // headers
     const headers = Headers.new();

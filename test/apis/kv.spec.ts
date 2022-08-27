@@ -126,10 +126,18 @@ test('kv: list: put many -> list -> return list details', async (t: ExecutionCon
   const { mf } = t.context
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/kv/list')
+  const data = await res.json()
   // Check the body was returned
   t.is(res.status, 200)
-  t.deepEqual(await res.json(), {
+  t.deepEqual(data, {
     listComplete: true,
     cursor: '',
+    keys: [
+      { name: 'list1' },
+      { name: 'list2' },
+      { name: 'list3' },
+      { name: 'list4' },
+      { name: 'list5', metadata: { name: 'test', input: 5 } },
+    ]
   })
 })

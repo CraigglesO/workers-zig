@@ -9,6 +9,7 @@ const object = @import("../bindings/object.zig");
 const Object = object.Object;
 const getObjectValue = object.getObjectValue;
 const getObjectValueNum = object.getObjectValueNum;
+const jsParse = object.jsParse;
 const ArrayBuffer = @import("../bindings/arraybuffer.zig").ArrayBuffer;
 const string = @import("../bindings/string.zig");
 const String = string.String;
@@ -142,7 +143,7 @@ pub const ListResult = struct {
       self.arr.free();
     }
 
-    pub fn next (self: *const ListKeys) ?ListKey {
+    pub fn next (self: *ListKeys) ?ListKey {
       if (self.pos == self.len) return null;
       const listkey = self.arr.getType(ListKey, self.pos);
       self.pos += 1;
@@ -172,7 +173,7 @@ pub const ListResult = struct {
     }
 
     pub fn metadata (self: *const ListKey, comptime T: type) ?T {
-      const obj = self.metaObject();
+      const obj = self.metaObject() orelse return null;
       defer obj.free();
       return obj.parse(T) orelse null;
     }
@@ -215,6 +216,53 @@ pub const KVNamespace = struct {
     defer value.free(val);
     // prep the options
     const opts = options.toObject();
+    defer opts.free();
+    // grab the function
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
+    defer func.free();
+    // prep the args
+    const args = Array.new();
+    defer args.free();
+    args.push(str.id);
+    args.push(val);
+    args.push(opts.id);
+
+    _ = func.callArgs(args.id);
+  }
+
+  pub fn putMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    value: PutValue,
+    comptime T: type,
+    metadata: T,
+    options: PutOptions
+  ) void {
+    // prep the string
+    const str = String.new(key);
+    defer str.free();
+    // prep the object
+    const val = value.toID();
+    defer value.free(val);
+    // metadata -> string -> Object -> options.metadata.
+    var buf: [1024]u8 = undefined;
+    var fba = std.heap.FixedBufferAllocator.init(&buf);
+    var metaBuf = std.ArrayList(u8).init(fba.allocator());
+    std.json.stringify(metadata, .{}, metaBuf.writer()) catch {
+      String.new("Failed to stringify " ++ @typeName(T)).throw();
+      return;
+    };
+    const metaString = String.new(metaBuf.items);
+    defer metaString.free();
+    const metaObj = Object.init(jsParse(metaString.id));
+    defer metaObj.free();
+    // prep the options
+    const newOptions = PutOptions{
+      .expiration = options.expiration,
+      .expirationTtl = options.expirationTtl,
+      .metadata = &metaObj,
+    };
+    const opts = newOptions.toObject();
     defer opts.free();
     // grab the function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };

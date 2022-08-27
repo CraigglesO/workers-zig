@@ -32,6 +32,7 @@ pub const DefaultValueSize = 6;
 pub const Classes = enum(u8) {
   Array = 0,
   Object,
+  Date,
   Map,
   Set,
   WeakMap,

@@ -28,7 +28,7 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 - 🪣 R2 bindings
 - 💾 D1 bindings (coming soon)
 - ✉️ WebSockets bindings (coming soon)
-- 🔐 Web-Crypto bindings (coming soon)
+- 🔐 Web-Crypto bindings - partially complete
 - 📌 Durable Objects bindings (coming soon)
 - 💪 Uses TypeScript
 

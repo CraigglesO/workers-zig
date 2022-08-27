@@ -6,6 +6,7 @@ import type { FetchContext, ScheduleContext } from "./worker"
 const CLASSES = [
   Array,
   Object,
+  Date,
   Map,
   Set,
   WeakMap,
