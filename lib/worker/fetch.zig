@@ -15,9 +15,9 @@ const getObjectValue = @import("../bindings/object.zig").getObjectValue;
 
 const Object = @import("../bindings/object.zig").Object;
 const jsStringLog = @import("../bindings/string.zig").jsStringLog;
-const basicHandler = @import("../tests/basic.zig").basicHandler;
+// const basicHandler = @import("../tests/basic.zig").basicHandler;
 
-pub const HandlerFn = fn (ctx: *FetchContext) void;
+pub const HandlerFn = fn (ctx: *FetchContext) callconv(.Async) void;
 
 pub const Route = struct {
   path: []const u8,
@@ -84,53 +84,48 @@ pub const FetchContext = struct {
   }
 };
 
-pub const Router = struct {
-  routes: []const Route,
+// pub const Router = struct {
+//   routes: []const Route,
 
-  pub fn init (comptime routes: anytype) !*Router {
-    var router = try allocator.create(Router);
-    errdefer allocator.destroy(router);
+//   pub fn init (comptime handles: anytype) !*Router {
+//     var router = try allocator.create(Router);
+//     errdefer allocator.destroy(router);
 
-    comptime var rs: []const Route = &[_]Route{};
-    inline for (routes) |handler| {
-      switch (@TypeOf(handler)) {
-        Route => {
-          rs = (rs ++ &[_]Route{handler});
-        },
-        else => |f_type| String.new("unsupported handler type " ++ @typeName(f_type)).throw(),
-      }
-    }
+//     comptime var routes: []const Route = &[_]Route{};
+//     inline for (handles) |handler| {
+//       switch (@TypeOf(handler)) {
+//         Route => {
+//           routes = (routes ++ &[_]Route{handler});
+//         },
+//         else => |f_type| String.new("unsupported handler type " ++ @typeName(f_type)).throw(),
+//       }
+//     }
 
-    router.* = .{ .routes = rs };
+//     router.* = .{ .routes = routes };
 
-    return router;
-  }
+//     return router;
+//   }
 
-  pub fn deinit (self: *const Router) void {
-    allocator.free(self);
-  }
+//   pub fn deinit (self: *const Router) void {
+//     allocator.free(self);
+//   }
 
-  pub fn handleRequest (self: *const Router, ctx: *FetchContext) void {
-    for (self.routes) |route| {
-      if (std.mem.eql(u8, route.path, ctx.path)) {
-        // const obj = Object.new();
-        // defer obj.free();
-        // obj.setNum("a", @intToFloat(f64, @ptrToInt(route.handle)));
-        // jsStringLog(obj.id);
-        // return basicHandler(ctx);
-        return route.handle(ctx);
-      }
-    }
+//   pub fn handleRequest (self: *const Router, ctx: *FetchContext) void {
+//     for (self.routes) |route| {
+//       if (std.mem.eql(u8, route.path, ctx.path)) {
+//         return route.handle(ctx);
+//       }
+//     }
 
-    ctx.throw(500, "Route does not exist.");
-  }
-};
+//     ctx.throw(500, "Route does not exist.");
+//   }
+// };
 
 pub fn createRoute(method: Method, path: []const u8, handler: HandlerFn) Route {
   return Route{
     .path = path,
     .method = method,
-    .handle = @ptrCast(HandlerFn, handler),
+    .handle = handler,
   };
 }
 

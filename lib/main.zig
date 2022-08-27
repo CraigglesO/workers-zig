@@ -28,39 +28,20 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
     resume @ptrCast(anyframe, @alignCast(4, frame));
 }
 
-pub export fn handleRequest (routerPtr: *anyopaque, ctxID: u32) callconv(.C) void {
-    // Grab the router
-    const router = @ptrCast(*worker.Router, @alignCast(4, routerPtr));
-    // build the fetchContext
-    const ctx = worker.FetchContext.init(ctxID) catch {
-      bindings.String.new("Unable to prepare a FetchContext.").throw();
-      return;
-    };
-    const frame = allocator.create(@Frame(_handleRequest)) catch {
-        ctx.throw(500, "Unable to prepare a frame.");
-        return undefined;
-    };
-    frame.* = async _handleRequest(router, ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-
-fn _handleRequest (router: *worker.Router, ctx: *worker.FetchContext) callconv(.Async) void {
-    router.handleRequest(ctx);
-}
-
 // ? PART 1
-// * Use fetch function
-// * KV (getStream test)
-// * Cache tests
+// * update toID functions with their own free methods
+// * zigFunction with input args (for lone bindings like string)
+// * change jsLog to common, not string
+// * support getting numbers better
+// * KV list
 // * R2
 
 // * schedule fn
 // * build skeleton
 // * DOCS
-
 // * share
 
+// ? PART 2
 // * add tests for all basic bindings
 // * streams (all the rest)
 // * HEADERS + ITERATOR

@@ -22,20 +22,23 @@ pub fn getCache(keyPtr: u32) u32 {
 }
 
 pub const CacheOptions = union(enum) {
-  string: []const u8,
+  text: []const u8,
+  string: *const String,
   none,
 
   pub fn toID (self: *const CacheOptions) u32 {
-    var key: u32 = Undefined;
     switch (self.*) {
-      .string => |str| {
-        const string = String.new(str);
-        key = string.id;
-      },
-      .none => {},
+      .text => |t| return String.new(t).id,
+      .string => |s| return s.id,
+      .none => return Undefined,
     }
+  }
 
-    return key;
+  pub fn free (self: *const CacheOptions, id: u32) void {
+    switch (self.*) {
+      .text => jsFree(id),
+      else => {},
+    }
   }
 };
 
@@ -63,77 +66,76 @@ pub const Cache = struct {
   }
 
   pub fn new (options: CacheOptions) Cache {
-    const key = options.toID();
-    defer jsFree(key);
-    return Cache{ .id = getCache(key) };
+    const optsPtr = options.toID();
+    defer options.free(optsPtr);
+    return Cache{ .id = getCache(optsPtr) };
   }
 
   pub fn free (self: *const Cache) void {
     jsFree(self.id);
   }
 
+  pub fn put (
+    self: *const Cache,
+    req: RequestInfo,
+    res: *const Response
+  ) void {
+    // prep arguments
+    const reqID = req.toID();
+    defer req.free(reqID);
+    const arr = Array.new();
+    defer arr.free();
+    arr.push(reqID);
+    arr.push(res.id);
+    // build async function
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
+    defer func.free();
+    // call async function
+    _ = func.callArgs(arr.id);
+  }
+
+  pub fn match (
+    self: *const Cache,
+    req: RequestInfo,
+    options: CacheQueryOptions
+  ) ?Response {
+    // prep arguments
+    const reqID = req.toID();
+    defer req.free(reqID);
+    const opts = options.toObject();
+    defer opts.free();
+    const arr = Array.new();
+    defer arr.free();
+    arr.push(reqID);
+    arr.push(opts.id);
+    // build async function
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "match") };
+    defer func.free();
+    // call async function
+    const result = func.callArgs(arr.id);
+    if (result == Undefined) return null;
+    return Response{ .id = result };
+  }
+
   pub fn delete (
     self: *const Cache,
-    request: RequestInfo,
-    options: *const CacheQueryOptions
+    req: RequestInfo,
+    options: CacheQueryOptions
   ) bool {
     // prep arguments
-    const reqID = request.toID();
-    defer jsFree(reqID);
+    const reqID = req.toID();
+    defer req.free(reqID);
     const opts = options.toObject();
-    defer jsFree(opts);
+    defer opts.free();
     const arr = Array.new();
+    defer arr.free();
     arr.push(reqID);
-    arr.push(opts);
+    arr.push(opts.id);
     // build async function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
     // call async function
     const result = func.callArgs(arr.id);
     return result == True;
-  }
-
-  pub fn match (
-    self: *const Cache,
-    request: RequestInfo,
-    options: *const CacheQueryOptions
-  ) ?Response {
-    // prep arguments
-    const reqID = request.toID();
-    defer jsFree(reqID);
-    const opts = options.toObject();
-    defer jsFree(opts);
-    const arr = Array.new();
-    arr.push(reqID);
-    arr.push(opts);
-    // build async function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "match") };
-    defer func.free();
-    // call async function
-    const result = func.callArgs(arr.id);
-    if (result == Undefined) {
-      return;
-    }
-    return Response{ .id = result };
-  }
-
-  pub fn put (
-    self: *const Cache,
-    request: RequestInfo,
-    response: *const Response
-  ) void {
-    // prep arguments
-    const reqID = request.toID();
-    defer jsFree(reqID);
-    const resID = response.toID();
-    defer jsFree(resID);
-    const arr = Array.new();
-    arr.push(reqID);
-    arr.push(resID);
-    // build async function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
-    defer func.free();
-    // call async function
-    func.callArgs(arr.id);
   }
 };

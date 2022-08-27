@@ -9,7 +9,6 @@ type WasmAllocSentinel = (size: number) => number
 
 export default class WASM {
   heap: Heap = new Heap()
-  routerPtr?: number
   idGen: number = 0
   instance!: WebAssembly.Instance
   wasmMemory?: Uint8Array
@@ -35,10 +34,6 @@ export default class WASM {
         ...this.#buildFunctions()
       }
     })
-
-    // If there is a main function, run it
-    const fetchEvent = this.instance.exports.fetchEvent as Function | undefined
-    if (fetchEvent !== undefined) this.routerPtr = fetchEvent()
   }
 
   /* HELPERS */

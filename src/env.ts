@@ -76,6 +76,11 @@ export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
   const item = wasm.heap.get(itemPtr)
   array.push(item)
 }
+
+export function jsArrayGet (wasm: WASM, arrayPtr: number, pos: number): number {
+  const array = wasm.heap.get(arrayPtr) as Array<any>
+  return wasm.heap.put(array[pos])
+}
 /** __ARRAY__ */
 
 /** OBJECT */

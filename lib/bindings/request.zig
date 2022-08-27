@@ -36,7 +36,7 @@ pub const Redirect = enum {
   };
 
   pub fn toString(self: *const Redirect) []const u8 {
-    return redirects[@enumToInt(self)];
+    return redirects[@enumToInt(self.*)];
   }
 
   pub fn fromString(str: []const u8) !Redirect {
@@ -60,10 +60,10 @@ pub const RequestInit = struct {
 
   pub fn toObject (self: *const RequestInit) Object {
     const obj = Object.new();
-    if (self.body != null) {
-      const bodyID = self.body.?.toID();
-      if (bodyID != Null) obj.set("body", bodyID);
-    }
+    var body = self.body orelse BodyInit{ .none = {} };
+    const bodyID = body.toID();
+    defer body.free(bodyID);
+    if (bodyID != Null) obj.set("body", bodyID);
     if (self.method != null) obj.setString("method", self.method.?.toString());
     if (self.headers != null) obj.set("headers", self.headers.?.id);
     if (self.redirect != null) obj.setString("redirect", self.redirect.?.toString());
@@ -81,31 +81,34 @@ pub const RequestInfo = union(enum) {
   string: *const String,
   request: *const Request,
 
-  // NOTE: Since the option may be a string, be sure to `jsFree(id)`
+  // NOTE: Since the option may be a string, be sure to `defer reqInfo.free(id)`
   pub fn toID (self: *const RequestInfo) u32 {
-    var requestPtr: u32 = Undefined;
     switch (self.*) {
-      .text => |t| requestPtr = String.new(t).id,
-      .string => |s| requestPtr = s.id,
-      .request => |req| requestPtr = req.id,
+      .text => |t| return String.new(t).id,
+      .string => |s| return s.id,
+      .request => |req| return req.id,
     }
-    return requestPtr;
+  }
+
+  pub fn free (self: *const RequestInfo, id: u32) void {
+    switch (self.*) {
+      .text => jsFree(id),
+      else => {},
+    }
   }
 };
 
 pub const RequestOptions = union(enum) {
-  requestInit: *const RequestInit,
+  requestInit: RequestInit,
   request: *const Request,
   none,
 
   pub fn toID(self: *const RequestOptions) u32 {
-    var reqInitID: u32 = Undefined;
     switch (self.*) {
-      .requestInit => |ri| reqInitID = ri.id,
-      .request => |req| reqInitID = req.id,
-      .none => {},
+      .requestInit => |*ri| return ri.toObject().id,
+      .request => |req| return req.id,
+      .none => return Undefined,
     }
-    return reqInitID;
   }
 };
 

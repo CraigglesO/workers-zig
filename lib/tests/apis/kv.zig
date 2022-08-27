@@ -1,15 +1,18 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 
-const workersZig = @import("workers-zig");
-const FetchContext = workersZig.FetchContext;
-const Response = workersZig.Response;
-const String = workersZig.String;
-const Headers = workersZig.Headers;
-const Object = workersZig.Object;
-const ArrayBuffer = workersZig.ArrayBuffer;
+const worker = @import("workers-zig");
+const FetchContext = worker.FetchContext;
+const Response = worker.Response;
+const String = worker.String;
+const Headers = worker.Headers;
+const Object = worker.Object;
+const ArrayBuffer = worker.ArrayBuffer;
+const Array = worker.Array;
+const True = worker.True;
+const False = worker.False;
 
-pub fn kvStringHandler (ctx: *FetchContext) void {
+pub fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -39,7 +42,7 @@ pub fn kvStringHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvTextHandler (ctx: *FetchContext) void {
+pub fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -79,7 +82,7 @@ const TestObj = struct {
     }
 };
 
-pub fn kvObjectHandler (ctx: *FetchContext) void {
+pub fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -114,7 +117,7 @@ pub fn kvObjectHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvJSONHandler (ctx: *FetchContext) void {
+pub fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -131,13 +134,7 @@ pub fn kvJSONHandler (ctx: *FetchContext) void {
         ctx.throw(500, "Could not find KV key's value");
         return;
     };
-    defer allocator.free(getObj.b);
-    // defer getObj.free();
-    // const testObj = getObj.parse(TestObj) catch {
-    //     ctx.throw(500, "Could not convert object to \"TestObj\"");
-    //     return;
-    // };
-    defer allocator.free(getObj.b);
+    defer std.json.parseFree(TestObj, getObj, .{ .allocator = allocator });
     const getObjJS = getObj.toObject();
     defer getObjJS.free();
     // get obj as string
@@ -157,7 +154,7 @@ pub fn kvJSONHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvArraybufferHandler (ctx: *FetchContext) void {
+pub fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -189,7 +186,7 @@ pub fn kvArraybufferHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvStreamHandler (ctx: *FetchContext) void {
+pub fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -219,7 +216,7 @@ pub fn kvStreamHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvBytesHandler (ctx: *FetchContext) void {
+pub fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -249,7 +246,7 @@ pub fn kvBytesHandler (ctx: *FetchContext) void {
     ctx.send(&res);
 }
 
-pub fn kvDeleteHandler (ctx: *FetchContext) void {
+pub fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
       ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
@@ -268,6 +265,62 @@ pub fn kvDeleteHandler (ctx: *FetchContext) void {
     // response
     const res = Response.new(
         .{ .text = text },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+
+    // store a bunch of values
+    kv.put("list1", .{ .text = "value1" }, .{});
+    kv.put("list2", .{ .text = "value2" }, .{});
+    kv.put("list3", .{ .text = "value3" }, .{});
+    kv.put("list4", .{ .text = "value4" }, .{});
+    kv.put("list5", .{ .text = "value5" }, .{});
+
+    // list kv
+    const listResult = kv.list(.{});
+    defer listResult.free();
+    const listComplete = listResult.listComplete();
+    const cursor = listResult.cursor();
+    defer allocator.free(cursor);
+    const keys = listResult.keys();
+    defer keys.free();
+
+    // build an object explaining what we see
+    const obj = Object.new();
+    defer obj.free();
+    if (listComplete) obj.set("listComplete", True)
+    else obj.set("listComplete", False);
+    obj.setString("cursor", cursor);
+    const arr = Array.new();
+    defer arr.free();
+    // for (keys.listKeys) |key| {
+    //     const name = key.name();
+    //     defer allocator.free(name);
+    //     const keyObj = Object.new();
+    //     defer keyObj.free();
+    //     keyObj.setString("name", name);
+    //     arr.push(keyObj.id);
+    // }
+    // obj.set("keys", arr.id);
+    
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "text/plain");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();

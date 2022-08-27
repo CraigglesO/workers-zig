@@ -78,7 +78,7 @@ pub const Response = struct {
     const jsArgs = Array.new();
     defer jsArgs.free();
     const bodyID = bodyInit.toID();
-    defer jsFree(bodyID);
+    defer bodyInit.free(bodyID);
     jsArgs.push(bodyID);
     jsArgs.push(jsResOptions.id);
     // create the class
@@ -92,7 +92,7 @@ pub const Response = struct {
     const jsArgs = Array.new();
     defer jsArgs.free();
     const bodyID = bodyInit.toID();
-    defer jsFree(bodyID);
+    defer bodyInit.free(bodyID);
     jsArgs.push(bodyID);
     jsArgs.push(response.id);
     // create the class

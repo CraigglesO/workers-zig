@@ -2,13 +2,17 @@ const std = @import("std");
 const allocator = std.heap.page_allocator;
 const common = @import("../bindings/common.zig");
 const jsFree = common.jsFree;
+const True = common.True;
 const Undefined = common.Undefined;
 const DefaultValueSize = common.DefaultValueSize;
 const object = @import("../bindings/object.zig");
 const Object = object.Object;
 const getObjectValue = object.getObjectValue;
+const getObjectValueNum = object.getObjectValueNum;
 const ArrayBuffer = @import("../bindings/arraybuffer.zig").ArrayBuffer;
-const String = @import("../bindings/string.zig").String;
+const string = @import("../bindings/string.zig");
+const String = string.String;
+const getStringFree = string.getStringFree;
 const Array = @import("../bindings/array.zig").Array;
 const ReadableStream = @import("../bindings/streams/readable.zig").ReadableStream;
 const AsyncFunction = @import("../bindings/function.zig").AsyncFunction;
@@ -84,47 +88,92 @@ pub const ListOptions = struct {
     if (self.prefix != null) obj.setString("prefix", self.prefix.?);
     if (self.jsPrefix != null) obj.set("prefix", self.jsPrefix.?.id);
     if (self.cursor != null) obj.setString("cursor", self.cursor.?);
-    if (self.jsCursor != null) obj.setS("cursor", self.jsCursor.?.id);
+    if (self.jsCursor != null) obj.set("cursor", self.jsCursor.?.id);
 
     return obj;
   }
 };
 
-// pub const ListResponse = struct {
-//   id: u32,
+// https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L954
+pub const ListResult = struct {
+  id: u32,
   
-//   pub fn init (id: u32) ListResponse {
-//     return ListResponse{ .id = id };
-//   }
+  pub fn init (id: u32) ListResult {
+    return ListResult{ .id = id };
+  }
 
-//   pub fn count () usize {
+  pub fn free (self: *const ListResult) void {
+    jsFree(self.id);
+  }
 
-//   }
+  pub fn keys (self: *const ListResult) ListKeys {
+    return ListKeys.init(getObjectValue(self.id, "keys"));
+  }
 
-//   pub fn get (index: usize) ListKey {
+  pub fn cursor (self: *const ListResult) []const u8 {
+    return getStringFree(getObjectValue(self.id, "cursor"));
+  }
 
-//   }
+  pub fn listComplete (self: *const ListResult) bool {
+    const jsPtr = getObjectValue(self.id, "list_complete");
+    return jsPtr == True;
+  }
 
-//   pub fn cursor () []u8 {
+  pub const ListKeys = struct {
+    arr: Array,
+    pos: u32 = 0,
+    len: u32,
 
-//   }
+    pub fn init (jsPtr: u32) ListKeys {
+      const arr = Array.init(jsPtr);
+      return ListKeys{
+        .arr = arr,
+        .len = arr.length(),
+      };
+    }
 
-//   pub fn listComplete () bool {
+    pub fn next (self: *const ListKeys) ?ListKey {
+      if (self.pos == len) return null;
+      const listkey = arr.getType(ListKey, pos);
+      pos += 1;
+      return listkey;
+    }
+  };
 
-//   }
+  pub const ListKey = struct {
+    id: u32,
 
-//   pub const ListKey = struct {
-//     id: u32,
+    pub fn init (jsPtr: u32) ListKey {
+      return ListKey{ .id = jsPtr };
+    }
 
-//     pub fn name () []u8 {
+    pub fn free (self: *const ListKey) void {
+      jsFree(self.id);
+    }
 
-//     }
+    pub fn name (self: *const ListKey) []const u8 {
+      return getStringFree(getObjectValue(self.id, "name"));
+    }
 
-//     pub fn metadata (comptime T: type) !T {
+    pub fn expiration (self: *const ListKey) ?u64 {
+      const num = getObjectValueNum(self.id, "expiration");
+      if (num <= DefaultValueSize) return null;
+      return @floatToInt(u64, num);
+    }
 
-//     }
-//   };
-// };
+    pub fn metadata (self: *const ListKey, comptime T: type) ?T {
+      const obj = self.metaObject();
+      defer obj.free();
+      return obj.parse(T) orelse null;
+    }
+
+    pub fn metaObject (self: *const ListKey) ?Object {
+      const objPtr = getObjectValue(self.id, "metadata");
+      if (objPtr <= DefaultValueSize) return null;
+      return Object.init(objPtr);
+    }
+  };
+};
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L852
 // Workers KV is a global, low-latency, key-value data store.
@@ -328,7 +377,14 @@ pub const KVNamespace = struct {
     _ = func.callArgs(str.id);
   }
 
-  // pub fn list (options: ?ListOptions) ListResponse {
+  pub fn list (self: *const KVNamespace, options: ListOptions) ListResult {
+    // prep the opts
+    const opts = options.toObject();
+    defer opts.free();
+    // grab the function
+    const func = AsyncFunction{ .id = getObjectValue(self.id, "list") };
+    defer func.free();
 
-  // }
+    return ListResult.init(func.callArgs(opts.id));
+  }
 };

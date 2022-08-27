@@ -379,6 +379,7 @@ pub const IncomingRequestCfProperties = struct {
 // TODO: This is a lot of work.. worry about it later.
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1290
 pub const RequestInitCfProperties = struct {
+  id: u32,
   cacheEverything: bool = false,
   // A request's cache key is what determines if two requests are
   // "the same" for caching purposes. If a request has the same cache key

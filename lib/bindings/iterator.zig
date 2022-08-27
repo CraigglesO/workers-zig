@@ -10,4 +10,8 @@ pub const Iterator = struct {
   pub fn free (self: *const Iterator) void {
     jsFree(self.id);
   }
+
+  // pub fn next () {
+
+  // }
 };

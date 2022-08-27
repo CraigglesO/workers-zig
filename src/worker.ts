@@ -15,8 +15,7 @@ export interface ScheduleContext {
   resolve?: () => void
 }
 
-export type ZigHandleReq = (routerPtr: number, id: number) => number
-export type ZigSchedule = (id: number) => number
+export type ZigFunction = (id: number) => number
 
 export type ZigUserFunction = (...args: any[]) => any
 
@@ -26,15 +25,12 @@ export class ZigWorker extends WASM {
     const { heap } = this
     // ensure wasm has been build
     await this._buildWASM()
-    // pull in routerPtr, if it's undefined, throw
-    const { routerPtr } = this
-    if (routerPtr === undefined) throw new Error('fetch was never initialized. Please create a "fetchEvent" function.');
 
     // grab the zig function and build a promise
-    const handleRequest = this.instance.exports.handleRequest as ZigHandleReq
+    const fetchEvent = this.instance.exports.fetchEvent as ZigFunction
     return new Promise<Response>(resolve => {
       context.resolve = resolve
-      handleRequest(routerPtr, heap.put(context))
+      fetchEvent(heap.put(context))
     })
   }
 
@@ -69,7 +65,7 @@ export class ZigWorker extends WASM {
     const id = heap.put(context)
 
     // grab the zig function
-    const zigSchedule = this.instance.exports.schedule as ZigSchedule
+    const zigSchedule = this.instance.exports.schedule as ZigFunction
 
     return new Promise<void>(resolve => {
       context.resolve = resolve

@@ -6,7 +6,8 @@ const Classes = common.Classes;
 const Undefined = common.Undefined;
 const String = @import("string.zig").String;
 
-pub extern fn jsArrayPush(arrId: u32, args: u32) void;
+pub extern fn jsArrayPush(arrID: u32, args: u32) void;
+pub extern fn jsArrayGet(arrID: u32, pos: u32) u32;
 
 pub const Array = struct {
   id: u32,
@@ -25,6 +26,15 @@ pub const Array = struct {
 
   pub fn push (self: *const Array, ptr: u32) void {
     jsArrayPush(self.id, ptr);
+  }
+
+  pub fn get (self: *const Array, pos: u32) u32 {
+    return jsArrayGet(self.id, pos);
+  }
+
+  pub fn getType (self: *const Array, comptime T: type, pos: u32) T {
+    const id = jsArrayGet(self.id, pos);
+    return T.init(id);
   }
 
   pub fn length (self: *const Array) u32 {

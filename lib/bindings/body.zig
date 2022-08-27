@@ -1,15 +1,19 @@
 const ReadableStream = @import("streams/readable.zig").ReadableStream;
 const String = @import("string.zig").String;
+const Object = @import("object.zig").Object;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
 const Blob = @import("blob.zig").Blob;
 const URLSearchParams = @import("url.zig").URLSearchParams;
 const FormData = @import("formData.zig").FormData;
-const Null = @import("common.zig").Null;
+const common = @import("common.zig");
+const jsFree = common.jsFree;
+const Null = common.Null;
 
 pub const BodyInit = union(enum) {
   stream: *const ReadableStream,
   string: *const String,
   text: []const u8,
+  object: *const Object,
   arrayBuffer: *const ArrayBuffer,
   bytes: []const u8,
   blob: *const Blob,
@@ -18,19 +22,26 @@ pub const BodyInit = union(enum) {
   none,
 
   pub fn toID (self: *const BodyInit) u32 {
-    var bodyID: u32 = Null;
     switch (self.*) {
-      .stream => |rs| bodyID = rs.id,
-      .string => |s| bodyID = s.id,
-      .text => |t| bodyID = String.new(t).id,
-      .arrayBuffer => |ab| bodyID = ab.id,
-      .bytes => |b| bodyID = ArrayBuffer.new(b).id,
-      .blob => |blob| bodyID = blob.id,
-      .urlSearchParams => |params| bodyID = params.id,
-      .formData => |formData| bodyID = formData.id,
-      .none => {},
+      .stream => |rs| return rs.id,
+      .string => |s| return s.id,
+      .text => |t| return String.new(t).id,
+      .object => |o| return o.stringify().id,
+      .arrayBuffer => |ab| return ab.id,
+      .bytes => |b| return ArrayBuffer.new(b).id,
+      .blob => |blob| return blob.id,
+      .urlSearchParams => |params| return params.id,
+      .formData => |formData| return formData.id,
+      .none => return Null,
     }
+  }
 
-    return bodyID;
+  pub fn free (self: *const BodyInit, id: u32) void {
+    switch (self.*) {
+      .text => jsFree(id),
+      .object => jsFree(id),
+      .bytes => jsFree(id),
+      else => {},
+    }
   }
 };

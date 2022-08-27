@@ -7,7 +7,7 @@ const Response = worker.Response;
 const String = worker.String;
 const Headers = worker.Headers;
 
-pub fn basicHandler (ctx: *FetchContext) void {
+pub fn basicHandler (ctx: *FetchContext) callconv(.Async) void {
     // get body from request
     const text = ctx.req.text() orelse return ctx.throw(500, "Failed to get body.");
     defer allocator.free(text);
