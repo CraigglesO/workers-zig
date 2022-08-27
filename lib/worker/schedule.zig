@@ -11,7 +11,7 @@ const Response = @import("../bindings/response.zig").Response;
 const StatusCode = @import("../http/common.zig").StatusCode;
 const String = @import("../bindings/string.zig").String;
 const Function = @import("../bindings/function.zig").Function;
-const getString = @import("../bindings/string.zig").getString;
+const getStringFree = @import("../bindings/string.zig").getStringFree;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
 const getObjectValueNum = @import("../bindings/object.zig").getObjectValueNum;
 
@@ -31,8 +31,7 @@ pub const ScheduledEvent = struct {
   // NOTE: user must free the returned string from the allocator heap
   pub fn cron (self: *const ScheduledEvent) []const u8 {
     const jsPtr = getObjectValue(self.id, "cron");
-    defer jsFree(jsPtr);
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn noRetry (self: *const ScheduledEvent) bool {

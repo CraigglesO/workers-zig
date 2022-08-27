@@ -29,7 +29,6 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 }
 
 // ? PART 1
-// * update toID functions with their own free methods
 // * zigFunction with input args (for lone bindings like string)
 // * change jsLog to common, not string
 // * support getting numbers better

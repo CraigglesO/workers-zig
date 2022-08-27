@@ -1,6 +1,6 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
-const getString = @import("string").getString;
+const getStringFree = @import("string").getStringFree;
 const getObjectValue = @import("object.zig").getObjectValue;
 const getObjectValueNum = @import("object.zig").getObjectValueNum;
 const Request = @import("request").Request;
@@ -49,137 +49,120 @@ pub const IncomingRequestCfPropertiesTLSClientAuth = struct {
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certIssuerDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDNLegacy");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certIssuerSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerSKI");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certSubjectDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDNRFC2253");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certSubjectDNLegacy (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDNLegacy");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certFingerprintSHA256 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certFingerprintSHA256");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certNotBefore (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certNotBefore");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certSKI (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSKI");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSerial");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certIssuerDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDN");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certVerified (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certVerified");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certNotAfter (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certNotAfter");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certSubjectDN (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certSubjectDN");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certPresented (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certPresented");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certRevoked (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certRevoked");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certIssuerSerial (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerSerial");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certIssuerDNRFC2253 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certIssuerDNRFC2253");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn certFingerprintSHA1 (self: *const IncomingRequestCfPropertiesTLSClientAuth) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "certFingerprintSHA1");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 };
 
@@ -199,8 +182,7 @@ pub const IncomingRequestCfProperties = struct {
   // The organisation which owns the ASN of the incoming request. (e.g. Google Cloud)
   pub fn asOrganization (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "asOrganization");
-    defer jsFree(jsPtr);
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn botManagement (self: *const IncomingRequestCfProperties) ?IncomingRequestCfPropertiesBotManagement {
@@ -211,16 +193,14 @@ pub const IncomingRequestCfProperties = struct {
 
   pub fn city (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "city");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn clientAcceptEncoding (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "clientAcceptEncoding");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn clientTcpRtt (self: *const IncomingRequestCfProperties) u32 {
@@ -236,16 +216,14 @@ pub const IncomingRequestCfProperties = struct {
   // NOTE: Be sure to free the memory returned by this function.
   pub fn colo (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "colo");
-    defer jsFree(jsPtr);
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn continent (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "continent");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // The two-letter country code in the request. This is the same value
@@ -253,16 +231,14 @@ pub const IncomingRequestCfProperties = struct {
   // NOTE: Be sure to free the memory returned by this function.
   pub fn country (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "country");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: Be sure to free the memory returned by this function.
   pub fn httpProtocol (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "httpProtocol");
-    defer jsFree(jsPtr);
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // NOTE: If latitude was undefined, this will return 0
@@ -279,62 +255,54 @@ pub const IncomingRequestCfProperties = struct {
   // NOTE: Be sure to free the memory returned by this function.
   pub fn metroCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "metroCode");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn postalCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "postalCode");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // e.g. "Texas"
   pub fn region (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "region");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // e.g. "TX"
   pub fn regionCode (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "regionCode");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // e.g. "weight=256;exclusive=1"
   pub fn requestPriority (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "requestPriority");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn timezone (self: *const IncomingRequestCfProperties) ?[]const u8 {
     const jsPtr = getObjectValue(self.id, "timezone");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   // TODO: Use http/common/tlsVersion
   pub fn tlsVersion (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "tlsVersion");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn tlsCipher (self: *const IncomingRequestCfProperties) []const u8 {
     const jsPtr = getObjectValue(self.id, "tlsCipher");
-    defer jsFree(jsPtr);
     if (jsPtr <= DefaultValueSize) return;
-    return getString(jsPtr);
+    return getStringFree(jsPtr);
   }
 
   pub fn tlsClientAuth (self: *const IncomingRequestCfProperties) IncomingRequestCfPropertiesTLSClientAuth {

@@ -18,7 +18,7 @@ const Method = @import("../http/common.zig").Method;
 const Object = @import("object.zig").Object;
 const String = @import("string.zig").String;
 const Array = @import("array.zig").Array;
-const getString = @import("string.zig").getString;
+const getStringFree = @import("string.zig").getStringFree;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
 const FormData = @import("formData.zig").FormData;
 const Blob = @import("blob.zig").Blob;
@@ -103,11 +103,18 @@ pub const RequestOptions = union(enum) {
   request: *const Request,
   none,
 
-  pub fn toID(self: *const RequestOptions) u32 {
+  pub fn toID (self: *const RequestOptions) u32 {
     switch (self.*) {
       .requestInit => |*ri| return ri.toObject().id,
       .request => |req| return req.id,
       .none => return Undefined,
+    }
+  }
+
+  pub fn free (self: *const RequestOptions, id: u32) {
+    switch (self.*) {
+      .requestInit => jsFree(id),
+      else => {},
     }
   }
 };
@@ -123,12 +130,12 @@ pub const Request = struct {
     return Request{ .id = ptr };
   }
 
-  pub fn new (requestStr: RequestInfo, requestInit: RequestOptions) Request {
+  pub fn new (reqInfo: RequestInfo, reqInit: RequestOptions) Request {
     // prepare arguments
-    const reqID = requestStr.toID();
-    defer jsFree(reqID);
-    const reqInitID = requestInit.toID();
-    defer jsFree(reqInitID);
+    const reqID = reqInfo.toID();
+    defer reqInfo.free(reqID);
+    const reqInitID = reqInit.toID();
+    defer reqInit.free(reqInitID);
 
     // setup arg array
     const args = Array.new();
@@ -216,8 +223,7 @@ pub const Request = struct {
     defer aFunc.free();
     const strPtr = aFunc.call();
     if (strPtr <= DefaultValueSize) return null;
-    defer jsFree(strPtr);
-    return getString(strPtr);
+    return getStringFree(strPtr);
   }
 
   pub fn json (self: *const Request, comptime T: type) ?T {

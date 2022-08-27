@@ -42,17 +42,24 @@ pub const PutValue = union(enum) {
   readableStream: *const ReadableStream,
 
   pub fn toID (self: *const PutValue) u32 {
-    var id: u32 = Undefined;
     switch (self.*) {
-      .text => |str| id = String.new(str).id,
-      .string => |str| id = str.id,
-      .object => |obj| id = obj.stringify().id,
-      .bytes => |bytes| id = ArrayBuffer.new(bytes).id,
-      .arrayBuffer => |ab| id = ab.id,
-      .readableStream => |rStream| id = rStream.id,
+      .text => |str| return String.new(str).id,
+      .string => |str| return str.id,
+      .object => |obj| return obj.stringify().id,
+      .bytes => |bytes| return ArrayBuffer.new(bytes).id,
+      .arrayBuffer => |ab| return ab.id,
+      .readableStream => |rStream| return rStream.id,
+      else => return Null,
     }
+  }
 
-    return id;
+  pub fn free (self: *const PutValue, id: u32) void {
+    switch (self.*) {
+      .text => jsFree(id),
+      .object => jsFree(id),
+      .bytes => jsFree(id),
+      else => {},
+    }
   }
 };
 
@@ -206,7 +213,7 @@ pub const KVNamespace = struct {
     defer str.free();
     // prep the object
     const val = value.toID();
-    defer jsFree(val);
+    defer value.free(val);
     // prep the options
     const opts = options.toObject();
     defer opts.free();

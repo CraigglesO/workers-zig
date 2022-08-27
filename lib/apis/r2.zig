@@ -23,6 +23,7 @@ pub const R2Value = union(enum) {
   readableStream: *const ReadableStream,
   string: *const String,
   text: []const u8,
+  object: *const Object,
   arrayBuffer: *const ArrayBuffer,
   bytes: []const u8,
   blob: *const Blob,
@@ -31,16 +32,26 @@ pub const R2Value = union(enum) {
   pub fn toID (self: *const R2Value) u32 {
     var bodyID: u32 = Null;
     switch (self.*) {
-      .readableStream => |rs| bodyID = rs.id,
-      .string => |s| bodyID = s.id,
-      .text => |t| bodyID = String.new(t).id,
-      .arrayBuffer => |ab| bodyID = ab.id,
-      .bytes => |b| bodyID = ArrayBuffer.new(b).id,
-      .blob => |blob| bodyID = blob.id,
-      .none => {},
+      .readableStream => |rs| return rs.id,
+      .string => |s| return s.id,
+      .text => |t| return String.new(t).id,
+      .object => |obj| return obj.stringify().id,
+      .arrayBuffer => |ab| return ab.id,
+      .bytes => |b| return ArrayBuffer.new(b).id,
+      .blob => |blob| return blob.id,
+      .none => return Null,
     }
 
     return bodyID;
+  }
+
+  pub fn free (self: *const R2Value, id: u32) void {
+    switch (self.*) {
+      .text => jsFree(id),
+      .object => jsFree(id),
+      .bytes => jsFree(id),
+      else => {},
+    }
   }
 };
 
@@ -241,7 +252,7 @@ pub const R2Bucket = struct {
     defer keyStr.free();
     // prep the object
     const val = value.toID();
-    defer jsFree(val);
+    defer value.free(val);
     // prep the options
     const opts = options.toObject();
     defer opts.free();

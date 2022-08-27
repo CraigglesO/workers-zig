@@ -1,4 +1,4 @@
-const getString = @import("string.zig").getString;
+const getStringFree = @import("string.zig").getStringFree;
 const getObjectValue = @import("object.zig").getObjectValue;
 const common = @import("common.zig");
 const jsFree = common.jsFree;
@@ -20,15 +20,13 @@ pub const Env = struct {
   pub fn key (self: *const Env, name: []const u8) ?[]const u8 {
     const strPtr = getObjectValue(self.id, name);
     if (strPtr <= DefaultValueSize) return null;
-    defer jsFree(strPtr);
-    return getString(strPtr);
+    return getStringFree(strPtr);
   }
 
   pub fn secret (self: *const Env, name: []const u8) ?[]const u8 {
     const strPtr = getObjectValue(self.id, name);
     if (strPtr <= DefaultValueSize) return null;
-    defer jsFree(strPtr);
-    return getString(strPtr);
+    return getStringFree(strPtr);
   }
 
   pub fn d1 () void {

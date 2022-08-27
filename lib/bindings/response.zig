@@ -18,7 +18,7 @@ const Method = @import("../http/common.zig").Method;
 const Object = @import("object.zig").Object;
 const String = @import("string.zig").String;
 const Array = @import("array.zig").Array;
-const getString = @import("string.zig").getString;
+const getStringFree = @import("string.zig").getStringFree;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
 const FormData = @import("formData.zig").FormData;
 const Blob = @import("blob.zig").Blob;
@@ -214,8 +214,7 @@ pub const Response = struct {
     defer aFunc.free();
     const strPtr = aFunc.call();
     if (strPtr <= DefaultValueSize) return;
-    defer jsFree(strPtr);
-    return getString(strPtr);
+    return getStringFree(strPtr);
   }
 
   pub fn json (self: *const Response, comptime T: type) ?T {
