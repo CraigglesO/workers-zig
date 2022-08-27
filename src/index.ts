@@ -30,14 +30,12 @@ export function zigFunction (name: string, ...args: any[]): Promise<any> {
   return zigWorker.function(name, ...args)
 }
 
-export function zigSchedule<Env = {}> (): Event<Env> {
-  return async (
-    event: ScheduledEvent,
-    env: Env,
-    executionCtx: ExecutionContext
-  ): Promise<void> => {
-    return zigWorker.schedule(event, env, executionCtx)
-  }
+export async function zigSchedule<Env = {}> (
+  event: ScheduledEvent,
+  env: Env,
+  executionCtx: ExecutionContext
+): Promise<void> {
+  return zigWorker.schedule(event, env, executionCtx)
 }
 
 /** @internal */

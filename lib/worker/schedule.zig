@@ -2,8 +2,9 @@ const std = @import("std");
 const allocator = std.heap.page_allocator;
 const common = @import("../bindings/common.zig");
 const jsFree = common.jsFree;
-const Undefined = common.Undefined;
 const jsResolve = common.jsResolve;
+const Undefined = common.Undefined;
+const True = common.True;
 const ExecutionContext = @import("../bindings/executionContext.zig").ExecutionContext;
 const Env = @import("../bindings/env.zig").Env;
 const Request = @import("../bindings/request.zig").Request;
@@ -12,8 +13,9 @@ const StatusCode = @import("../http/common.zig").StatusCode;
 const String = @import("../bindings/string.zig").String;
 const Function = @import("../bindings/function.zig").Function;
 const getStringFree = @import("../bindings/string.zig").getStringFree;
-const getObjectValue = @import("../bindings/object.zig").getObjectValue;
-const getObjectValueNum = @import("../bindings/object.zig").getObjectValueNum;
+const object = @import("../bindings/object.zig");
+const getObjectValue = object.getObjectValue;
+const getObjectValueNum = object.getObjectValueNum;
 
 pub const ScheduleFn = fn handle(*ScheduledContext) void;
 
@@ -24,6 +26,10 @@ pub const ScheduledEvent = struct {
     return ScheduledEvent{ .id = ptr };
   }
 
+  pub fn free (self: *const ScheduledEvent) void {
+    jsFree(self.id);
+  }
+
   pub fn scheduledTime (self: *const ScheduledEvent) u64 {
     return getObjectValueNum(self.id, "scheduledTime", u64);
   }
@@ -32,12 +38,6 @@ pub const ScheduledEvent = struct {
   pub fn cron (self: *const ScheduledEvent) []const u8 {
     const jsPtr = getObjectValue(self.id, "cron");
     return getStringFree(jsPtr);
-  }
-
-  pub fn noRetry (self: *const ScheduledEvent) bool {
-    const func = Function{ .id = getObjectValue(self.id, "noRetry") };
-    defer jsFree(func.id);
-    func.call();
   }
 };
 

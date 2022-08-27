@@ -65,7 +65,7 @@ export class ZigWorker extends WASM {
     const id = heap.put(context)
 
     // grab the zig function
-    const zigSchedule = this.instance.exports.schedule as ZigFunction
+    const zigSchedule = this.instance.exports.scheduledEvent as ZigFunction
 
     return new Promise<void>(resolve => {
       context.resolve = resolve

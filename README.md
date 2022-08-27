@@ -21,7 +21,7 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 - 🗿 WASI support (coming soon)
 - 🎮 JS bindings with support to write your own - [List of supported bindings here](#docs/bindings)
 - 📨 Fetch bindings
-- ⏰ Scheduled bindings (coming soon)
+- ⏰ Scheduled bindings
 - 🔑 Supports Variables and Secrets from `env`
 - ✨ Cache bindings
 - 📦 KV bindings

@@ -2,7 +2,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 import { Router } from 'itty-router'
-import { zigFetch, getZigWorker } from '../src/index'
+import { zigFetch, zigSchedule, getZigWorker } from '../src/index'
 
 const router = Router()
 // js route
@@ -35,5 +35,6 @@ export function zigHeap (): Array<any> {
 }
 
 export default {
-  fetch: router.handle
+  fetch: router.handle,
+  scheduled: zigSchedule
 }

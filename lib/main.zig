@@ -29,11 +29,11 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 }
 
 // ? PART 1
-// * zigFunction with input args (for lone bindings like string)
 // * KV list
 // * R2
+// * crypto
 
-// * schedule fn
+// * zigFunction with input args (for lone bindings like string)
 // * build skeleton
 // * DOCS
 // * share
