@@ -1,4 +1,5 @@
 pub extern fn jsFree (ptr: u32) void;
+pub extern fn jsLog (ptr: u32) void;
 pub extern fn jsResolve(ctx: u32, response: u32) void;
 pub extern fn jsSize (ptr: u32) u32;
 pub extern fn jsToBytes (ptr: u32) [*]u8;

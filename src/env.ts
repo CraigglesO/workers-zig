@@ -61,10 +61,6 @@ export function jsStringGet (wasm: WASM, stringPtr: number): number {
   return wasm.putString(string)
 }
 
-export function jsStringLog (wasm: WASM, stringPtr: number): void {
-  console.log(wasm.heap.get(stringPtr) as string)
-}
-
 export function jsStringThrow (wasm: WASM, stringPtr: number): void {
   throw new Error(wasm.heap.get(stringPtr) as string)
 }
@@ -187,6 +183,10 @@ export function jsResolve (wasm: WASM, ctxPtr: number, resPtr: number): void {
 /** __FUNCTION__ */
 
 /** UTIL **/
+export function jsLog (wasm: WASM, stringPtr: number): void {
+  console.log(wasm.heap.get(stringPtr) as string)
+}
+
 export function jsSize (wasm: WASM, ptr: number): number {
   const data = wasm.heap.get(ptr) as ArrayBuffer | Uint8Array | Array<any>
   return 'byteLength' in data ? data.byteLength : data.length

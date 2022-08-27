@@ -30,7 +30,6 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 
 // ? PART 1
 // * zigFunction with input args (for lone bindings like string)
-// * change jsLog to common, not string
 // * support getting numbers better
 // * KV list
 // * R2

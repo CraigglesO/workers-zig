@@ -111,7 +111,7 @@ pub const RequestOptions = union(enum) {
     }
   }
 
-  pub fn free (self: *const RequestOptions, id: u32) {
+  pub fn free (self: *const RequestOptions, id: u32) void {
     switch (self.*) {
       .requestInit => jsFree(id),
       else => {},

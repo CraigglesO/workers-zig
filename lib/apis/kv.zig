@@ -3,7 +3,7 @@ const allocator = std.heap.page_allocator;
 const common = @import("../bindings/common.zig");
 const jsFree = common.jsFree;
 const True = common.True;
-const Undefined = common.Undefined;
+const Null = common.Null;
 const DefaultValueSize = common.DefaultValueSize;
 const object = @import("../bindings/object.zig");
 const Object = object.Object;
@@ -49,7 +49,6 @@ pub const PutValue = union(enum) {
       .bytes => |bytes| return ArrayBuffer.new(bytes).id,
       .arrayBuffer => |ab| return ab.id,
       .readableStream => |rStream| return rStream.id,
-      else => return Null,
     }
   }
 

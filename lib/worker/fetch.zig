@@ -13,10 +13,6 @@ const String = @import("../bindings/string.zig").String;
 const getStringFree = @import("../bindings/string.zig").getStringFree;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
 
-const Object = @import("../bindings/object.zig").Object;
-const jsStringLog = @import("../bindings/string.zig").jsStringLog;
-// const basicHandler = @import("../tests/basic.zig").basicHandler;
-
 pub const HandlerFn = fn (ctx: *FetchContext) callconv(.Async) void;
 
 pub const Route = struct {
