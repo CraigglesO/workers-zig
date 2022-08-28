@@ -107,7 +107,7 @@ pub const Object = struct {
     return getObjectValue(self.id, key);
   }
 
-  pub fn getNum (self: *const Object, key: []const u8, comptime T: type) f64 {
+  pub fn getNum (self: *const Object, key: []const u8, comptime T: type) T {
     return getObjectValueNum(self.id, key, T);
   }
 

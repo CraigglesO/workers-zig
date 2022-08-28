@@ -218,7 +218,7 @@ pub const KVNamespace = struct {
     const opts = options.toObject();
     defer opts.free();
     // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
+    const func = AsyncFunction.init(getObjectValue(self.id, "put"));
     defer func.free();
     // prep the args
     const args = Array.new();
@@ -265,7 +265,7 @@ pub const KVNamespace = struct {
     const opts = newOptions.toObject();
     defer opts.free();
     // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
+    const func = AsyncFunction.init(getObjectValue(self.id, "put"));
     defer func.free();
     // prep the args
     const args = Array.new();
@@ -277,20 +277,21 @@ pub const KVNamespace = struct {
     _ = func.callArgs(args.id);
   }
 
-  pub fn getString (
+  pub fn _get (
     self: *const KVNamespace,
     key: []const u8,
-    options: GetOptions
-  ) ?String {
+    options: GetOptions,
+    resType: []const u8,
+  ) u32 {
     // prep the string
     const str = String.new(key);
     defer str.free();
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.setString("type", "text");
+    opts.setString("type", resType);
     // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
+    const func = AsyncFunction.init(getObjectValue(self.id, "get"));
     defer func.free();
     // prep the args
     const args = Array.new();
@@ -298,9 +299,73 @@ pub const KVNamespace = struct {
     args.push(str.id);
     args.push(opts.id);
 
-    const result = func.callArgs(args.id);
+    return func.callArgs(args.id);
+  }
+
+  pub fn _getMeta (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions,
+    resType: []const u8,
+  ) u32 {
+    // prep the string
+    const str = String.new(key);
+    defer str.free();
+    // grab options
+    const opts = options.toObject();
+    defer opts.free();
+    opts.setString("type", resType);
+    // grab the function
+    const func = AsyncFunction.init(getObjectValue(self.id, "getWithMetadata"));
+    defer func.free();
+    // prep the args
+    const args = Array.new();
+    defer args.free();
+    args.push(str.id);
+    args.push(opts.id);
+
+    return func.callArgs(args.id);
+  }
+
+  pub fn getString (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?String {
+    const result = self._get(key, options, "text");
     if (result <= DefaultValueSize) return null;
     return String{ .id = result };
+  }
+
+  pub const KVStringMetadata = struct {
+    value: String,
+    metadata: ?Object,
+
+    pub fn init (valuePtr: u32, metaPtr: u32) KVStringMetadata {
+      var metadata: ?Object = null;
+      if (metaPtr > DefaultValueSize) metadata = Object.init(metaPtr);
+      return KVStringMetadata{
+        .value = String.init(valuePtr),
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVStringMetadata) void {
+      self.value.free();
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getStringWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVStringMetadata {
+    const result = self._getMeta(key, options, "text");
+    if (result <= DefaultValueSize) return null;
+    const resObj = Object.init(result);
+    defer resObj.free();
+    return KVStringMetadata.init(resObj.get("value"), resObj.get("metadata"));
   }
 
   pub fn getText (
@@ -313,30 +378,73 @@ pub const KVNamespace = struct {
     return str.value();
   }
 
+  pub const KVTextMetadata = struct {
+    value: []const u8,
+    metadata: ?Object,
+
+    pub fn init (value: []const u8, metadata: ?Object) KVTextMetadata {
+      return KVTextMetadata{
+        .value = value,
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVTextMetadata) void {
+      allocator.free(self.value);
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getTextWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVTextMetadata {
+    const strMeta = self.getStringWithMetadata(key, options);
+    if (strMeta == null) return null;
+    defer strMeta.?.value.free();
+    return KVTextMetadata.init(strMeta.?.value.value(), strMeta.?.metadata);
+  }
+
   pub fn getObject (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
   ) ?Object {
-    // prep the string
-    const str = String.new(key);
-    defer str.free();
-    // grab options
-    const opts = options.toObject();
-    defer opts.free();
-    opts.setString("type", "json");
-    // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
-    defer func.free();
-    // prep the args
-    const args = Array.new();
-    defer args.free();
-    args.push(str.id);
-    args.push(opts.id);
-
-    const result = func.callArgs(args.id);
+    const result = self._get(key, options, "json");
     if (result <= DefaultValueSize) return null;
     return Object{ .id = result };
+  }
+
+  pub const KVObjectMetadata = struct {
+    value: Object,
+    metadata: ?Object,
+
+    pub fn init (valuePtr: u32, metaPtr: u32) KVObjectMetadata {
+      var metadata: ?Object = null;
+      if (metaPtr > DefaultValueSize) metadata = Object.init(metaPtr);
+      return KVObjectMetadata{
+        .value = Object.init(valuePtr),
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVObjectMetadata) void {
+      self.value.free();
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getObjectWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVObjectMetadata {
+    const result = self._getMeta(key, options, "json");
+    if (result <= DefaultValueSize) return null;
+    const resObj = Object.init(result);
+    defer resObj.free();
+    return KVObjectMetadata.init(resObj.get("value"), resObj.get("metadata"));
   }
 
   // NOTE: data must be freed by the caller
@@ -363,25 +471,40 @@ pub const KVNamespace = struct {
     key: []const u8,
     options: GetOptions
   ) ?ArrayBuffer {
-    // prep the string
-    const str = String.new(key);
-    defer str.free();
-    // grab options
-    const opts = options.toObject();
-    defer opts.free();
-    opts.setString("type", "arrayBuffer");
-    // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
-    defer func.free();
-    // prep the args
-    const args = Array.new();
-    defer args.free();
-    args.push(str.id);
-    args.push(opts.id);
-
-    const result = func.callArgs(args.id);
+    const result = self._get(key, options, "arrayBuffer");
     if (result <= DefaultValueSize) return null;
     return ArrayBuffer{ .id = result };
+  }
+
+  pub const KVArrayBufferMetadata = struct {
+    value: ArrayBuffer,
+    metadata: ?Object,
+
+    pub fn init (valuePtr: u32, metaPtr: u32) KVArrayBufferMetadata {
+      var metadata: ?Object = null;
+      if (metaPtr > DefaultValueSize) metadata = Object.init(metaPtr);
+      return KVArrayBufferMetadata{
+        .value = ArrayBuffer.init(valuePtr),
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVArrayBufferMetadata) void {
+      self.value.free();
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getArrayBufferWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVArrayBufferMetadata {
+    const result = self._getMeta(key, options, "arrayBuffer");
+    if (result <= DefaultValueSize) return null;
+    const resObj = Object.init(result);
+    defer resObj.free();
+    return KVArrayBufferMetadata.init(resObj.get("value"), resObj.get("metadata"));
   }
 
   // NOTE: free bytes after use
@@ -395,30 +518,73 @@ pub const KVNamespace = struct {
     return ab.bytes();
   }
 
+  pub const KVBytesMetadata = struct {
+    value: []const u8,
+    metadata: ?Object,
+
+    pub fn init (value: []const u8, metadata: ?Object) KVBytesMetadata {
+      return KVBytesMetadata{
+        .value = value,
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVBytesMetadata) void {
+      allocator.free(self.value);
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getBytesWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVBytesMetadata {
+    const abMeta = self.getArrayBufferWithMetadata(key, options);
+    if (abMeta == null) return null;
+    defer abMeta.?.value.free();
+    return KVBytesMetadata.init(abMeta.?.value.bytes(), abMeta.?.metadata);
+  }
+
   pub fn getStream (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions
   ) ?ReadableStream {
-    // prep the string
-    const str = String.new(key);
-    defer str.free();
-    // grab options
-    const opts = options.toObject();
-    defer opts.free();
-    opts.setString("type", "stream");
-    // grab the function
-    const func = AsyncFunction{ .id = getObjectValue(self.id, "get") };
-    defer func.free();
-    // prep the args
-    const args = Array.new();
-    defer args.free();
-    args.push(str.id);
-    args.push(opts.id);
-
-    const result = func.callArgs(args.id);
+    const result = self._get(key, options, "stream");
     if (result <= DefaultValueSize) return null;
-    return ReadableStream{ .id = result };
+    return ReadableStream.init(result);
+  }
+
+  pub const KVStreamMetadata = struct {
+    value: ReadableStream,
+    metadata: ?Object,
+
+    pub fn init (valuePtr: u32, metaPtr: u32) KVStreamMetadata {
+      var metadata: ?Object = null;
+      if (metaPtr > DefaultValueSize) metadata = Object.init(metaPtr);
+      return KVStreamMetadata{
+        .value = ReadableStream.init(valuePtr),
+        .metadata = metadata,
+      };
+    }
+
+    pub fn free (self: *const KVStreamMetadata) void {
+      self.value.free();
+      self.metadata.?.free();
+    }
+  };
+
+  pub fn getStreamWithMetadata (
+    self: *const KVNamespace,
+    key: []const u8,
+    options: GetOptions
+  ) ?KVStreamMetadata {
+    const result = self._getMeta(key, options, "stream");
+    if (result <= DefaultValueSize) return null;
+    const resObj = Object.init(result);
+    defer resObj.free();
+    return KVStreamMetadata.init(resObj.get("value"), resObj.get("metadata"));
   }
 
   pub fn delete (

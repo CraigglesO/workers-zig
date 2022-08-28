@@ -29,18 +29,18 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 }
 
 // ? PART 1
-// * crypto
-// * KV getMetadata
-// * KV test getMeta & expire
+// * KV test expire
 // * R2
+// * rather than input u32 in places, inject bindings and grab the .id
 
-// * zigFunction with input args (for lone bindings like string)
-// * allow user to set own zig + js
 // * build skeleton
 // * DOCS
 // * share
 
 // ? PART 2
+// * finish crypto
+// * zigFunction with input args (for lone bindings like string)
+// * allow user to set own zig + js
 // * add tests for all basic bindings
 // * streams (all the rest)
 // * HEADERS + ITERATOR

@@ -41,7 +41,7 @@ pub const ReadableStream = struct {
     return ReadableStream{ .id = ptr };
   }
 
-  // TODO: Supprt inputs
+  // TODO: Support inputs
   pub fn new () ReadableStream {
     return ReadableStream{ .id = jsCreateClass(Classes.ReadableStream.toInt(), Undefined) };
   }

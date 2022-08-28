@@ -3,7 +3,9 @@ const jsFree = common.jsFree;
 const jsSize = common.jsSize;
 const jsToBytes = common.jsToBytes;
 const jsToBuffer = common.jsToBuffer;
-const Array = @import("array.zig").Array;
+const JSValue = common.JSValue;
+const Classes = common.Classes;
+const jsCreateClass = common.jsCreateClass;
 
 pub const ArrayBuffer = struct {
   id: u32,
@@ -30,7 +32,11 @@ pub const ArrayBuffer = struct {
     return data[0..size];
   }
 
-  pub fn byteLength (self: *const Array) u32 {
+  pub fn uint8Array (self: *const ArrayBuffer) JSValue {
+    return JSValue.init(jsCreateClass(Classes.Uint8Array.toInt(), self.id));
+  }
+
+  pub fn byteLength (self: *const ArrayBuffer) u32 {
     return jsSize(self.id);
   }
 };

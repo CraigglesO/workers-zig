@@ -13,6 +13,11 @@ const Undefined = worker.Undefined;
 const True = worker.True;
 const False = worker.False;
 
+const MetaTest = struct {
+    name: []const u8 = "",
+    input: u32 = 0,
+};
+
 pub fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
@@ -43,6 +48,45 @@ pub fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
+pub fn kvStringWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // create a js string to use
+    const jsStr = String.new("value");
+    defer jsStr.free();
+    // prep meta
+    const metaObj = MetaTest{ .name = "string", .input = 1 };
+    // store
+    kv.putMetadata("key", .{ .string = &jsStr }, MetaTest, metaObj, .{});
+    // get
+    const stringMeta = kv.getStringWithMetadata("key", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer stringMeta.free();
+    // prep obj
+    const obj = Object.new();
+    defer obj.free();
+    obj.set("value", stringMeta.value.id);
+    obj.set("meta", stringMeta.metadata.?.id);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
 pub fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
@@ -63,6 +107,42 @@ pub fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // response
     const res = Response.new(
         .{ .text = text },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub fn kvTextWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // prep meta
+    const metaObj = MetaTest{ .name = "text2", .input = 2 };
+    // store
+    kv.putMetadata("key", .{ .text = "value2" }, MetaTest, metaObj, .{});
+    // get
+    const textMeta = kv.getTextWithMetadata("key", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer textMeta.free();
+    // prep obj
+    const obj = Object.new();
+    defer obj.free();
+    obj.setString("value", textMeta.value);
+    obj.set("meta", textMeta.metadata.?.id);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();
@@ -111,6 +191,46 @@ pub fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     // response
     const res = Response.new(
         .{ .string = &body },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub fn kvObjectWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // build the object
+    const inObj = TestObj{ .a = 1, .b = "test" };
+    const jsObj = inObj.toObject();
+    defer jsObj.free();
+    // prep meta
+    const metaObj = MetaTest{ .name = "text3", .input = 3 };
+    // store
+    kv.putMetadata("key", .{ .object = &jsObj }, MetaTest, metaObj, .{});
+    // get
+    const objMeta = kv.getObjectWithMetadata("key", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer objMeta.free();
+    // prep obj
+    const obj = Object.new();
+    defer obj.free();
+    obj.set("value", objMeta.value.id);
+    obj.set("meta", objMeta.metadata.?.id);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();
@@ -187,6 +307,49 @@ pub fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
+pub fn kvArrayBufferWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // build the object
+    const bytes = [_]u8{ 0, 1, 2, 3};
+    const ab = ArrayBuffer.new(bytes[0..]);
+    defer ab.free();
+    // prep meta
+    const metaObj = MetaTest{ .name = "text4", .input = 4 };
+    // store
+    kv.putMetadata("ab", .{ .arrayBuffer = &ab }, MetaTest, metaObj, .{});
+    // get
+    const abMeta = kv.getArrayBufferWithMetadata("ab", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer abMeta.free();
+    // prep obj
+    const obj = Object.new();
+    defer obj.free();
+    // convert ab to uint8array
+    const uint8 = abMeta.value.uint8Array();
+    defer uint8.free();
+    obj.set("value", uint8.id);
+    obj.set("meta", abMeta.metadata.?.id);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
 pub fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
@@ -210,6 +373,40 @@ pub fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
     // response
     const res = Response.new(
         .{ .stream = &getStream },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+// TODO: Ensure metadata works...
+pub fn kvStreamWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // build the object
+    const bytes = [_]u8{ 0, 1, 2, 3};
+    // prep meta
+    const metaObj = MetaTest{ .name = "text6", .input = 6 };
+    // store
+    kv.putMetadata("bytes", .{ .bytes = bytes[0..] }, MetaTest, metaObj, .{});
+    // get
+    const bytesMeta = kv.getStreamWithMetadata("bytes", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer bytesMeta.free();
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .stream = &bytesMeta.value },
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();
@@ -247,6 +444,49 @@ pub fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
+pub fn kvBytesWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    // build the object
+    const bytes = [_]u8{ 0, 1, 2, 3};
+    // prep meta
+    const metaObj = MetaTest{ .name = "text5", .input = 5 };
+    // store
+    kv.putMetadata("bytes", .{ .bytes = bytes[0..] }, MetaTest, metaObj, .{});
+    // get
+    const bytesMeta = kv.getBytesWithMetadata("bytes", .{}) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer bytesMeta.free();
+    // prep obj
+    const obj = Object.new();
+    defer obj.free();
+    // convert bytes->ab->uint8array
+    const ab = ArrayBuffer.new(bytesMeta.value);
+    defer ab.free();
+    const uint8 = ab.uint8Array();
+    defer uint8.free();
+    obj.set("value", uint8.id);
+    obj.set("meta", bytesMeta.metadata.?.id);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.set("Content-Type", "application/json");
+    // response
+    const res = Response.new(
+        .{ .object = &obj },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
 pub fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env
     const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
@@ -272,11 +512,6 @@ pub fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
 
     ctx.send(&res);
 }
-
-const MetaTest = struct {
-    name: []const u8,
-    input: u32,
-};
 
 pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     // get the kvinstance from env

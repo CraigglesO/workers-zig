@@ -46,12 +46,18 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "cacheIgnoreDelete", path)) return cache.cacheIgnoreDeleteHandler(ctx);
   // ** KV **
   if (eql(u8, "kvString", path)) return kv.kvStringHandler(ctx);
+  if (eql(u8, "kvStringMeta", path)) return kv.kvStringWithMetadataHandler(ctx);
   if (eql(u8, "kvText", path)) return kv.kvTextHandler(ctx);
+  if (eql(u8, "kvTextMeta", path)) return kv.kvTextWithMetadataHandler(ctx);
   if (eql(u8, "kvObject", path)) return kv.kvObjectHandler(ctx);
+  if (eql(u8, "kvObjectMeta", path)) return kv.kvObjectWithMetadataHandler(ctx);
   if (eql(u8, "kvJSON", path)) return kv.kvJSONHandler(ctx);
   if (eql(u8, "kvArraybuffer", path)) return kv.kvArraybufferHandler(ctx);
+  if (eql(u8, "kvArraybufferMeta", path)) return kv.kvArrayBufferWithMetadataHandler(ctx);
   if (eql(u8, "kvStream", path)) return kv.kvStreamHandler(ctx);
+  if (eql(u8, "kvStreamMeta", path)) return kv.kvStreamWithMetadataHandler(ctx);
   if (eql(u8, "kvBytes", path)) return kv.kvBytesHandler(ctx);
+  if (eql(u8, "kvBytesMeta", path)) return kv.kvBytesWithMetadataHandler(ctx);
   if (eql(u8, "kvDelete", path)) return kv.kvDeleteHandler(ctx);
   if (eql(u8, "kvList", path)) return kv.kvListHandler(ctx);
 

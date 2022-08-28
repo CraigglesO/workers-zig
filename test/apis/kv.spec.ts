@@ -50,6 +50,16 @@ test('kv: string: put -> get -> return get result', async (t: ExecutionContext<C
   t.is(await res.text(), 'value')
 })
 
+test('kv: string: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/string-meta')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { value: 'value', meta: { name: 'string', input: 1 } })
+})
+
 test('kv: text: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
@@ -60,6 +70,16 @@ test('kv: text: put -> get -> return get result', async (t: ExecutionContext<Con
   t.is(await res.text(), 'value2')
 })
 
+test('kv: text: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/text-meta')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { value: 'value2', meta: { name: 'text2', input: 2 } })
+})
+
 test('kv: object: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
@@ -68,6 +88,16 @@ test('kv: object: put -> get -> return get result', async (t: ExecutionContext<C
   // Check the body was returned
   t.is(res.status, 200)
   t.deepEqual(await res.json(), { a: 1, b: 'test' })
+})
+
+test('kv: object: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/object-meta')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { value: { a: 1, b: 'test' }, meta: { name: 'text3', input: 3 } })
 })
 
 test('kv: json: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
@@ -91,11 +121,31 @@ test('kv: arraybuffer: put -> get -> return get result', async (t: ExecutionCont
   t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
 })
 
+test('kv: arraybuffer: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/arraybuffer-meta')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { value: { 0: 0, 1: 1, 2: 2, 3: 3 }, meta: { name: 'text4', input: 4 } })
+})
+
 test('kv: stream: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/kv/stream')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
+})
+
+test('kv: stream: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/stream-meta')
   // Check the body was returned
   t.is(res.status, 200)
   t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
@@ -109,6 +159,16 @@ test('kv: bytes: put -> get -> return get result', async (t: ExecutionContext<Co
   // Check the body was returned
   t.is(res.status, 200)
   t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
+})
+
+test('kv: bytes: putMeta -> getMeta -> return get result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/bytes-meta')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { value: { 0: 0, 1: 1, 2: 2, 3: 3 }, meta: { name: 'text5', input: 5 } })
 })
 
 test('kv: delete: put -> delete -> get -> return result', async (t: ExecutionContext<Context>) => {

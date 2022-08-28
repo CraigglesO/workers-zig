@@ -165,7 +165,7 @@ export function jsCreateClass (wasm: WASM, classPos: number, argsPtr: number): n
   const Class = CLASSES[classPos]
   const args = wasm.heap.get(argsPtr) as Array<any> | undefined
   // @ts-ignore
-  return wasm.heap.put(args !== undefined ? new Class(...args) : new Class())
+  return wasm.heap.put(args === undefined ? new Class() : Array.isArray(args) ? new Class(...args) : new Class(args))
 }
 
 export function jsEqual (wasm: WASM, aPtr: number, bPtr: number): number {
