@@ -15,6 +15,10 @@ r2_buckets = [
   { binding = 'TEST_BUCKET', bucket_name = 'test-bucket', preview_bucket_name = 'dev-test' }
 ]
 
+d1_databases = [
+  { binding="TEST_DB", database_name="testdb", database_id="", preview_database_id="" }
+]
+
 [build]
 command = "npm run build:zig && npm run build:esm"
 watch_dir = [

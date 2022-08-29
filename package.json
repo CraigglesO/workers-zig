@@ -49,6 +49,7 @@
     "@ava/typescript": "^3.0.1",
     "@cloudflare/d1": "^1.4.1",
     "@cloudflare/workers-types": "^3.14.1",
+    "@miniflare/d1": "2.6.0-d1.1",
     "@types/node": "^18.7.10",
     "ava": "^4.3.1",
     "esbuild": "^0.14.53",
