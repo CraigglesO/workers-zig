@@ -71,6 +71,15 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "r2Stream", path)) return r2.r2StreamHandler(ctx);
   if (eql(u8, "r2Text", path)) return r2.r2TextHandler(ctx);
   if (eql(u8, "r2String", path)) return r2.r2StringHandler(ctx);
+  if (eql(u8, "r2ArrayBuffer", path)) return r2.r2ArrayBufferHandler(ctx);
+  if (eql(u8, "r2Bytes", path)) return r2.r2BytesHandler(ctx);
+  if (eql(u8, "r2Object", path)) return r2.r2ObjectHandler(ctx);
+  if (eql(u8, "r2JSON", path)) return r2.r2JSONHandler(ctx);
+  if (eql(u8, "r2Head", path)) return r2.r2HeadHandler(ctx);
+  if (eql(u8, "r2Delete", path)) return r2.r2DeleteHandler(ctx);
+  if (eql(u8, "r2List", path)) return r2.r2ListHandler(ctx);
+  if (eql(u8, "r2R2Object", path)) return r2.r2R2ObjectHandler(ctx);
+  if (eql(u8, "r2R2ObjectBody", path)) return r2.r2R2ObjectBodyHandler(ctx);
 
   // If we make it here, throw.
   ctx.throw(500, "Route does not exist.");

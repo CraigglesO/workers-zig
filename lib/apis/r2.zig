@@ -73,12 +73,12 @@ pub const R2HTTPMetadata = struct {
     var contentEncoding: ?[]const u8 = null;
     var cacheControl: ?[]const u8 = null;
     var cacheExpiry: ?Date = null;
-    if (r2Object.has("contentType")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentType"));
-    if (r2Object.has("contentLanguage")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentLanguage"));
-    if (r2Object.has("contentDisposition")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentDisposition"));
-    if (r2Object.has("contentEncoding")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentEncoding"));
-    if (r2Object.has("cacheControl")) r2Object = getStringFree(getObjectValue(r2Object.id, "cacheControl"));
-    if (r2Object.has("cacheExpiry")) r2Object = Date.init(getObjectValue(r2Object.id, "cacheExpiry"));
+    if (r2Object.has("contentType")) contentType = getStringFree(getObjectValue(r2Object.id, "contentType"));
+    if (r2Object.has("contentLanguage")) contentLanguage = getStringFree(getObjectValue(r2Object.id, "contentLanguage"));
+    if (r2Object.has("contentDisposition")) contentDisposition = getStringFree(getObjectValue(r2Object.id, "contentDisposition"));
+    if (r2Object.has("contentEncoding")) contentEncoding = getStringFree(getObjectValue(r2Object.id, "contentEncoding"));
+    if (r2Object.has("cacheControl")) cacheControl = getStringFree(getObjectValue(r2Object.id, "cacheControl"));
+    if (r2Object.has("cacheExpiry")) cacheExpiry = Date.init(getObjectValue(r2Object.id, "cacheExpiry"));
     return R2HTTPMetadata{
       .contentType = contentType,
       .contentLanguage = contentLanguage,
@@ -101,12 +101,12 @@ pub const R2HTTPMetadata = struct {
   }
 
   pub fn writeHttpMetadata (self: *const R2HTTPMetadata, headers: Headers) void {
-    if (self.contentType) headers.setText("Content-Type", self.contentType.?.id);
-    if (self.contentLanguage) headers.setText("Content-Language", self.contentLanguage.?.id);
-    if (self.contentDisposition) headers.setText("Content-Disposition", self.contentDisposition.?.id);
-    if (self.contentEncoding) headers.setText("Content-Encoding", self.contentEncoding.?.id);
-    if (self.cacheControl) headers.setText("Cache-Control", self.cacheControl.?.id);
-    if (self.cacheExpiry) headers.setText("Cache-Expiry", self.cacheExpiry.?.id);
+    if (self.contentType) |ct| headers.setText("Content-Type", ct);
+    if (self.contentLanguage) |cl| headers.setText("Content-Language", cl);
+    if (self.contentDisposition) |cd| headers.setText("Content-Disposition", cd);
+    if (self.contentEncoding) |ce| headers.setText("Content-Encoding", ce);
+    if (self.cacheControl) |cc| headers.setText("Cache-Control", cc);
+    if (self.cacheExpiry) |ce| headers.set("Cache-Expiry", ce);
   }
 };
 
@@ -184,17 +184,21 @@ pub const R2Object = struct {
   }
 
   pub fn httpMetadata (self: *const R2Object) R2HTTPMetadata {
-    return R2HTTPMetadata.init(getObjectValue(self.id, "httpMetadata"));
+    const obj = Object.init(getObjectValue(self.id, "httpMetadata"));
+    defer obj.free();
+    return R2HTTPMetadata.fromObject(&obj);
   }
 
   pub fn customMetadata (self: *const R2Object) Record {
     return Record.init(getObjectValue(self.id, "customMetadata"));
   }
 
-  pub fn range (self: *const R2Object) R2Range {
-    const r2range = Object.init(getObjectValue(self.id, "range"));
+  pub fn range (self: *const R2Object) ?R2Range {
+    const r2rangeID = getObjectValue(self.id, "range");
+    if (r2rangeID <= DefaultValueSize) return null;
+    const r2range = Object.init(r2rangeID);
     defer r2range.free();
-    return R2Range.fromObject(r2range);
+    return R2Range.fromObject(&r2range);
   }
 
   pub fn writeHttpMetadata (self: *const R2Object, headers: Headers) void {
@@ -264,12 +268,14 @@ pub const R2ObjectBody = struct {
   }
 
   pub fn json (self: *const R2ObjectBody, comptime T: type) ?T {
-    const func = AsyncFunction.init(getObjectValue(self.id, "json"));
-    defer func.free();
-
-    const obj = Object.init(func.call());
-    if (obj.id <= DefaultValueSize) return null;
-    return obj.parse(T) catch return null;
+    const str = self.text();
+    defer allocator.free(str);
+    var stream = std.json.TokenStream.init(str);
+    return std.json.parse(T, &stream, .{
+      .ignore_unknown_fields = true,
+      .allow_trailing_data = true,
+      .allocator = allocator,
+    }) catch return null;
   }
 
   pub fn blob (self: *const R2ObjectBody) Blob {
@@ -310,17 +316,21 @@ pub const R2ObjectBody = struct {
   }
 
   pub fn httpMetadata (self: *const R2ObjectBody) R2HTTPMetadata {
-    return R2HTTPMetadata.init(getObjectValue(self.id, "httpMetadata"));
+    const obj = Object.init(getObjectValue(self.id, "httpMetadata"));
+    defer obj.free();
+    return R2HTTPMetadata.fromObject(&obj);
   }
 
   pub fn customMetadata (self: *const R2ObjectBody) Record {
     return Record.init(getObjectValue(self.id, "customMetadata"));
   }
 
-  pub fn range (self: *const R2ObjectBody) R2Range {
-    const r2range = Object.init(getObjectValue(self.id, "range"));
+  pub fn range (self: *const R2ObjectBody) ?R2Range {
+    const r2rangeID = getObjectValue(self.id, "range");
+    if (r2rangeID <= DefaultValueSize) return null;
+    const r2range = Object.init(r2rangeID);
     defer r2range.free();
-    return R2Range.fromObject(r2range);
+    return R2Range.fromObject(&r2range);
   }
 
   pub fn writeHttpMetadata (self: *const R2ObjectBody, headers: Headers) void {
@@ -331,11 +341,21 @@ pub const R2ObjectBody = struct {
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1124
 pub const R2Objects = struct {
+  id: u32,
+
+  pub fn init (jsPtr: u32) R2Objects {
+    return R2Objects{ .id = jsPtr };
+  }
+
+  pub fn free (self: *const R2Objects) void {
+    jsFree(self.id);
+  }
+
   pub fn objects (self: *const R2Objects) ListR2Objects {
     return ListR2Objects.init(getObjectValue(self.id, "objects"));
   }
 
-  pub fn truncated (self: *const R2ObjectBody) bool {
+  pub fn truncated (self: *const R2Objects) bool {
     const trunc = getObjectValue(self.id, "truncated");
     return trunc == True;
   }
@@ -508,12 +528,12 @@ pub const R2ListOptions = struct {
     const obj = Object.new();
 
     obj.setNum("limit", u16, self.limit);
-    if (self.prefix != null) obj.setText("prefix", self.prefix.?);
-    if (self.jsPrefix != null) obj.set("prefix", &self.jsPrefix.?);
-    if (self.cursor != null) obj.setText("cursor", self.cursor.?);
-    if (self.jsCursor != null) obj.set("cursor", &self.jsCursor.?);
-    if (self.delimiter != null) obj.setText("delimiter", self.delimiter.?);
-    if (self.jsDelimiter != null) obj.set("delimiter", &self.jsDelimiter.?);
+    if (self.prefix) |p| obj.setText("prefix", p);
+    if (self.jsPrefix) |jsp| obj.set("jspefix", jsp);
+    if (self.cursor) |c| obj.setText("cursor", c);
+    if (self.jsCursor) |jsc| obj.set("cursor", jsc);
+    if (self.delimiter) |d| obj.setText("delimiter", d);
+    if (self.jsDelimiter) |jsd| obj.set("delimiter", jsd);
     if (self.includeHttpMetadata or self.includeCustomMetadata) {
       const arr = Array.new();
       defer arr.free();
@@ -560,7 +580,7 @@ pub const R2Bucket = struct {
     const func = AsyncFunction.init(getObjectValue(self.id, "head"));
     defer func.free();
 
-    const result = func.call();
+    const result = func.callArgsID(keyStr.id);
     if (result <= DefaultValueSize) return null;
     return R2Object{ .id = result };
   }

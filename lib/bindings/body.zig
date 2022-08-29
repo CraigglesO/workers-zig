@@ -1,6 +1,7 @@
 const ReadableStream = @import("streams/readable.zig").ReadableStream;
 const String = @import("string.zig").String;
 const Object = @import("object.zig").Object;
+const jsStringify = @import("object.zig").jsStringify;
 const ArrayBuffer = @import("arraybuffer.zig").ArrayBuffer;
 const Blob = @import("blob.zig").Blob;
 const URLSearchParams = @import("url.zig").URLSearchParams;
@@ -14,6 +15,7 @@ pub const BodyInit = union(enum) {
   string: *const String,
   text: []const u8,
   object: *const Object,
+  objectID: u32,
   arrayBuffer: *const ArrayBuffer,
   bytes: []const u8,
   blob: *const Blob,
@@ -27,6 +29,7 @@ pub const BodyInit = union(enum) {
       .string => |s| return s.id,
       .text => |t| return String.new(t).id,
       .object => |o| return o.stringify().id,
+      .objectID => |oid| return jsStringify(oid),
       .arrayBuffer => |ab| return ab.id,
       .bytes => |b| return ArrayBuffer.new(b).id,
       .blob => |blob| return blob.id,
@@ -40,6 +43,7 @@ pub const BodyInit = union(enum) {
     switch (self.*) {
       .text => jsFree(id),
       .object => jsFree(id),
+      .objectID => jsFree(id),
       .bytes => jsFree(id),
       else => {},
     }

@@ -41,6 +41,15 @@ router.get('/kv/list', zigFetch<Env>('kvList'))
 router.get('/r2/stream', zigFetch<Env>('r2Stream'))
 router.get('/r2/text', zigFetch<Env>('r2Text'))
 router.get('/r2/string', zigFetch<Env>('r2String'))
+router.get('/r2/array-buffer', zigFetch<Env>('r2ArrayBuffer'))
+router.get('/r2/bytes', zigFetch<Env>('r2Bytes'))
+router.get('/r2/object', zigFetch<Env>('r2Object'))
+router.get('/r2/json', zigFetch<Env>('r2JSON'))
+router.get('/r2/head', zigFetch<Env>('r2Head'))
+router.get('/r2/delete', zigFetch<Env>('r2Delete'))
+router.get('/r2/list', zigFetch<Env>('r2List'))
+router.get('/r2/r2object', zigFetch<Env>('r2R2Object'))
+router.get('/r2/r2object-body', zigFetch<Env>('r2R2ObjectBody'))
 
 // ** ZIG HEAP **
 // return the heap to ensure it's cleaned up
