@@ -36,7 +36,7 @@ test.afterEach(async (t: ExecutionContext<Context>) => {
     [3, true],
     [4, false],
     [5, Infinity],
-    [6, NaN] // NaN resolves to null
+    [6, NaN]
   ])
 })
 

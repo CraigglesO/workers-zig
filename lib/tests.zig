@@ -9,6 +9,7 @@ const ScheduledContext = worker.ScheduledContext;
 const Object = worker.Object;
 
 const basicHandler = @import("tests/basic.zig").basicHandler;
+const fetch = @import("tests/apis/fetch.zig");
 const kv = @import("tests/apis/kv.zig");
 const cache = @import("tests/apis/cache.zig");
 
@@ -37,6 +38,8 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   // Try routes
   // ** BASIC **
   if (eql(u8, "basic", path)) return basicHandler(ctx);
+  // ** FETCH **
+  if (eql(u8, "fetch", path)) return fetch.fetchHandler(ctx);
   // ** CACHE **
   if (eql(u8, "cacheText", path)) return cache.cacheTextHandler(ctx);
   if (eql(u8, "cacheString", path)) return cache.cacheStringHandler(ctx);

@@ -171,8 +171,6 @@ pub const Request = struct {
   }
 
   // NOTE: the returned string is a pointer to a string in memory that must be freed
-  // var str = Request.url();
-  // defer allocator.free(str);
   pub fn url (self: *const Request) []const u8 {
     // grab the url var
     const urlStr = String.init(getObjectValue(self.id, "url"));
@@ -251,10 +249,10 @@ pub const Request = struct {
   }
 
   // fast track arrayBuffer->toOwned
-  pub fn bytes (self: *const Request) ?[]u8 {
+  pub fn bytes (self: *const Request) ?[]const u8 {
     if (!self.hasBody()) return null;
     const ab = self.arrayBuffer();
-    defer ab.free();
-    return ab.bytes();
+    defer ab.?.free();
+    return ab.?.bytes();
   }
 };

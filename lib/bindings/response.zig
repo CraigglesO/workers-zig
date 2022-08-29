@@ -159,7 +159,7 @@ pub const Response = struct {
 
   // ** FUNCTIONS **
 
-  pub fn redirect(self: *const Response, newURL: []const u8, newStatus: ?u16) Response {
+  pub fn redirect (self: *const Response, newURL: []const u8, newStatus: ?u16) Response {
     // grab the redirect function
     const func = Function.init(getObjectValue(self.id, "redirect"));
     defer func.free();
@@ -184,8 +184,6 @@ pub const Response = struct {
   }
 
   // ** BODY **
-  // body is ReadableStream | null
-
   // check that body is ReadableStream
   pub fn hasBody (self: *const Response) bool {
     const body = getObjectValue(self.id, "body");
@@ -204,6 +202,7 @@ pub const Response = struct {
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "arrayBuffer"));
     defer aFunc.free();
     const abID = aFunc.call();
+    if (abID <= DefaultValueSize) return null;
     return ArrayBuffer.init(abID);
   }
 
@@ -213,17 +212,18 @@ pub const Response = struct {
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "text"));
     defer aFunc.free();
     const strPtr = aFunc.call();
-    if (strPtr <= DefaultValueSize) return;
+    if (strPtr <= DefaultValueSize) return null;
     return getStringFree(strPtr);
   }
 
   pub fn json (self: *const Response, comptime T: type) ?T {
     if (!self.hasBody()) return null;
     // get the "string" and then parse it locally
-    const str = self.text();
-    defer allocator.free(str);
-    const stream = std.json.TokenStream.init(str);
-    return try std.json.parse(T, &stream, .{});
+    var str = self.text();
+    if (str == null) return null;
+    defer allocator.free(str.?);
+    var stream = std.json.TokenStream.init(str.?);
+    return std.json.parse(T, &stream, .{}) catch return null;
   }
 
   pub fn formData (self: *const Response) ?FormData {
@@ -231,6 +231,7 @@ pub const Response = struct {
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "formData"));
     defer aFunc.free();
     const formID = aFunc.call();
+    if (formID <= DefaultValueSize) return null;
     return FormData.init(formID);
   }
 
@@ -239,6 +240,7 @@ pub const Response = struct {
     const aFunc = AsyncFunction.init(getObjectValue(self.id, "blob"));
     defer aFunc.free();
     const blobID = aFunc.call();
+    if (blobID <= DefaultValueSize) return null;
     return Blob.init(blobID);
   }
 
@@ -246,7 +248,8 @@ pub const Response = struct {
   pub fn bytes (self: *const Response) ?[]u8 {
     if (!self.hasBody()) return null;
     const ab = self.arrayBuffer();
-    defer ab.free();
-    return ab.bytes();
+    if (ab == null) return null;
+    defer ab.?.free();
+    return ab.?.bytes();
   }
 };

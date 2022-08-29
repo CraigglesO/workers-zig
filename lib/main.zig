@@ -31,13 +31,13 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 // ? PART 1
 // * R2 tests
 // * Fetch test
-// * req/res tests
 
 // * DOCS
 // * build skeleton
 // * share
 
 // ? PART 2
+// * req/res tests
 // * new method of managing js heap so that after a request the heap is gaurenteed cleaned up
 // * finish crypto
 // * zigFunction with input args (for lone bindings like string)

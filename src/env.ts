@@ -265,7 +265,13 @@ export async function jsFetch (
 ): Promise<void> {
   const url = wasm.heap.get(urlPtr) as string | Request
   const init = wasm.heap.get(initPtr) as RequestInit | Request | undefined
-  const res = wasm.heap.put(await fetch(url, init))
+  const fetchings = await fetch(url, init).catch(err => {
+    console.log(err)
+    return new Response(null, {
+      status: 502
+    })
+  })
+  const res = wasm.heap.put(fetchings)
 
   wasm.put(u32ToU8(res), resPtr)
   wasm.resume(frame)

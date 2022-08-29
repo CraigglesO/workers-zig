@@ -219,7 +219,7 @@ pub fn kvTextCacheTtlHandler (ctx: *FetchContext) callconv(.Async) void {
     // response
     const res = Response.new(
         .{ .text = text },
-        .{ .status = 200, .statusText = "ok", .headers = &headers }
+        .{ .status = 200, .statusText = "ok", .headers = &headers },
     );
     defer res.free();
 

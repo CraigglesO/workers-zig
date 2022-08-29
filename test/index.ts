@@ -9,6 +9,8 @@ const router = Router()
 router.get('/', () => new Response('Hello from JS!'))
 // zig route using zig's FetchMap
 router.post('/basic', zigFetch<Env>('basic'))
+// **FETCH**
+router.get('/fetch', zigFetch<Env>('fetch'))
 // **CACHE**
 router.get('/cache/text', zigFetch<Env>('cacheText'))
 router.get('/cache/string', zigFetch<Env>('cacheString'))
