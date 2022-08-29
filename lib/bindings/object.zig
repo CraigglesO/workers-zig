@@ -1,12 +1,15 @@
 const std = @import("std");
 const allocator = std.heap.page_allocator;
 const common = @import("common.zig");
+const jsGetClass = common.jsGetClass;
 const jsCreateClass = common.jsCreateClass;
 const Classes = common.Classes;
 const Undefined = common.Undefined;
 const True = common.True;
 const jsFree = common.jsFree;
 const String = @import("string.zig").String;
+const Array = @import("array.zig").Array;
+const Function = @import("function.zig").Function;
 
 pub extern fn jsObjectHas(obj: u32, key: u32) u32;
 pub extern fn jsObjectSet(obj: u32, key: u32, value: u32) void;
@@ -80,20 +83,124 @@ pub const Object = struct {
     return Object{ .id = jsCreateClass(Classes.Object.toInt(), Undefined) };
   }
 
-  // fn fromStruct (comptime T: type) Object {
-  //   // Convert the struct to a JS object.
-  //   var buf: [1000]u8 = undefined;
-  //   var fba = std.heap.FixedBufferAllocator.init(&buf);
-  //   var string = std.ArrayList(u8).init(fba.allocator());
-  //   try std.json.stringify(T, .{}, string.writer());
-  //   // pass string to js
-  //   const ptr = jsObjectFromString(string.ptr, string.len);
-  //   return Object{ .id = ptr };
-  // }
+  pub const ListKeys = struct {
+    arr: Array,
+    pos: u32 = 0,
+    len: u32,
 
-  // TODO: pub fn keys ()
-  // TODO: pub fn values ()
-  // TODO: pub fn entries ()
+    pub fn init (jsPtr: u32) ListKeys {
+      const arr = Array.init(jsPtr);
+      return ListKeys{
+        .arr = arr,
+        .len = arr.length(),
+      };
+    }
+
+    pub fn free (self: *const ListKeys) void {
+      self.arr.free();
+    }
+
+    pub fn next (self: *ListKeys) ?String {
+      if (self.pos == self.len) return null;
+      const string = self.arr.getType(String, self.pos);
+      self.pos += 1;
+      return string;
+    }
+  };
+
+  pub fn keys (self: *const Object) ListKeys {
+    const objClass = jsGetClass(Classes.Object.toInt());
+    defer jsFree(objClass);
+    const func = Function.init(getObjectValue(objClass, "keys"));
+    defer func.free();
+    return ListKeys.init(func.callArgs(self));
+  }
+
+  pub const ListValues = struct {
+    arr: Array,
+    pos: u32 = 0,
+    len: u32,
+
+    pub fn init (jsPtr: u32) ListValues {
+      const arr = Array.init(jsPtr);
+      return ListValues{
+        .arr = arr,
+        .len = arr.length(),
+      };
+    }
+
+    pub fn free (self: *const ListValues) void {
+      self.arr.free();
+    }
+
+    pub fn next (self: *ListValues, comptime T: type) ?T {
+      if (self.pos == self.len) return null;
+      const string = self.arr.getType(T, self.pos);
+      self.pos += 1;
+      return string;
+    }
+  };
+
+  pub fn values (self: *const Object) ListValues {
+    const objClass = jsGetClass(Classes.Object.toInt());
+    defer jsFree(objClass);
+    const func = Function.init(getObjectValue(objClass, "values"));
+    defer func.free();
+    return ListValues.init(func.callArgs(self));
+  }
+
+  pub const ListEntries = struct {
+    arr: Array,
+    pos: u32 = 0,
+    len: u32,
+
+    pub const Entry = struct {
+      arr: Array,
+
+      pub fn init (jsPtr: u32) Entry {
+        return Entry{ .arr = Array.init(jsPtr) };
+      }
+
+      pub fn free (self: *const Entry) void {
+        jsFree(self.arr.id);
+      }
+
+      pub fn key (self: *const Entry) String {
+        return String.init(self.arr.get(0));
+      }
+
+      pub fn value (self: *const Entry, comptime T: anytype) T {
+        return T.init(self.arr.get(1));
+      }
+    };
+
+    pub fn init (jsPtr: u32) ListEntries {
+      const arr = Array.init(jsPtr);
+      return ListEntries{
+        .arr = arr,
+        .len = arr.length(),
+      };
+    }
+
+    pub fn free (self: *const ListEntries) void {
+      self.arr.free();
+    }
+
+    pub fn next (self: *ListEntries) ?Entry {
+      if (self.pos == self.len) return null;
+      const entry = self.arr.getType(Entry, self.pos);
+      self.pos += 1;
+      return entry;
+    }
+  };
+
+  pub fn entries (self: *const Object) ListEntries {
+    const objClass = jsGetClass(Classes.Object.toInt());
+    defer jsFree(objClass);
+    const func = Function.init(getObjectValue(objClass, "entries"));
+    defer func.free();
+    return ListEntries.init(func.callArgs(self));
+  }
 
   pub fn free (self: *const Object) void {
     jsFree(self.id);
