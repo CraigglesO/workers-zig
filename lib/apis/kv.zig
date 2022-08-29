@@ -74,7 +74,7 @@ pub const PutOptions = struct {
 
     if (self.expiration != null) obj.setNum("expiration", u64, self.expiration.?);
     if (self.expirationTtl != null) obj.setNum("expirationTtl", u64, self.expirationTtl.?);
-    if (self.metadata != null) obj.set("metadata", self.metadata.?.id);
+    if (self.metadata != null) obj.set("metadata", self.metadata.?);
 
     return obj;
   }
@@ -92,10 +92,10 @@ pub const ListOptions = struct {
     const obj = Object.new();
 
     obj.setNum("limit", u16, self.limit);
-    if (self.prefix != null) obj.setString("prefix", self.prefix.?);
-    if (self.jsPrefix != null) obj.set("prefix", self.jsPrefix.?.id);
-    if (self.cursor != null) obj.setString("cursor", self.cursor.?);
-    if (self.jsCursor != null) obj.set("cursor", self.jsCursor.?.id);
+    if (self.prefix != null) obj.setText("prefix", self.prefix.?);
+    if (self.jsPrefix != null) obj.set("prefix", self.jsPrefix.?);
+    if (self.cursor != null) obj.setText("cursor", self.cursor.?);
+    if (self.jsCursor != null) obj.set("cursor", self.jsCursor.?);
 
     return obj;
   }
@@ -223,11 +223,11 @@ pub const KVNamespace = struct {
     // prep the args
     const args = Array.new();
     defer args.free();
-    args.push(str.id);
-    args.push(val);
-    args.push(opts.id);
+    args.push(&str);
+    args.pushID(val);
+    args.push(&opts);
 
-    _ = func.callArgs(args.id);
+    _ = func.callArgsID(args.id);
   }
 
   pub fn putMetadata (
@@ -270,14 +270,14 @@ pub const KVNamespace = struct {
     // prep the args
     const args = Array.new();
     defer args.free();
-    args.push(str.id);
-    args.push(val);
-    args.push(opts.id);
+    args.push(&str);
+    args.pushID(val);
+    args.push(&opts);
 
-    _ = func.callArgs(args.id);
+    _ = func.callArgsID(args.id);
   }
 
-  pub fn _get (
+  fn _get (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions,
@@ -289,20 +289,20 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.setString("type", resType);
+    opts.setText("type", resType);
     // grab the function
     const func = AsyncFunction.init(getObjectValue(self.id, "get"));
     defer func.free();
     // prep the args
     const args = Array.new();
     defer args.free();
-    args.push(str.id);
-    args.push(opts.id);
+    args.push(&str);
+    args.push(&opts);
 
-    return func.callArgs(args.id);
+    return func.callArgsID(args.id);
   }
 
-  pub fn _getMeta (
+  fn _getMeta (
     self: *const KVNamespace,
     key: []const u8,
     options: GetOptions,
@@ -314,17 +314,17 @@ pub const KVNamespace = struct {
     // grab options
     const opts = options.toObject();
     defer opts.free();
-    opts.setString("type", resType);
+    opts.setText("type", resType);
     // grab the function
     const func = AsyncFunction.init(getObjectValue(self.id, "getWithMetadata"));
     defer func.free();
     // prep the args
     const args = Array.new();
     defer args.free();
-    args.push(str.id);
-    args.push(opts.id);
+    args.push(&str);
+    args.push(&opts);
 
-    return func.callArgs(args.id);
+    return func.callArgsID(args.id);
   }
 
   pub fn getString (
@@ -598,7 +598,7 @@ pub const KVNamespace = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
 
-    _ = func.callArgs(str.id);
+    _ = func.callArgsID(str.id);
   }
 
   pub fn list (self: *const KVNamespace, options: ListOptions) ListResult {
@@ -609,6 +609,6 @@ pub const KVNamespace = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "list") };
     defer func.free();
 
-    return ListResult.init(func.callArgs(opts.id));
+    return ListResult.init(func.callArgsID(opts.id));
   }
 };

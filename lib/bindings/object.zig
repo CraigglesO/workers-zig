@@ -111,7 +111,11 @@ pub const Object = struct {
     return getObjectValueNum(self.id, key, T);
   }
 
-  pub fn set (self: *const Object, key: []const u8, value: u32) void {
+  pub fn set (self: *const Object, key: []const u8, value: anytype) void {
+    return setObjectValue(self.id, key, value.id);
+  }
+
+  pub fn setID (self: *const Object, key: []const u8, value: u32) void {
     return setObjectValue(self.id, key, value);
   }
 
@@ -119,7 +123,7 @@ pub const Object = struct {
     return setObjectValueNum(self.id, key, T, value);
   } 
 
-  pub fn setString (self: *const Object, key: []const u8, value: []const u8) void {
+  pub fn setText (self: *const Object, key: []const u8, value: []const u8) void {
     return setObjectString(self.id, key, value);
   }
 

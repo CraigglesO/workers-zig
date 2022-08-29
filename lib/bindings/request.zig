@@ -63,13 +63,13 @@ pub const RequestInit = struct {
     var body = self.body orelse BodyInit{ .none = {} };
     const bodyID = body.toID();
     defer body.free(bodyID);
-    if (bodyID != Null) obj.set("body", bodyID);
-    if (self.method != null) obj.setString("method", self.method.?.toString());
-    if (self.headers != null) obj.set("headers", self.headers.?.id);
-    if (self.redirect != null) obj.setString("redirect", self.redirect.?.toString());
+    if (bodyID != Null) obj.setID("body", bodyID);
+    if (self.method != null) obj.setText("method", self.method.?.toString());
+    if (self.headers != null) obj.set("headers", &self.headers.?);
+    if (self.redirect != null) obj.setText("redirect", self.redirect.?.toString());
     if (self.cf != null) {
       const cfID = self.cf.?.toID();
-      if (cfID != Null) obj.set("cf", cfID);
+      if (cfID != Null) obj.setID("cf", cfID);
     }
 
     return obj;
@@ -140,8 +140,8 @@ pub const Request = struct {
     // setup arg array
     const args = Array.new();
     defer args.free();
-    args.push(reqID);
-    args.push(reqInitID);
+    args.pushID(reqID);
+    args.pushID(reqInitID);
     
     return Request{ .id = jsCreateClass(Classes.Request.toInt(), args.id) };
   }
@@ -152,7 +152,7 @@ pub const Request = struct {
 
   pub fn clone (self: *const Request) Request {
     // grab the clone function
-    const func = Function{ .id = getObjectValue(self.id, "clone") };
+    const func = Function.init(getObjectValue(self.id, "clone"));
     defer func.free();
     // call the clone function and return the resultant pointer
     return Request.init(func.call());

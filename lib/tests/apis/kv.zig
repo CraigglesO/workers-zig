@@ -37,7 +37,7 @@ pub fn kvStringHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "text/plain");
+    headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
         .{ .string = &text },
@@ -71,12 +71,12 @@ pub fn kvStringWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     // prep obj
     const obj = Object.new();
     defer obj.free();
-    obj.set("value", stringMeta.value.id);
-    obj.set("meta", stringMeta.metadata.?.id);
+    obj.set("value", &stringMeta.value);
+    obj.set("meta", &stringMeta.metadata.?);
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .object = &obj },
@@ -103,7 +103,7 @@ pub fn kvTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "text/plain");
+    headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
         .{ .text = text },
@@ -134,12 +134,12 @@ pub fn kvTextWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     // prep obj
     const obj = Object.new();
     defer obj.free();
-    obj.setString("value", textMeta.value);
-    obj.set("meta", textMeta.metadata.?.id);
+    obj.setText("value", textMeta.value);
+    obj.set("meta", &textMeta.metadata.?);
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .object = &obj },
@@ -157,7 +157,7 @@ const TestObj = struct {
     pub fn toObject (self: *const TestObj) Object {
         const obj = Object.new();
         obj.setNum("a", u32, self.a);
-        obj.setString("b", self.b);
+        obj.setText("b", self.b);
 
         return obj;
     }
@@ -187,7 +187,7 @@ pub fn kvObjectHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .string = &body },
@@ -222,12 +222,12 @@ pub fn kvObjectWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     // prep obj
     const obj = Object.new();
     defer obj.free();
-    obj.set("value", objMeta.value.id);
-    obj.set("meta", objMeta.metadata.?.id);
+    obj.set("value", &objMeta.value);
+    obj.set("meta", &objMeta.metadata.?);
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .object = &obj },
@@ -264,7 +264,7 @@ pub fn kvJSONHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .string = &body },
@@ -296,7 +296,7 @@ pub fn kvArraybufferHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .arrayBuffer = &getAB },
@@ -334,12 +334,12 @@ pub fn kvArrayBufferWithMetadataHandler (ctx: *FetchContext) callconv(.Async) vo
     // convert ab to uint8array
     const uint8 = abMeta.value.uint8Array();
     defer uint8.free();
-    obj.set("value", uint8.id);
-    obj.set("meta", abMeta.metadata.?.id);
+    obj.set("value", &uint8);
+    obj.set("meta", &abMeta.metadata.?);
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .object = &obj },
@@ -369,7 +369,7 @@ pub fn kvStreamHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .stream = &getStream },
@@ -403,7 +403,7 @@ pub fn kvStreamWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .stream = &bytesMeta.value },
@@ -433,7 +433,7 @@ pub fn kvBytesHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .bytes = getBytes },
@@ -471,12 +471,12 @@ pub fn kvBytesWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     defer ab.free();
     const uint8 = ab.uint8Array();
     defer uint8.free();
-    obj.set("value", uint8.id);
-    obj.set("meta", bytesMeta.metadata.?.id);
+    obj.set("value", &uint8);
+    obj.set("meta", &bytesMeta.metadata.?);
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "application/json");
+    headers.setText("Content-Type", "application/json");
     // response
     const res = Response.new(
         .{ .object = &obj },
@@ -502,7 +502,7 @@ pub fn kvDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "text/plain");
+    headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
         .{ .text = text },
@@ -541,9 +541,9 @@ pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
     // build an object explaining what we see
     const obj = Object.new();
     defer obj.free();
-    if (listComplete) obj.set("listComplete", True)
-    else obj.set("listComplete", False);
-    obj.setString("cursor", cursor);
+    if (listComplete) obj.setID("listComplete", True)
+    else obj.setID("listComplete", False);
+    obj.setText("cursor", cursor);
     const arr = Array.new();
     defer arr.free();
     while (keys.next()) |*key| {
@@ -558,17 +558,17 @@ pub fn kvListHandler (ctx: *FetchContext) callconv(.Async) void {
         const keyObj = Object.new();
         defer keyObj.free();
         // set values
-        keyObj.setString("name", name);
-        keyObj.set("metadata", (if (metadata) |m| m.id else Undefined));
+        keyObj.setText("name", name);
+        keyObj.setID("metadata", (if (metadata) |*m| m.id else Undefined));
         // store
-        arr.push(keyObj.id);
+        arr.push(&keyObj);
     }
-    obj.set("keys", arr.id);
+    obj.set("keys", &arr);
     
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "text/plain");
+    headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
         .{ .object = &obj },

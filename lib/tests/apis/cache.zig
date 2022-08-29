@@ -15,8 +15,8 @@ pub fn cacheTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }
@@ -39,8 +39,8 @@ pub fn cacheStringHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }
@@ -62,8 +62,8 @@ pub fn cacheUniqueHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }
@@ -85,8 +85,8 @@ pub fn cacheDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }
@@ -118,8 +118,8 @@ pub fn cacheIgnoreTextHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }
@@ -147,8 +147,8 @@ pub fn cacheIgnoreDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
     defer cacheHeaders.free();
-    cacheHeaders.set("Cache-Control", "max-age=3600");
-    cacheHeaders.set("Content-Type", "text/plain");
+    cacheHeaders.setText("Cache-Control", "max-age=3600");
+    cacheHeaders.setText("Content-Type", "text/plain");
     const cacheRes = Response.new(
       .{ .text = "cached response" },
       .{ .status = 200, .statusText = "ok", .headers = &cacheHeaders }

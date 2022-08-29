@@ -48,7 +48,7 @@ pub const CacheQueryOptions = struct {
 
   pub fn toObject (self: *const CacheQueryOptions) Object {
     const obj = Object.new();
-    if (self.ignoreMethod != null) obj.set("ignoreMethod", toJSBool(self.ignoreMethod.?));
+    if (self.ignoreMethod != null) obj.setID("ignoreMethod", toJSBool(self.ignoreMethod.?));
     return obj;
   }
 };
@@ -81,13 +81,13 @@ pub const Cache = struct {
     defer req.free(reqID);
     const arr = Array.new();
     defer arr.free();
-    arr.push(reqID);
-    arr.push(res.id);
+    arr.pushID(reqID);
+    arr.push(res);
     // build async function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "put") };
     defer func.free();
     // call async function
-    _ = func.callArgs(arr.id);
+    _ = func.callArgsID(arr.id);
   }
 
   pub fn match (
@@ -102,13 +102,13 @@ pub const Cache = struct {
     defer opts.free();
     const arr = Array.new();
     defer arr.free();
-    arr.push(reqID);
-    arr.push(opts.id);
+    arr.pushID(reqID);
+    arr.push(&opts);
     // build async function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "match") };
     defer func.free();
     // call async function
-    const result = func.callArgs(arr.id);
+    const result = func.callArgsID(arr.id);
     if (result == Undefined) return null;
     return Response{ .id = result };
   }
@@ -125,13 +125,13 @@ pub const Cache = struct {
     defer opts.free();
     const arr = Array.new();
     defer arr.free();
-    arr.push(reqID);
-    arr.push(opts.id);
+    arr.pushID(reqID);
+    arr.push(&opts);
     // build async function
     const func = AsyncFunction{ .id = getObjectValue(self.id, "delete") };
     defer func.free();
     // call async function
-    const result = func.callArgs(arr.id);
+    const result = func.callArgsID(arr.id);
     return result == True;
   }
 };

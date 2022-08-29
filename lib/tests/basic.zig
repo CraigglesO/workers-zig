@@ -14,7 +14,7 @@ pub fn basicHandler (ctx: *FetchContext) callconv(.Async) void {
     // headers
     const headers = Headers.new();
     defer headers.free();
-    headers.set("Content-Type", "text/plain");
+    headers.setText("Content-Type", "text/plain");
     // body
     const body = String.new(text);
     defer body.free();

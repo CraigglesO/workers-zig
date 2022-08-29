@@ -23,10 +23,10 @@ pub const PipeToOptions = struct {
   pub fn toObject (self: *const PipeToOptions) Object {
     const obj = Object.new();
     if (self.preventClose != null) {
-      obj.set("ignoreMethod", toJSBool(self.preventClose.?));
+      obj.setID("ignoreMethod", toJSBool(self.preventClose.?));
     }
-    // if (self.preventAbort != null) { obj.set("ignoreMethod", toJSBool(self.preventAbort.?)); }
-    // if (self.preventCancel != null) { obj.set("ignoreMethod", toJSBool(self.preventCancel.?)); }
+    // if (self.preventAbort != null) { obj.setID("ignoreMethod", toJSBool(self.preventAbort.?)); }
+    // if (self.preventCancel != null) { obj.setID("ignoreMethod", toJSBool(self.preventCancel.?)); }
     return obj;
   }
 };
@@ -74,8 +74,8 @@ pub const ReadableStream = struct {
     // setup args
     const args = Array.new();
     defer args.free();
-    args.push(destination.id);
-    args.push(optObj.id);
+    args.push(&destination);
+    args.push(&optObj);
 
     func.call(args.id);
   }

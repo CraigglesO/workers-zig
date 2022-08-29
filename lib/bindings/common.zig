@@ -21,7 +21,7 @@ pub fn instanceOf (classPos: *u8, classPrt: *u32) bool {
     return (res == True);
 }
 
-pub const Null: u32 = 1;
+pub const Null = 1;
 pub const Undefined: u32 = 2;
 pub const True: u32 = 3;
 pub const False: u32 = 4;

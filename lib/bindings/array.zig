@@ -25,8 +25,18 @@ pub const Array = struct {
     jsFree(self.id);
   }
 
-  pub fn push (self: *const Array, ptr: u32) void {
-    jsArrayPush(self.id, ptr);
+  pub fn push (self: *const Array, jsValue: anytype) void {
+    jsArrayPush(self.id, jsValue.id);
+  }
+
+  pub fn pushID (self: *const Array, jsPtr: u32) void {
+    jsArrayPush(self.id, jsPtr);
+  }
+
+  pub fn pushString (self: *const Array, str: []const u8) void {
+    const jsStr = String.new(str);
+    defer jsStr.free();
+    jsArrayPush(self.id, jsStr.id);
   }
 
   pub fn get (self: *const Array, pos: u32) u32 {

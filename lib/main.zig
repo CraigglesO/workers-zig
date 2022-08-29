@@ -30,7 +30,7 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 
 // ? PART 1
 // * KV test expire
-// * R2
+// * R2 tests
 // * rather than input u32 in places, inject bindings and grab the .id
 
 // * build skeleton

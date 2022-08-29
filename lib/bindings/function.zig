@@ -29,8 +29,8 @@ pub const Function = struct {
     return jsFnCall(self.id, Undefined);
   }
 
-  pub fn callArgs (self: *const Function, argsPtr: u32) u32 {
-    return jsFnCall(self.id, argsPtr);
+  pub fn callArgs (self: *const Function, args: anytype) u32 {
+    return jsFnCall(self.id, args.id);
   }
 };
 
@@ -49,7 +49,11 @@ pub const AsyncFunction = struct {
     return await async jsAsync(self.id, Undefined);
   }
 
-  pub fn callArgs (self: *const AsyncFunction, argsPtr: u32) callconv(.Async) u32 {
-    return await async jsAsync(self.id, argsPtr);
+  pub fn callArgs (self: *const AsyncFunction, args: anytype) callconv(.Async) u32 {
+    return await async jsAsync(self.id, args.id);
+  }
+
+  pub fn callArgsID (self: *const AsyncFunction, id: u32) callconv(.Async) u32 {
+    return await async jsAsync(self.id, id);
   }
 };

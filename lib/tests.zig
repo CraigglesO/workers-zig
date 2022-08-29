@@ -99,7 +99,7 @@ pub fn scheduledHandler (ctx: *ScheduledContext) callconv(.Async) void {
   // get ctx cron string
   const cron = ctx.event.cron();
   defer allocator.free(cron);
-  obj.setString("cron", cron);
+  obj.setText("cron", cron);
 
   // get scheduled time
   const scheduledTime = ctx.event.scheduledTime();

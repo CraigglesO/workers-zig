@@ -28,22 +28,39 @@ pub const Headers = struct {
     jsFree(self.id);
   }
 
-  pub fn append (self: *const Headers, name: []const u8, value: []const u8) void {
+  pub fn append (self: *const Headers, name: []const u8, value: anytype) void {
+    // prepare the name & value
+    const jsName = String.new(name);
+    defer jsName.free();
+    // prepare the function
+    const func = Function.init(getObjectValue(self.id, "append"));
+    defer func.free();
+    // prepare the arguments
+    const jsArray = Array.new();
+    defer jsArray.free();
+    jsArray.push(&jsName);
+    jsArray.push(&value);
+    // call the function
+    const res = JSValue.init(func.callArgs(&jsArray));
+    defer res.free();
+  }
+
+  pub fn appendText (self: *const Headers, name: []const u8, value: []const u8) void {
     // prepare the name & value
     const jsName = String.new(name);
     defer jsName.free();
     const jsValue = String.new(value);
     defer jsValue.free();
     // prepare the function
-    const func = Function{ .id = getObjectValue(self.id, "append") };
+    const func = Function.init(getObjectValue(self.id, "append"));
     defer func.free();
     // prepare the arguments
     const jsArray = Array.new();
     defer jsArray.free();
-    jsArray.push(jsName.id);
-    jsArray.push(jsValue.id);
+    jsArray.push(&jsName);
+    jsArray.push(&jsValue);
     // call the function
-    const res = JSValue.init(func.callArgs(jsArray.id));
+    const res = JSValue.init(func.callArgs(&jsArray));
     defer res.free();
   }
 
@@ -52,10 +69,10 @@ pub const Headers = struct {
     const jsName = String.init(name);
     defer jsName.free();
     // prepare the function
-    const func = Function{ .id = getObjectValue(self.id, "get") };
+    const func = Function.init(getObjectValue(self.id, "get"));
     defer func.free();
     // call the function
-    const result = func.callArgs(jsName.id);
+    const result = func.callArgs(&jsName);
     // return the result
     if (result == Undefined) {
       return;
@@ -73,29 +90,46 @@ pub const Headers = struct {
     const jsName = String.init(name);
     defer jsName.free();
     // prepare the function
-    const func = Function{ .id = getObjectValue(self.id, "has") };
+    const func = Function.init(getObjectValue(self.id, "has"));
     defer func.free();
     // call the function
-    const result = func.callArgs(jsName.id);
+    const result = func.callArgs(&jsName);
     return result == True;
   }
+
+  pub fn set (self: *const Headers, name: []const u8, value: anytype) void {
+    // prepare the name & value
+    const jsName = String.new(name);
+    defer jsName.free();
+    // prepare the function
+    const func = Function.init(getObjectValue(self.id, "set"));
+    defer func.free();
+    // prepare the arguments
+    const jsArray = Array.new();
+    defer jsArray.free();
+    jsArray.push(&jsName);
+    jsArray.push(&value);
+    // call the function
+    const res = JSValue.init(func.callArgs(&jsArray));
+    defer res.free();
+  }
   
-  pub fn set (self: *const Headers, name: []const u8, value: []const u8) void {
+  pub fn setText (self: *const Headers, name: []const u8, value: []const u8) void {
     // prepare the name & value
     const jsName = String.new(name);
     defer jsName.free();
     const jsValue = String.new(value);
     defer jsValue.free();
     // prepare the function
-    const func = Function{ .id = getObjectValue(self.id, "set") };
+    const func = Function.init(getObjectValue(self.id, "set"));
     defer func.free();
     // prepare the arguments
     const jsArray = Array.new();
     defer jsArray.free();
-    jsArray.push(jsName.id);
-    jsArray.push(jsValue.id);
+    jsArray.push(&jsName);
+    jsArray.push(&jsValue);
     // call the function
-    const res = JSValue.init(func.callArgs(jsArray.id));
+    const res = JSValue.init(func.callArgs(&jsArray));
     defer res.free();
   }
 
@@ -104,10 +138,10 @@ pub const Headers = struct {
     const jsName = String.new(name);
     defer jsName.free();
     // prepare the function
-    const func = Function{ .id = getObjectValue(self.id, "delete") };
+    const func = Function.init(getObjectValue(self.id, "delete"));
     defer func.free();
     // call the function
-    const res = JSValue.init(func.callArgs(jsName.id));
+    const res = JSValue.init(func.callArgs(&jsName));
     defer res.free();
   }
 

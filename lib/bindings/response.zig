@@ -49,10 +49,10 @@ pub const ResponseInit = struct {
   pub fn toObject (self: *const ResponseInit) Object {
     const obj = Object.new();
     if (self.status != null) obj.setNum("status", u16, self.status.?);
-    if (self.statusText != null) obj.setString("statusText", self.statusText.?);
-    if (self.headers != null) obj.set("headers", self.headers.?.id);
-    if (self.webSocket != null) obj.set("webSocket", self.webSocket.?.id);
-    if (self.encodeBody != EncodeBody.auto) obj.setString("encodeBody", self.encodeBody.toString());
+    if (self.statusText != null) obj.setText("statusText", self.statusText.?);
+    if (self.headers != null) obj.set("headers", self.headers.?);
+    if (self.webSocket != null) obj.set("webSocket", self.webSocket.?);
+    if (self.encodeBody != EncodeBody.auto) obj.setText("encodeBody", self.encodeBody.toString());
 
     return obj;
   }
@@ -79,8 +79,8 @@ pub const Response = struct {
     defer jsArgs.free();
     const bodyID = bodyInit.toID();
     defer bodyInit.free(bodyID);
-    jsArgs.push(bodyID);
-    jsArgs.push(jsResOptions.id);
+    jsArgs.pushID(bodyID);
+    jsArgs.push(&jsResOptions);
     // create the class
     const jsPtr = common.jsCreateClass(common.Classes.Response.toInt(), jsArgs.id);
 
@@ -93,8 +93,8 @@ pub const Response = struct {
     defer jsArgs.free();
     const bodyID = bodyInit.toID();
     defer bodyInit.free(bodyID);
-    jsArgs.push(bodyID);
-    jsArgs.push(response.id);
+    jsArgs.pushID(bodyID);
+    jsArgs.push(&response);
     // create the class
     const jsPtr = common.jsCreateClass(common.Classes.Response.toInt(), jsArgs.id);
 
@@ -161,7 +161,7 @@ pub const Response = struct {
 
   pub fn redirect(self: *const Response, newURL: []const u8, newStatus: ?u16) Response {
     // grab the redirect function
-    const func = Function{ .id = getObjectValue(self.id, "redirect") };
+    const func = Function.init(getObjectValue(self.id, "redirect"));
     defer func.free();
     // add arguments
     const args = Array.new();
@@ -169,15 +169,15 @@ pub const Response = struct {
     // build string
     const urlStr = String.new(newURL);
     defer urlStr.free();
-    args.push(urlStr.id);
-    args.push(newStatus orelse Undefined);
+    args.push(&urlStr);
+    args.pushID(newStatus orelse Undefined);
     // call the clone function and return the resultant pointer
-    return Response.init(func.callArgs(args));
+    return Response.init(func.callArgs(&args));
   }
 
   pub fn clone (self: *const Response) Response {
     // grab the clone function
-    const func = Function{ .id = getObjectValue(self.id, "clone") };
+    const func = Function.init(getObjectValue(self.id, "clone"));
     defer func.free();
     // call the clone function and return the resultant pointer
     return Response.init(func.call());

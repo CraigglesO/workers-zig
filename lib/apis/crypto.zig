@@ -148,7 +148,7 @@ pub const CryptoKeyKeyAlgorithm = struct {
 
   pub fn toObject (self: *const CryptoKeyKeyAlgorithm) Object {
     const obj = Object.new();
-    obj.setString("name", self.name);
+    obj.setText("name", self.name);
     return obj;
   }
 };
@@ -164,28 +164,28 @@ pub const SubtleCryptoEncryptAlgorithm = struct {
 
   pub fn toObject (self: *const SubtleCryptoEncryptAlgorithm) u32 {
     const obj = Object.new();
-    obj.setString("name", self.name);
+    obj.setText("name", self.name);
     if (self.iv != null) {
       const id = self.iv.?.toID();
       defer self.iv.?.free(id);
-      obj.set("iv", id);
+      obj.setID("iv", id);
     }
     if (self.additionalData != null) {
       const id = self.additionalData.?.toID();
       defer self.additionalData.?.free(id);
-      obj.set("additionalData", id);
+      obj.setID("additionalData", id);
     }
     if (self.tagLength != null) obj.setNum("tagLength", self.tagLength.?);
     if (self.counter != null) {
       const id = self.counter.?.toID();
       defer self.counter.?.free(id);
-      obj.set("counter", id);
+      obj.setID("counter", id);
     }
     if (self.length != null) obj.setNum("length", self.length.?);
     if (self.label != null) {
       const id = self.label.?.toID();
       defer self.label.?.free(id);
-      obj.set("label", id);
+      obj.setID("label", id);
     }
   }
 };
@@ -200,20 +200,20 @@ pub const SubtleCryptoGenerateKeyAlgorithm = struct {
 
   pub fn toObject (self: *const SubtleCryptoGenerateKeyAlgorithm) u32 {
     const obj = Object.new();
-    obj.setString("name", self.name);
+    obj.setText("name", self.name);
     if (self.hash != null) {
       const id = self.hash.?.toID();
       defer self.hash.?.free(id);
-      obj.set("hash", id);
+      obj.setID("hash", id);
     }
     if (self.modulusLength != null) obj.setNum("modulusLength", self.modulusLength.?);
     if (self.publicExponent != null) {
       const id = self.publicExponent.?.toID();
       defer self.publicExponent.?.free(id);
-      obj.set("publicExponent", id);
+      obj.setID("publicExponent", id);
     }
     if (self.length != null) obj.setNum("length", self.length.?);
-    if (self.namedCurve != null) obj.setString("namedCurve", self.namedCurve.?);
+    if (self.namedCurve != null) obj.setText("namedCurve", self.namedCurve.?);
   }
 };
 
@@ -226,15 +226,15 @@ pub const SubtleCryptoImportKeyAlgorithm = struct {
 
   pub fn toObject (self: *const SubtleCryptoImportKeyAlgorithm) u32 {
     const obj = Object.new();
-    obj.setString("name", self.name);
+    obj.setText("name", self.name);
     if (self.hash != null) {
       const id = self.hash.?.toID();
       defer self.hash.?.free(id);
-      obj.set("hash", id);
+      obj.setID("hash", id);
     }
     if (self.length != null) obj.setNum("length", self.length.?);
-    if (self.namedCurve != null) obj.setString("namedCurve", self.namedCurve.?);
-    if (self.compressed != null) obj.set("compressed", toJSBool(self.compressed));
+    if (self.namedCurve != null) obj.setText("namedCurve", self.namedCurve.?);
+    if (self.compressed != null) obj.setID("compressed", toJSBool(self.compressed));
   }
 };
 
@@ -254,11 +254,11 @@ pub const SubtleCryptoSignAlgorithm = struct {
 
   pub fn toObject (self: *const SubtleCryptoSignAlgorithm) u32 {
     const obj = Object.new();
-    obj.setString("name", self.name);
+    obj.setText("name", self.name);
     if (self.hash != null) {
       const id = self.hash.?.toID();
       defer self.hash.?.free(id);
-      obj.set("hash", id);
+      obj.setID("hash", id);
     }
     if (self.dataLength != null) obj.setNum("dataLength", self.dataLength.?);
     if (self.saltLength != null) obj.setNum("saltLength", self.saltLength.?);
