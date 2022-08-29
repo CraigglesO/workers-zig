@@ -7,8 +7,19 @@ const Undefined = common.Undefined;
 const String = @import("string.zig").String;
 
 pub extern fn jsArrayPush (arrID: u32, args: u32) void;
+pub extern fn jsArrayPushNum (arrID: u32, value: f64) void;
 pub extern fn jsArrayGet (arrID: u32, pos: u32) u32;
 pub extern fn jsArrayGetNum (arrID: u32, pos: u32) f64;
+
+pub fn arrayPushNum (arr: *const Array, comptime T: type, num: T) void {
+  var fValue: f64 = 0;
+  switch(@typeInfo(T)) {
+    .Int => fValue = @intToFloat(f64, num),
+    .Float => fValue = @floatCast(f64, num),
+    else => String.new("Can't cast f64 to " ++ @typeName(T)).throw(),
+  }
+  jsArrayPushNum(arr.id, fValue);
+}
 
 pub const Array = struct {
   id: u32,
@@ -29,11 +40,15 @@ pub const Array = struct {
     jsArrayPush(self.id, jsValue.id);
   }
 
+  pub fn pushNum (self: *const Array, comptime T: type, num: T) void {
+    arrayPushNum(self, T, num);
+  }
+
   pub fn pushID (self: *const Array, jsPtr: u32) void {
     jsArrayPush(self.id, jsPtr);
   }
 
-  pub fn pushString (self: *const Array, str: []const u8) void {
+  pub fn pushText (self: *const Array, str: []const u8) void {
     const jsStr = String.new(str);
     defer jsStr.free();
     jsArrayPush(self.id, jsStr.id);

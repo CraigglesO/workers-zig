@@ -86,6 +86,11 @@ export function jsArrayPush (wasm: WASM, arrayPtr: number, itemPtr: number) {
   array.push(item)
 }
 
+export function jsArrayPushNum (wasm: WASM, arrayPtr: number, num: number) {
+  const array = wasm.heap.get(arrayPtr) as Array<any>
+  array.push(num)
+}
+
 export function jsArrayGet (wasm: WASM, arrayPtr: number, pos: number): number {
   const array = wasm.heap.get(arrayPtr) as Array<any>
   return wasm.heap.put(array[pos])

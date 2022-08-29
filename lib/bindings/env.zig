@@ -5,6 +5,7 @@ const jsFree = common.jsFree;
 const DefaultValueSize = common.DefaultValueSize;
 const KVNamespace = @import("../apis/kv.zig").KVNamespace;
 const R2Bucket = @import("../apis/r2.zig").R2Bucket;
+const D1Database = @import("../apis/d1.zig").D1Database;
 
 pub const Env = struct {
   id: u32,
@@ -29,8 +30,10 @@ pub const Env = struct {
     return getStringFree(strPtr);
   }
 
-  pub fn d1 () void {
-
+  pub fn d1 (self: *const Env, name: []const u8) ?D1Database {
+    const d1Ptr = getObjectValue(self.id, name);
+    if (d1Ptr <= DefaultValueSize) return null;
+    return D1Database.init(d1Ptr);
   }
 
   pub fn durableObject () void {

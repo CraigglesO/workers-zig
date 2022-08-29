@@ -537,8 +537,8 @@ pub const R2ListOptions = struct {
     if (self.includeHttpMetadata or self.includeCustomMetadata) {
       const arr = Array.new();
       defer arr.free();
-      if (self.includeHttpMetadata) arr.pushString("httpMetadata");
-      if (self.includeCustomMetadata) arr.pushString("customMetadata");
+      if (self.includeHttpMetadata) arr.pushText("httpMetadata");
+      if (self.includeCustomMetadata) arr.pushText("customMetadata");
       obj.set("include", &arr);
     }
 
