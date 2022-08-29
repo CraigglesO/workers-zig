@@ -28,5 +28,5 @@ pub fn fetch (request: RequestInfo, requestInit: RequestOptions) callconv(.Async
   args.pushID(urlID);
   args.pushID(reqInitID);
 
-  return Response{ .id = await async fetchResp(urlID, reqInitID) };
+  return Response.init(await async fetchResp(urlID, reqInitID));
 }

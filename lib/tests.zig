@@ -49,6 +49,9 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "kvStringMeta", path)) return kv.kvStringWithMetadataHandler(ctx);
   if (eql(u8, "kvText", path)) return kv.kvTextHandler(ctx);
   if (eql(u8, "kvTextMeta", path)) return kv.kvTextWithMetadataHandler(ctx);
+  if (eql(u8, "kvTextExpireTtl", path)) return kv.kvTextWithExpireTtlHandler(ctx);
+  if (eql(u8, "kvTextExpire", path)) return kv.kvTextWithExpireHandler(ctx);
+  if (eql(u8, "kvTextCacheTtl", path)) return kv.kvTextCacheTtlHandler(ctx);
   if (eql(u8, "kvObject", path)) return kv.kvObjectHandler(ctx);
   if (eql(u8, "kvObjectMeta", path)) return kv.kvObjectWithMetadataHandler(ctx);
   if (eql(u8, "kvJSON", path)) return kv.kvJSONHandler(ctx);

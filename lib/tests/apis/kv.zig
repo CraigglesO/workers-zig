@@ -150,6 +150,82 @@ pub fn kvTextWithMetadataHandler (ctx: *FetchContext) callconv(.Async) void {
     ctx.send(&res);
 }
 
+pub fn kvTextWithExpireTtlHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    kv.put("expire", .{ .text = "expiringText" }, .{ .expirationTtl = 100 });
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.setText("Content-Type", "text/plain");
+    // response
+    const res = Response.new(
+        .{ .none = {} },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub const DateObj = struct {
+    date: u32,
+};
+
+pub fn kvTextWithExpireHandler (ctx: *FetchContext) callconv(.Async) void {
+    const dateObj = ctx.req.json(DateObj) orelse return ctx.throw(500, "Failed to get body.");
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    kv.put("expire", .{ .text = "expiringText" }, .{ .expiration = dateObj.date });
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.setText("Content-Type", "text/plain");
+    // response
+    const res = Response.new(
+        .{ .none = {} },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
+pub fn kvTextCacheTtlHandler (ctx: *FetchContext) callconv(.Async) void {
+    // get the kvinstance from env
+    const kv = ctx.env.kv("TEST_NAMESPACE") orelse {
+      ctx.throw(500, "Could not find \"TEST_NAMESPACE\"");
+      return;
+    };
+    defer kv.free();
+    kv.put("key", .{ .text = "value" }, .{});
+    const text = kv.getText("key", .{ .cacheTtl = 3_600 }) orelse {
+        ctx.throw(500, "Could not find KV key's value");
+        return;
+    };
+    defer allocator.free(text);
+    // headers
+    const headers = Headers.new();
+    defer headers.free();
+    headers.setText("Content-Type", "text/plain");
+    // response
+    const res = Response.new(
+        .{ .text = text },
+        .{ .status = 200, .statusText = "ok", .headers = &headers }
+    );
+    defer res.free();
+
+    ctx.send(&res);
+}
+
 const TestObj = struct {
     a: u32,
     b: []const u8,

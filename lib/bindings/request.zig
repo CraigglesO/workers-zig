@@ -229,10 +229,11 @@ pub const Request = struct {
   pub fn json (self: *const Request, comptime T: type) ?T {
     if (!self.hasBody()) return null;
     // get the "string" and then parse it locally
-    const str = self.text();
-    defer allocator.free(str);
-    const stream = std.json.TokenStream.init(str);
-    return try std.json.parse(T, &stream, .{});
+    var str = self.text();
+    if (str == null) return null;
+    defer allocator.free(str.?);
+    var stream = std.json.TokenStream.init(str.?);
+    return std.json.parse(T, &stream, .{}) catch return null;
   }
 
   pub fn formData (self: *const Request) ?FormData {

@@ -80,6 +80,59 @@ test('kv: text: putMeta -> getMeta -> return get result', async (t: ExecutionCon
   t.deepEqual(await res.json(), { value: 'value2', meta: { name: 'text2', input: 2 } })
 })
 
+test('kv: text: put+expirationTtl -> check that data was stored with expire', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/text-expirettl')
+  // Check the body was returned
+  t.is(res.status, 200)
+  // grab the KV and check the data
+  const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
+  const list = await TEST_NAMESPACE.list()
+  const firstKey = list.keys[0]
+  t.true((firstKey.expiration ?? 0) > (Date.now() / 1000))
+  t.is(typeof firstKey.expiration, 'number');
+  t.is(firstKey.metadata, undefined)
+  t.is(firstKey.name, 'expire')
+})
+
+test('kv: text: put+expiration -> check that data was stored with expire', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  const date = Math.floor(Date.now() / 1000) + 100
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/text-expire', {
+    method: 'POST',
+    body: JSON.stringify({ date })
+  })
+  // Check the body was returned
+  t.is(res.status, 200)
+  // grab the KV and check the data
+  const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
+  const list = await TEST_NAMESPACE.list()
+  const firstKey = list.keys[0]
+  t.true(firstKey.expiration == date)
+  t.is(typeof firstKey.expiration, 'number');
+  t.is(firstKey.metadata, undefined)
+  t.is(firstKey.name, 'expire')
+})
+
+test('kv: text: put -> get+cacheTtl: check that cache is storing result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/kv/text-cacheTtl')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.is(await res.text(), 'value')
+
+  // NOTE: Miniflare doesn't do anything with cache-ttl, but it seems like this works
+  // const caches = await mf.getCaches()
+  // const defaultCache = caches.default
+  // console.log(defaultCache)
+})
+
 test('kv: object: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context

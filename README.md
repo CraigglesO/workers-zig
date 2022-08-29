@@ -19,7 +19,6 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 
 - 🔗 Zero dependencies
 - 🤝 Use in tandem with Javascript or 100% Zig WebAssembly
-- 🗿 WASI support (coming soon)
 - 🎮 JS bindings with support to write your own - [List of supported bindings here](#docs/bindings)
 - 📨 Fetch bindings
 - ⏰ Scheduled bindings
@@ -27,11 +26,16 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 - ✨ Cache bindings
 - 📦 KV bindings
 - 🪣 R2 bindings
-- 💾 D1 bindings (coming soon)
-- ✉️ WebSockets bindings (coming soon)
 - 🔐 Web-Crypto bindings - partially complete
-- 📌 Durable Objects bindings (coming soon)
 - 💪 Uses TypeScript
+
+## Features coming soon
+
+- 🗿 WASI support
+- 📌 Durable Objects bindings
+- 💾 D1 bindings
+- ✉️ WebSockets bindings
+- once CF lands dynamic imports: Only load wasm when needed.
 
 ## Install
 

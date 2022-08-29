@@ -29,15 +29,16 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 }
 
 // ? PART 1
-// * KV test expire
 // * R2 tests
-// * rather than input u32 in places, inject bindings and grab the .id
+// * Fetch test
+// * req/res tests
 
-// * build skeleton
 // * DOCS
+// * build skeleton
 // * share
 
 // ? PART 2
+// * new method of managing js heap so that after a request the heap is gaurenteed cleaned up
 // * finish crypto
 // * zigFunction with input args (for lone bindings like string)
 // * allow user to set own zig + js
