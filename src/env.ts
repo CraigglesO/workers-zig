@@ -54,6 +54,10 @@ export function jsFree (wasm: WASM, ptr: number): void {
   if (ptr <= DEFAULT_HEAP_SIZE) return
   wasm.heap.delete(ptr)
 }
+
+export function jsHeapGetNum (wasm: WASM, ptr: number): number {
+  return wasm.heap.get(ptr) as number;
+}
 /** __HEAP__ **/
 
 /** STRING **/
@@ -161,39 +165,11 @@ export async function jsAsyncFnCall (
   wasm.resume(frame)
 }
 
-export function jsCreateClass (wasm: WASM, classPos: number, argsPtr: number): number {
-  const Class = CLASSES[classPos]
-  const args = wasm.heap.get(argsPtr) as Array<any> | undefined
-  // @ts-ignore
-  return wasm.heap.put(args === undefined ? new Class() : Array.isArray(args) ? new Class(...args) : new Class(args))
-}
-
-export function jsEqual (wasm: WASM, aPtr: number, bPtr: number): number {
-  const a = wasm.heap.get(aPtr)
-  const b = wasm.heap.get(bPtr)
-  return wasm.heap.put(a === b)
-}
-
-export function jsDeepEqual (wasm: WASM, aPtr: number, bPtr: number): number {
-  const a = wasm.heap.get(aPtr)
-  const b = wasm.heap.get(bPtr)
-  try {
-    return wasm.heap.put(JSON.stringify(a) == JSON.stringify(b))
-  } catch (_) { return wasm.heap.put(false) }
-}
-
-export function jsInstanceOf (wasm: WASM, classPos: number, classPrt: number): number {
-  const Class = CLASSES[classPos]
-  const classPtr = wasm.heap.get(classPrt)
-  return classPtr instanceof Class ? wasm.heap.put(true) : wasm.heap.put(false)
-}
-
 export function jsResolve (wasm: WASM, ctxPtr: number, resPtr: number): void {
   const ctx = wasm.heap.get(ctxPtr) as FetchContext | ScheduleContext
   const res = wasm.heap.get(resPtr) as Response // undefined if ScheduleContext
   ctx.resolve?.(res)
 }
-
 /** __FUNCTION__ */
 
 /** UTIL **/
@@ -222,6 +198,37 @@ export function jsToBytes (wasm: WASM, ptr: number): number {
 export function jsToBuffer (wasm: WASM, ptr: number, len: number): number {
   const data = wasm.get(ptr, len)
   return wasm.heap.put(data.buffer)
+}
+
+export function jsGetClass (wasm: WASM, classPos: number): number {
+  return wasm.heap.put(CLASSES[classPos])
+}
+
+export function jsCreateClass (wasm: WASM, classPos: number, argsPtr: number): number {
+  const Class = CLASSES[classPos]
+  const args = wasm.heap.get(argsPtr) as Array<any> | undefined
+  // @ts-ignore
+  return wasm.heap.put(args === undefined ? new Class() : Array.isArray(args) ? new Class(...args) : new Class(args))
+}
+
+export function jsEqual (wasm: WASM, aPtr: number, bPtr: number): number {
+  const a = wasm.heap.get(aPtr)
+  const b = wasm.heap.get(bPtr)
+  return wasm.heap.put(a === b)
+}
+
+export function jsDeepEqual (wasm: WASM, aPtr: number, bPtr: number): number {
+  const a = wasm.heap.get(aPtr)
+  const b = wasm.heap.get(bPtr)
+  try {
+    return wasm.heap.put(JSON.stringify(a) == JSON.stringify(b))
+  } catch (_) { return wasm.heap.put(false) }
+}
+
+export function jsInstanceOf (wasm: WASM, classPos: number, classPrt: number): number {
+  const Class = CLASSES[classPos]
+  const classPtr = wasm.heap.get(classPrt)
+  return classPtr instanceof Class ? wasm.heap.put(true) : wasm.heap.put(false)
 }
 /** __UTIL__ **/
 
@@ -265,8 +272,7 @@ export async function jsFetch (
 ): Promise<void> {
   const url = wasm.heap.get(urlPtr) as string | Request
   const init = wasm.heap.get(initPtr) as RequestInit | Request | undefined
-  const fetchings = await fetch(url, init).catch(err => {
-    console.log(err)
+  const fetchings = await fetch(url, init).catch(() => {
     return new Response(null, {
       status: 502
     })

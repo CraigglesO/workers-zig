@@ -78,7 +78,7 @@ pub const R2HTTPMetadata = struct {
     if (r2Object.has("contentDisposition")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentDisposition"));
     if (r2Object.has("contentEncoding")) r2Object = getStringFree(getObjectValue(r2Object.id, "contentEncoding"));
     if (r2Object.has("cacheControl")) r2Object = getStringFree(getObjectValue(r2Object.id, "cacheControl"));
-    if (r2Object.has("cacheExpiry")) r2Object = getStringFree(getObjectValue(r2Object.id, "cacheExpiry"));
+    if (r2Object.has("cacheExpiry")) r2Object = Date.init(getObjectValue(r2Object.id, "cacheExpiry"));
     return R2HTTPMetadata{
       .contentType = contentType,
       .contentLanguage = contentLanguage,
@@ -87,6 +87,17 @@ pub const R2HTTPMetadata = struct {
       .cacheControl = cacheControl,
       .cacheExpiry = cacheExpiry,
     };
+  }
+
+  pub fn toObject (self: *const R2HTTPMetadata) Object {
+    const obj = Object.new();
+    if (self.contentType) |ct| obj.setText("contentType", ct);
+    if (self.contentLanguage) |cl| obj.setText("contentLanguage", cl);
+    if (self.contentDisposition) |cd| obj.setText("contentDisposition", cd);
+    if (self.contentEncoding) |ce| obj.setText("contentEncoding", ce);
+    if (self.cacheControl) |cc| obj.setText("cacheControl", cc);
+    if (self.cacheExpiry) |ce| obj.set("cacheExpiry", &ce);
+    return obj;
   }
 
   pub fn writeHttpMetadata (self: *const R2HTTPMetadata, headers: Headers) void {
@@ -121,9 +132,9 @@ pub const R2Range = struct {
   pub fn toObject (self: *const R2Range) Object {
     const obj = Object.new();
 
-    obj.setNum("offset", u64, self.offset);
-    obj.setNum("length", u64, self.length);
-    obj.setNum("suffix", u64, self.suffix);
+    if (self.offset) |o| obj.setNum("offset", u64, o);
+    if (self.length) |l| obj.setNum("length", u64, l);
+    if (self.suffix) |s| obj.setNum("suffix", u64, s);
 
     return obj;
   }
@@ -131,28 +142,43 @@ pub const R2Range = struct {
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1099
 pub const R2Object = struct {
+  id: u32,
+
+  pub fn init (jsPtr: u32) R2Object {
+    return R2Object{ .id = jsPtr };
+  }
+
+  pub fn free (self: *const R2Object) void {
+    jsFree(self.id);
+  }
+
   // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn key (self: *const R2Object) []const u8 {
     return getStringFree(getObjectValue(self.id, "key"));
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn version (self: *const R2Object) []const u8 {
     return getStringFree(getObjectValue(self.id, "version"));
   }
 
   // readonly size: number;
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn size (self: *const R2Object) u64 {
     return getObjectValueNum(self.id, "size", u64);
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn etag (self: *const R2Object) []const u8 {
     return getStringFree(getObjectValue(self.id, "etag"));
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn httpEtag (self: *const R2Object) []const u8 {
     return getStringFree(getObjectValue(self.id, "httpEtag"));
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn uploaded (self: *const R2Object) Date {
     return Date.init(getObjectValue(self.id, "uploaded"));
   }
@@ -179,9 +205,23 @@ pub const R2Object = struct {
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1115
 pub const R2ObjectBody = struct {
+  id: u32,
+
+  pub fn init (jsPtr: u32) R2ObjectBody {
+    return R2ObjectBody{ .id = jsPtr };
+  }
+
+  pub fn free (self: *const R2ObjectBody) void {
+    jsFree(self.id);
+  }
+
   pub fn bodyUsed (self: *const R2ObjectBody) bool {
     const used = getObjectValue(self.id, "bodyUsed");
     return used == True;
+  }
+
+  pub fn body (self: *const R2ObjectBody) ReadableStream {
+    return ReadableStream.init(getObjectValue(self.id, "body"));
   }
 
   pub fn arrayBuffer (self: *const R2ObjectBody) ArrayBuffer {
@@ -191,11 +231,29 @@ pub const R2ObjectBody = struct {
     return ArrayBuffer.init(func.call());
   }
 
-  pub fn text (self: *const R2ObjectBody) String {
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
+  pub fn bytes (self: *const R2ObjectBody) []const u8 {
+    const func = AsyncFunction.init(getObjectValue(self.id, "arrayBuffer"));
+    defer func.free();
+
+    const ab = ArrayBuffer.init(func.call());
+    defer ab.free();
+    return ab.bytes();
+  }
+
+  pub fn string (self: *const R2ObjectBody) String {
     const func = AsyncFunction.init(getObjectValue(self.id, "text"));
     defer func.free();
 
     return String.init(func.call());
+  }
+
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
+  pub fn text (self: *const R2ObjectBody) []const u8 {
+    const func = AsyncFunction.init(getObjectValue(self.id, "text"));
+    defer func.free();
+
+    return getStringFree(func.call());
   }
 
   pub fn object (self: *const R2ObjectBody) Object {
@@ -205,12 +263,13 @@ pub const R2ObjectBody = struct {
     return Object.init(func.call());
   }
 
-  pub fn json (self: *const R2ObjectBody, comptime T: type) T {
+  pub fn json (self: *const R2ObjectBody, comptime T: type) ?T {
     const func = AsyncFunction.init(getObjectValue(self.id, "json"));
     defer func.free();
 
     const obj = Object.init(func.call());
-    return obj.parse(T);
+    if (obj.id <= DefaultValueSize) return null;
+    return obj.parse(T) catch return null;
   }
 
   pub fn blob (self: *const R2ObjectBody) Blob {
@@ -225,19 +284,23 @@ pub const R2ObjectBody = struct {
     return getStringFree(getObjectValue(self.id, "key"));
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn version (self: *const R2ObjectBody) []const u8 {
     return getStringFree(getObjectValue(self.id, "version"));
   }
 
   // readonly size: number;
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn size (self: *const R2ObjectBody) u64 {
     return getObjectValueNum(self.id, "size", u64);
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn etag (self: *const R2ObjectBody) []const u8 {
     return getStringFree(getObjectValue(self.id, "etag"));
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn httpEtag (self: *const R2ObjectBody) []const u8 {
     return getStringFree(getObjectValue(self.id, "httpEtag"));
   }
@@ -277,6 +340,7 @@ pub const R2Objects = struct {
     return trunc == True;
   }
 
+  // NOTE: User must cleanup the slice after use via the std.heap.page_allocator
   pub fn cursor (self: *const R2Objects) []const u8 {
     return getStringFree(getObjectValue(self.id, "cursor"));
   }
@@ -342,36 +406,90 @@ pub const R2Conditional = struct {
   etagDoesNotMatch: ?[]const u8 = null,
   uploadedBefore: ?Date = null,
   uploadedAfter: ?Date = null,
+
+  pub fn toObject (self: *const R2Conditional) Object {
+    const obj = Object.new();
+    if (self.etagMatches) |em| obj.setText("etagMatches", em);
+    if (self.etagDoesNotMatch) |ednm| obj.setText("etagDoesNotMatch", ednm);
+    if (self.uploadedBefore) |ub| obj.set("uploadedBefore", ub);
+    if (self.uploadedAfter) |ua| obj.set("uploadedBefore", ua);
+    return obj;
+  }
 };
 
 pub const OnlyIf = union(enum) {
-  r2Conditional: *const R2Conditional,
+  r2Conditional: R2Conditional,
   headers: *const Headers,
+
+  pub fn toID (self: *const OnlyIf) u32 {
+    switch (self.*) {
+      .r2Conditional => |c| return c.toObject().id,
+      .headers => |h| return h.id,
+    }
+  }
+
+  pub fn free (self: *const OnlyIf, id: u32) void {
+    switch (self.*) {
+      .r2Conditional => jsFree(id),
+      .headers => {},
+    }
+  }
 };
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1050
 pub const R2GetOptions = struct {
   onlyIf: ?OnlyIf = null,
   range: ?R2Range = null,
+
+  pub fn toObject (self: *const R2GetOptions) Object {
+    const obj = Object.new();
+    if (self.onlyIf) |oi| {
+      const oiID = oi.toID();
+      defer oi.free(oiID);
+      obj.setID("onlyIf", oiID);
+    }
+    if (self.range) |r| {
+      const orObj = r.toObject();
+      defer orObj.free();
+      obj.set("range", orObj);
+    }
+
+    return obj;
+  }
 };
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1131
 pub const R2PutOptions = struct {
-  httpMetadata: ?R2PutOptionsHttpMetadata,
-  customMetadata: ?Record,
-  md5: ?R2PutOptionsMd5,
+  // httpMetadata
+  httpMetadata: ?*const R2HTTPMetadata = null,
+  headers: ?*const Headers = null,
+  // custom
+  customMetadata: ?*const Object = null,
+  // md5
+  md5String: ?*const String = null,
+  md5Text: ?[]const u8 = null,
+  md5ArrayBuffer: ?*const ArrayBuffer = null,
+  md5Bytes: ?[]const u8 = null,
 
-  pub const R2PutOptionsHttpMetadata = union(enum) {
-    r2HTTPMetadata: R2HTTPMetadata,
-    headers: Headers,
-  };
-
-  pub const R2PutOptionsMd5 = union(enum) {
-    string: String,
-    text: []const u8,
-    arrayBuffer: ArrayBuffer,
-    bytes: []const u8,
-  };
+  pub fn toObject (self: *const R2PutOptions) Object {
+    const obj = Object.new();
+    if (self.httpMetadata) |m| {
+      const mObj = m.toObject();
+      defer mObj.free();
+      obj.set("httpMetadata", mObj);
+    }
+    if (self.headers) |h| obj.set("httpMetadata", h);
+    if (self.customMetadata) |cm| obj.set("customMetadata", cm);
+    if (self.md5String) |md5| obj.set("md5", md5);
+    if (self.md5Text) |md5| obj.setText("md5", md5);
+    if (self.md5ArrayBuffer) |md5| obj.set("md5", md5);
+    if (self.md5Bytes) |md5| {
+      const ab = ArrayBuffer.new(md5);
+      defer ab.free();
+      obj.set("md5", ab);
+    }
+    return obj;
+  }
 };
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L948
@@ -411,6 +529,15 @@ pub const R2ListOptions = struct {
 pub const R2GetResponse = union(enum) {
   r2object: R2Object,
   r2objectBody: R2ObjectBody,
+  none,
+
+  pub fn free (self: *const R2GetResponse) void {
+    switch (self.*) {
+      .r2object => |obj| obj.free(),
+      .r2objectBody => |objBod| objBod.free(),
+      .none => {},
+    }
+  }
 };
 
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L1008
@@ -442,7 +569,7 @@ pub const R2Bucket = struct {
     self: *const R2Bucket,
     key: []const u8,
     options: R2GetOptions
-  ) ?R2GetResponse {
+  ) R2GetResponse {
     // prep the string
     const keyStr = String.new(key);
     defer keyStr.free();
@@ -458,9 +585,9 @@ pub const R2Bucket = struct {
     args.push(&keyStr);
     args.push(&opts);
 
-    const result = func.callArgs(&args);
-    if (result <= DefaultValueSize) return null;
-    const hasBody = object.hasObject("body");
+    const result = func.callArgsID(args.id);
+    if (result <= DefaultValueSize) return R2GetResponse{ .none = {} };
+    const hasBody = object.hasObject(result, "body");
     if (hasBody) return R2GetResponse{ .r2objectBody = R2ObjectBody.init(result) };
     return R2GetResponse{ .r2object = R2Object.init(result) };
   }
@@ -490,7 +617,7 @@ pub const R2Bucket = struct {
     args.pushID(val);
     args.push(&opts);
 
-    _ = func.callArgs(&args);
+    return R2Object.init(func.callArgsID(args.id));
   }
 
   pub fn delete (self: *const R2Bucket, key: []const u8) void {
@@ -501,7 +628,7 @@ pub const R2Bucket = struct {
     const func = AsyncFunction.init(getObjectValue(self.id, "delete"));
     defer func.free();
 
-    _ = func.callArgs(&str);
+    _ = func.callArgsID(str.id);
   }
 
   pub fn list (self: *const R2Bucket, options: R2ListOptions) R2Objects {
@@ -512,6 +639,6 @@ pub const R2Bucket = struct {
     const func = AsyncFunction.init(getObjectValue(self.id, "list"));
     defer func.free();
 
-    return R2Objects.init(func.callArgs(&opts));
+    return R2Objects.init(func.callArgsID(opts.id));
   }
 };

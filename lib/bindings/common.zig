@@ -1,9 +1,12 @@
+const String = @import("string.zig").String;
+
 pub extern fn jsFree (ptr: u32) void;
 pub extern fn jsLog (ptr: u32) void;
-pub extern fn jsResolve(ctx: u32, response: u32) void;
+pub extern fn jsResolve (ctx: u32, response: u32) void;
 pub extern fn jsSize (ptr: u32) u32;
 pub extern fn jsToBytes (ptr: u32) [*]u8;
 pub extern fn jsToBuffer (ptr: [*]const u8, len: usize) u32;
+pub extern fn jsGetClass (classPos: u8) u32;
 pub extern fn jsCreateClass (classPos: u8, argsPtr: u32) u32;
 pub extern fn jsEqual (aPtr: u8, bPtr: u32) u32; 
 pub fn equal (aPtr: *u8, bPtr: *u32) bool {
@@ -19,6 +22,18 @@ pub extern fn jsInstanceOf (classPos: u8, classPrt: u32) u32;
 pub fn instanceOf (classPos: *u8, classPrt: *u32) bool {
     const res = jsInstanceOf(classPos.*, classPrt.*);
     return (res == True);
+}
+pub extern fn jsHeapGetNum (ptr: u32) f64;
+pub fn getNum (ptr: u32, comptime T: type) T {
+  const input: f64 = jsHeapGetNum(ptr);
+  switch(@typeInfo(T)) {
+    .Int => return @floatToInt(T, input),
+    .Float => return @floatCast(T, input),
+    else => {
+      String.new("Can't cast f64 to " ++ @typeName(T)).throw();
+      return @as(T, 0);
+    },
+  }
 }
 
 pub const Null = 1;

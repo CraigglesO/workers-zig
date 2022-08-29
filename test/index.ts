@@ -37,6 +37,10 @@ router.get('/kv/bytes', zigFetch<Env>('kvBytes'))
 router.get('/kv/bytes-meta', zigFetch<Env>('kvBytesMeta'))
 router.get('/kv/delete', zigFetch<Env>('kvDelete'))
 router.get('/kv/list', zigFetch<Env>('kvList'))
+// **R2**
+router.get('/r2/stream', zigFetch<Env>('r2Stream'))
+router.get('/r2/text', zigFetch<Env>('r2Text'))
+router.get('/r2/string', zigFetch<Env>('r2String'))
 
 // ** ZIG HEAP **
 // return the heap to ensure it's cleaned up

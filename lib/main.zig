@@ -29,14 +29,18 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 }
 
 // ? PART 1
-// * R2 tests
-// * Fetch test
+// * R2 tests:
+// ** arrayBuffer, bytes, json, object
+// ** R2Object & R2ObjectBody params
+// ** delete
+// ** list
 
 // * DOCS
 // * build skeleton
 // * share
 
 // ? PART 2
+// * R2 tests: R2ListOptions, R2PutOptions, R2GetOptions
 // * req/res tests
 // * new method of managing js heap so that after a request the heap is gaurenteed cleaned up
 // * finish crypto

@@ -9,9 +9,10 @@ const ScheduledContext = worker.ScheduledContext;
 const Object = worker.Object;
 
 const basicHandler = @import("tests/basic.zig").basicHandler;
+const cache = @import("tests/apis/cache.zig");
 const fetch = @import("tests/apis/fetch.zig");
 const kv = @import("tests/apis/kv.zig");
-const cache = @import("tests/apis/cache.zig");
+const r2 = @import("tests/apis/r2.zig");
 
 // NOTE:
 // https://github.com/ziglang/zig/issues/3160
@@ -38,8 +39,6 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   // Try routes
   // ** BASIC **
   if (eql(u8, "basic", path)) return basicHandler(ctx);
-  // ** FETCH **
-  if (eql(u8, "fetch", path)) return fetch.fetchHandler(ctx);
   // ** CACHE **
   if (eql(u8, "cacheText", path)) return cache.cacheTextHandler(ctx);
   if (eql(u8, "cacheString", path)) return cache.cacheStringHandler(ctx);
@@ -47,6 +46,8 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "cacheDelete", path)) return cache.cacheDeleteHandler(ctx);
   if (eql(u8, "cacheIgnoreText", path)) return cache.cacheIgnoreTextHandler(ctx);
   if (eql(u8, "cacheIgnoreDelete", path)) return cache.cacheIgnoreDeleteHandler(ctx);
+  // ** FETCH **
+  if (eql(u8, "fetch", path)) return fetch.fetchHandler(ctx);
   // ** KV **
   if (eql(u8, "kvString", path)) return kv.kvStringHandler(ctx);
   if (eql(u8, "kvStringMeta", path)) return kv.kvStringWithMetadataHandler(ctx);
@@ -66,6 +67,10 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "kvBytesMeta", path)) return kv.kvBytesWithMetadataHandler(ctx);
   if (eql(u8, "kvDelete", path)) return kv.kvDeleteHandler(ctx);
   if (eql(u8, "kvList", path)) return kv.kvListHandler(ctx);
+  // ** R2 **
+  if (eql(u8, "r2Stream", path)) return r2.r2StreamHandler(ctx);
+  if (eql(u8, "r2Text", path)) return r2.r2TextHandler(ctx);
+  if (eql(u8, "r2String", path)) return r2.r2StringHandler(ctx);
 
   // If we make it here, throw.
   ctx.throw(500, "Route does not exist.");

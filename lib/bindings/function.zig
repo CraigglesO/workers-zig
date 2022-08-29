@@ -32,6 +32,10 @@ pub const Function = struct {
   pub fn callArgs (self: *const Function, args: anytype) u32 {
     return jsFnCall(self.id, args.id);
   }
+
+  pub fn callArgsID (self: *const Function, id: u32) u32 {
+    return jsFnCall(self.id, id);
+  }
 };
 
 pub const AsyncFunction = struct {
