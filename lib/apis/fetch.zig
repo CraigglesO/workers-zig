@@ -6,7 +6,7 @@ const RequestOptions = @import("../bindings/request.zig").RequestOptions;
 const Response = @import("../bindings/response.zig").Response;
 const Array = @import("../bindings/array.zig").Array;
 
-pub extern fn jsFetch(frame: *anyopaque, urlPtr: u32, initPtr: u32, resPtr: *u32) void;
+pub extern fn jsFetch (frame: *anyopaque, urlPtr: u32, initPtr: u32, resPtr: *u32) void;
 pub fn fetchResp(urlPtr: u32, initPtr: u32) u32 {
   var res: u32 = 0;
   suspend {

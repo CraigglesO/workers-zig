@@ -11,13 +11,13 @@ const String = @import("string.zig").String;
 const Array = @import("array.zig").Array;
 const Function = @import("function.zig").Function;
 
-pub extern fn jsObjectHas(obj: u32, key: u32) u32;
-pub extern fn jsObjectSet(obj: u32, key: u32, value: u32) void;
-pub extern fn jsObjectSetNum(obj: u32, key: u32, value: f64) void;
-pub extern fn jsObjectGet(obj: u32, key: u32) u32;
-pub extern fn jsObjectGetNum(obj: u32, key: u32) f64;
-pub extern fn jsStringify(obj: u32) u32;
-pub extern fn jsParse(str: u32) u32;
+pub extern fn jsObjectHas (obj: u32, key: u32) u32;
+pub extern fn jsObjectSet (obj: u32, key: u32, value: u32) void;
+pub extern fn jsObjectSetNum (obj: u32, key: u32, value: f64) void;
+pub extern fn jsObjectGet (obj: u32, key: u32) u32;
+pub extern fn jsObjectGetNum (obj: u32, key: u32) f64;
+pub extern fn jsStringify (obj: u32) u32;
+pub extern fn jsParse (str: u32) u32;
 
 pub fn hasObject (obj: u32, key: []const u8) bool {
   const jsKey = String.new(key);

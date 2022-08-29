@@ -6,9 +6,9 @@ const Classes = common.Classes;
 const Undefined = common.Undefined;
 const String = @import("string.zig").String;
 
-pub extern fn jsArrayPush(arrID: u32, args: u32) void;
-pub extern fn jsArrayGet(arrID: u32, pos: u32) u32;
-pub extern fn jsArrayGetNum(arrID: u32, pos: u32) f64;
+pub extern fn jsArrayPush (arrID: u32, args: u32) void;
+pub extern fn jsArrayGet (arrID: u32, pos: u32) u32;
+pub extern fn jsArrayGetNum (arrID: u32, pos: u32) f64;
 
 pub const Array = struct {
   id: u32,

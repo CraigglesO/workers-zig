@@ -18,8 +18,6 @@ const Array = @import("../bindings/array.zig").Array;
 const ReadableStream = @import("../bindings/streams/readable.zig").ReadableStream;
 const AsyncFunction = @import("../bindings/function.zig").AsyncFunction;
 
-pub const KV_MAX_SIZE = 25 * 1_000 * 1_000; // 25MiB
-
 // https://github.com/cloudflare/workers-types/blob/master/index.d.ts#L932
 // Note: To simplify, we getX rather than applying type to the options.
 pub const GetOptions = struct {

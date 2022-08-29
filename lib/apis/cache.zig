@@ -12,8 +12,8 @@ const Array = @import("../bindings/array.zig").Array;
 const Object = @import("../bindings/object.zig").Object;
 const getObjectValue = @import("../bindings/object.zig").getObjectValue;
 
-pub extern fn jsCacheGet(frame: *anyopaque, keyPtr: u32, resPtr: *u32) void;
-pub fn getCache(keyPtr: u32) u32 {
+pub extern fn jsCacheGet (frame: *anyopaque, keyPtr: u32, resPtr: *u32) void;
+pub fn getCache (keyPtr: u32) u32 {
   var res: u32 = 0;
   suspend {
     jsCacheGet(@frame(), keyPtr, &res);      
