@@ -4,11 +4,11 @@ specifiers:
   '@ava/typescript': ^3.0.1
   '@cloudflare/d1': ^1.4.1
   '@cloudflare/workers-types': ^3.14.1
-  '@d1testflare/d1': ^2.7.1
+  '@d1testflare/d1': ^2.7.5
   '@miniflare/d1': 2.6.0-d1.1
   '@types/node': ^18.7.10
   ava: ^4.3.1
-  d1testflare: ^2.7.1
+  d1testflare: ^2.7.5
   esbuild: ^0.14.53
   hono: ^2.0.8
   itty-router: ^2.6.1
@@ -24,11 +24,11 @@ devDependencies:
   '@ava/typescript': 3.0.1
   '@cloudflare/d1': 1.4.1
   '@cloudflare/workers-types': 3.14.1
-  '@d1testflare/d1': 2.7.1
+  '@d1testflare/d1': 2.7.5
   '@miniflare/d1': 2.6.0-d1.1
   '@types/node': 18.7.10
   ava: 4.3.1_@ava+typescript@3.0.1
-  d1testflare: 2.7.1
+  d1testflare: 2.7.5
   esbuild: 0.14.53
   hono: 2.0.8
   itty-router: 2.6.1
@@ -100,8 +100,8 @@ packages:
       urlpattern-polyfill: 4.0.3
     dev: true
 
-  /@d1testflare/d1/2.7.1:
-    resolution: {integrity: sha512-EFUZbH4ymoj5SZ0MLH57Dr7wIZVtNUQlI2aY1qw6N1KdMOR1mH9JfV5xwHe6+ahVoRdFApGbb33n3V4pUa6+rA==}
+  /@d1testflare/d1/2.7.5:
+    resolution: {integrity: sha512-G9j0AGhRFUpXglujxZWkopKAo9FQO/xMXVPhskMtVTRBg/6tJIwzD4MXHwF5C3Qk0WPm3S3qBsAOkJGpxebwMg==}
     engines: {node: '>=16.7'}
     dependencies:
       '@d1testflare/core': 2.7.1
@@ -876,8 +876,8 @@ packages:
       array-find-index: 1.0.2
     dev: true
 
-  /d1testflare/2.7.1:
-    resolution: {integrity: sha512-4bmU284LODN9ORFNgIfF0XbsBHTHkkGwVt5zkzht9ZHf3DuPzLI7AmC2vj+gbXYKkysePzrSq8yzkiZjBGk8+A==}
+  /d1testflare/2.7.5:
+    resolution: {integrity: sha512-WEpHQRhGhvapg/ghx+UUojeKCpf3hNj4NDGWBRrioqkR26pAk+nfygGwvjE3mm+rBBOSCQk62ojROi6V7X5NAA==}
     engines: {node: '>=16.13'}
     hasBin: true
     peerDependencies:
@@ -895,7 +895,7 @@ packages:
       '@d1testflare/cache': 2.7.1
       '@d1testflare/cli-parser': 2.7.1
       '@d1testflare/core': 2.7.1
-      '@d1testflare/d1': 2.7.1
+      '@d1testflare/d1': 2.7.5
       '@d1testflare/durable-objects': 2.7.1
       '@d1testflare/html-rewriter': 2.7.1
       '@d1testflare/http-server': 2.7.1

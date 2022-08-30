@@ -1,10 +1,8 @@
 import avaTest, { TestFn, ExecutionContext } from 'ava'
 import { Miniflare } from 'd1testflare'
-import type { D1Database } from '@d1testflare/d1'
 
 export interface Context {
   mf: Miniflare
-  db: D1Database
 }
 
 const test = avaTest as TestFn<Context>
@@ -29,7 +27,7 @@ test.beforeEach(async (t: ExecutionContext<Context>) => {
     stmt.bind(13, 'Bs Beverages', 'Random Name'),
   ]).catch(err => console.error(err))
 
-  t.context = { mf, db }
+  t.context = { mf }
 })
 
 test.afterEach(async (t: ExecutionContext<Context>) => {
@@ -50,7 +48,7 @@ test.afterEach(async (t: ExecutionContext<Context>) => {
 
 test('d1: exec: put -> return result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
-  const { db } = t.context
+  const { mf } = t.context
   // // Dispatch a fetch event to our worker
   // const res = await mf.dispatchFetch('http://localhost:8787/r2/stream')
   // // Check the body was returned
@@ -58,9 +56,9 @@ test('d1: exec: put -> return result', async (t: ExecutionContext<Context>) => {
   // t.is(await res.text(), 'value')
   t.true(true)
   // const db = await mf.getD1Database('TEST_DB')
-  const stmt = db.prepare('SELECT CompanyName FROM Customers WHERE CustomerID = ?')
-  const res = await stmt.bind(1).first()
-  console.log(res)
+  // const stmt = db.prepare('SELECT CompanyName FROM Customers WHERE CustomerID = ?')
+  // const res = await stmt.bind(1).first()
+  // console.log('res', res)
 })
 
 // all: {
