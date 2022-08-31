@@ -53,12 +53,20 @@ pub const D1Database = struct {
   }
 
   pub fn batch (self: *const D1Database, stmts: []const PreparedStatement) callconv(.Async) BatchSQLSuccess {
-    const arr = Array.init();
-    for (stmts) |stmt| arr.push(stmt);
+    const arr = Array.new();
+    defer arr.free();
+    for (stmts) |stmt| {
+      defer stmt.free();
+      arr.push(stmt);
+    }
     const func = AsyncFunction{ .id = getObjectValue(self.id, "batch") };
     defer func.free();
 
-    return BatchSQLSuccess.init(func.callArgsID(arr.id));
+    const parentArr = Array.new();
+    defer parentArr.free();
+    parentArr.push(arr);
+
+    return BatchSQLSuccess.init(func.callArgsID(parentArr.id));
   }
 };
 
@@ -206,7 +214,7 @@ pub const PreparedStatement = struct {
     return ParamsList.init(getObjectValue(self.id, "params"));
   }
 
-  pub fn bind (self: *const PreparedStatement, input: Array) PreparedStatement { // input Array<any>
+  pub fn bind (self: *const PreparedStatement, input: *const Array) PreparedStatement { // input Array<any>
     const func = AsyncFunction{ .id = getObjectValue(self.id, "bind") };
     defer func.free();
 
@@ -240,7 +248,7 @@ pub const PreparedStatement = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "raw") };
     defer func.free();
 
-    return SQLSuccess.init(func.call());
+    return Array.init(func.call());
   }
 
   pub fn run (self: *const PreparedStatement) callconv(.Async) SQLSuccess { // SQLSuccess<void> [no results returned]

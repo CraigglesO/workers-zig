@@ -84,6 +84,10 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   // ** D1 **
   if (eql(u8, "d1First", path)) return d1.d1FirstHandler(ctx);
   if (eql(u8, "d1All", path)) return d1.d1AllHandler(ctx);
+  if (eql(u8, "d1Raw", path)) return d1.d1RawHandler(ctx);
+  if (eql(u8, "d1Run", path)) return d1.d1RunHandler(ctx);
+  if (eql(u8, "d1Batch", path)) return d1.d1BatchHandler(ctx);
+  if (eql(u8, "d1Exec", path)) return d1.d1ExecHandler(ctx);
 
   // If we make it here, throw.
   ctx.throw(500, "Route does not exist.");

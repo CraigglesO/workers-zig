@@ -53,6 +53,10 @@ router.get('/r2/r2object-body', zigFetch<Env>('r2R2ObjectBody'))
 // **D1**
 router.get('/d1/first', zigFetch<Env>('d1First'))
 router.get('/d1/all', zigFetch<Env>('d1All'))
+router.get('/d1/raw', zigFetch<Env>('d1Raw'))
+router.get('/d1/run', zigFetch<Env>('d1Run'))
+router.get('/d1/batch', zigFetch<Env>('d1Batch'))
+router.get('/d1/exec', zigFetch<Env>('d1Exec'))
 
 // ** ZIG HEAP **
 // return the heap to ensure it's cleaned up
