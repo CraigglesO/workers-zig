@@ -26,6 +26,7 @@ test.beforeEach(async (t: ExecutionContext<Context>) => {
     stmt.bind(11, 'Bs Beverages', 'Victoria Ashworth'),
     stmt.bind(13, 'Bs Beverages', 'Random Name'),
   ]).catch(err => console.error(err))
+  console.log('HERHEHREHR')
 
   t.context = { mf }
 })
@@ -46,28 +47,29 @@ test.afterEach(async (t: ExecutionContext<Context>) => {
   ])
 })
 
-test('d1: exec: put -> return result', async (t: ExecutionContext<Context>) => {
+test('d1: first: return result', async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
-  // // Dispatch a fetch event to our worker
-  // const res = await mf.dispatchFetch('http://localhost:8787/r2/stream')
-  // // Check the body was returned
-  // t.is(res.status, 200)
-  // t.is(await res.text(), 'value')
-  t.true(true)
-  // const db = await mf.getD1Database('TEST_DB')
-  // const stmt = db.prepare('SELECT CompanyName FROM Customers WHERE CustomerID = ?')
-  // const res = await stmt.bind(1).first()
-  // console.log('res', res)
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/d1/first')
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(await res.json(), { CompanyName: 'Alfreds Futterkiste' })
 })
 
-// all: {
-//   results: [ { CompanyName: 'Alfreds Futterkiste' } ],
-//   duration: 0.061768000945448875,
-//   lastRowId: null,
-//   changes: null,
-//   success: true,
-//   served_by: 'x-miniflare.db3'
-// }
-
-// first: { CompanyName: 'Alfreds Futterkiste' }
+test('d1: all: return result', async (t: ExecutionContext<Context>) => {
+  // Get the Miniflare instance
+  const { mf } = t.context
+  // Dispatch a fetch event to our worker
+  const res = await mf.dispatchFetch('http://localhost:8787/d1/all')
+  const body = await res.json()
+  // const clone = { ...body }
+  // Check the body was returned
+  t.is(res.status, 200)
+  t.deepEqual(body.results, [ { CompanyName: 'Alfreds Futterkiste' } ])
+  t.deepEqual(body.lastRowId, null)
+  t.deepEqual(body.changes, null)
+  t.deepEqual(body.success, true)
+  t.deepEqual(body.served_by, 'x-miniflare.db3')
+  t.is(typeof body.duration, 'number')
+})

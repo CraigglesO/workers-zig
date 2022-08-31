@@ -35,7 +35,7 @@
     "build:esm": "node esbuild.mjs",
     "build:zig": "zig build",
     "wrangler:publish": "wrangler publish",
-    "test": "zig build && node esbuild.mjs && NODE_OPTIONS=--experimental-vm-modules ava --verbose ./test/**/*.spec.ts"
+    "test": "zig build && node esbuild.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/**/*.spec.ts"
   },
   "ava": {
     "extensions": {

@@ -13,6 +13,7 @@ const cache = @import("tests/apis/cache.zig");
 const fetch = @import("tests/apis/fetch.zig");
 const kv = @import("tests/apis/kv.zig");
 const r2 = @import("tests/apis/r2.zig");
+const d1 = @import("tests/apis/d1.zig");
 
 // NOTE:
 // https://github.com/ziglang/zig/issues/3160
@@ -80,6 +81,9 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   if (eql(u8, "r2List", path)) return r2.r2ListHandler(ctx);
   if (eql(u8, "r2R2Object", path)) return r2.r2R2ObjectHandler(ctx);
   if (eql(u8, "r2R2ObjectBody", path)) return r2.r2R2ObjectBodyHandler(ctx);
+  // ** D1 **
+  if (eql(u8, "d1First", path)) return d1.d1FirstHandler(ctx);
+  if (eql(u8, "d1All", path)) return d1.d1AllHandler(ctx);
 
   // If we make it here, throw.
   ctx.throw(500, "Route does not exist.");

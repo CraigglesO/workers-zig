@@ -177,10 +177,6 @@ pub const PreparedStatement = struct {
     return getStringFree(getObjectValue(self.id, "statement"));
   }
 
-  pub fn database (self: *const PreparedStatement) D1Database {
-    return D1Database.init(getObjectValue(self.id, "database"));
-  }
-
   pub const ParamsList = struct {
     arr: Array,
     pos: u32 = 0,
@@ -214,23 +210,25 @@ pub const PreparedStatement = struct {
     const func = AsyncFunction{ .id = getObjectValue(self.id, "bind") };
     defer func.free();
 
-    return Object.init(func.callArgsID(input.id));
+    return PreparedStatement.init(func.callArgsID(input.id));
   }
 
   pub fn first (self: *const PreparedStatement, column: ?[]const u8) callconv(.Async) Object {
+    defer self.free();
     const func = AsyncFunction{ .id = getObjectValue(self.id, "first") };
     defer func.free();
 
     if (column) |c| {
       const str = String.new(c);
       defer str.free();
-      Object.init(func.callArgsID(str.id));
+      return Object.init(func.callArgsID(str.id));
     } else {
       return Object.init(func.call());
     }
   }
 
   pub fn all (self: *const PreparedStatement) callconv(.Async) SQLSuccess { // SQLSuccess<Array<Object>>
+    defer self.free();
     const func = AsyncFunction{ .id = getObjectValue(self.id, "all") };
     defer func.free();
 
@@ -238,6 +236,7 @@ pub const PreparedStatement = struct {
   }
 
   pub fn raw (self: *const PreparedStatement) callconv(.Async) Array { // Array<T>
+    defer self.free();
     const func = AsyncFunction{ .id = getObjectValue(self.id, "raw") };
     defer func.free();
 
@@ -245,6 +244,7 @@ pub const PreparedStatement = struct {
   }
 
   pub fn run (self: *const PreparedStatement) callconv(.Async) SQLSuccess { // SQLSuccess<void> [no results returned]
+    defer self.free();
     const func = AsyncFunction{ .id = getObjectValue(self.id, "run") };
     defer func.free();
 
