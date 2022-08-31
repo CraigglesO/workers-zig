@@ -1,33 +1,35 @@
 import avaTest, { TestFn, ExecutionContext } from 'ava'
-import { Miniflare } from 'miniflare'
+import { Miniflare } from 'd1testflare'
+import type { D1Database } from '@d1testflare/d1'
 
 export interface Context {
   mf: Miniflare
+  db: D1Database
 }
 
 const test = avaTest as TestFn<Context>
 
-const SQL = `
-DROP TABLE IF EXISTS \`Customers\`;
-CREATE TABLE Customers (CustomerID INT, CompanyName TEXT, ContactName TEXT, PRIMARY KEY (\`CustomerID\`));
-INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (1, "Alfreds Futterkiste", "Maria Anders"),(4, "Around the Horn", "Thomas Hardy"),(11, "Bs Beverages", "Victoria Ashworth"),(13, "Bs Beverages", "Random Name");
-`
-
 test.beforeEach(async (t: ExecutionContext<Context>) => {
   // Create a new Miniflare environment for each test
   const mf = new Miniflare({
-    // Autoload configuration from `.env`, `package.json` and `wrangler.toml`
     envPath: true,
     packagePath: true,
     wranglerConfigPath: true,
-    // We don't want to rebuild our worker for each test, we're already doing
-    // it once before we run all tests in package.json, so disable it here.
-    // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
     d1Databases: ['TEST_DB'],
   })
-  t.context = { mf }
+  // prep the db
+  const db = await mf.getD1Database('TEST_DB')
+  db.exec('CREATE TABLE Customers (CustomerID INT PRIMARY KEY, CompanyName TEXT, ContactName TEXT);')
+  const stmt = db.prepare('INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)')
+  await db.batch([
+    stmt.bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
+    stmt.bind(11, 'Bs Beverages', 'Victoria Ashworth'),
+    stmt.bind(13, 'Bs Beverages', 'Random Name'),
+  ]).catch(err => console.error(err))
+
+  t.context = { mf, db }
 })
 
 test.afterEach(async (t: ExecutionContext<Context>) => {
@@ -47,12 +49,27 @@ test.afterEach(async (t: ExecutionContext<Context>) => {
 })
 
 test('d1: exec: put -> return result', async (t: ExecutionContext<Context>) => {
-  // // Get the Miniflare instance
-  // const { mf } = t.context
+  // Get the Miniflare instance
+  const { db } = t.context
   // // Dispatch a fetch event to our worker
   // const res = await mf.dispatchFetch('http://localhost:8787/r2/stream')
   // // Check the body was returned
   // t.is(res.status, 200)
   // t.is(await res.text(), 'value')
   t.true(true)
+  // const db = await mf.getD1Database('TEST_DB')
+  const stmt = db.prepare('SELECT CompanyName FROM Customers WHERE CustomerID = ?')
+  const res = await stmt.bind(1).first()
+  console.log(res)
 })
+
+// all: {
+//   results: [ { CompanyName: 'Alfreds Futterkiste' } ],
+//   duration: 0.061768000945448875,
+//   lastRowId: null,
+//   changes: null,
+//   success: true,
+//   served_by: 'x-miniflare.db3'
+// }
+
+// first: { CompanyName: 'Alfreds Futterkiste' }
