@@ -22,6 +22,7 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     buildCommand: undefined,
     modules: true,
     kvNamespaces: ['TEST_NAMESPACE'],
+    scriptPath: "dist/worker.mjs",
     host: "127.0.0.1",
     port: 8787,
   })

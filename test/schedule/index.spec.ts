@@ -21,6 +21,7 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     modules: true,
     crons: ['30 * * * *'],
     kvNamespaces: ['TEST_NAMESPACE'],
+    scriptPath: "dist/worker.mjs",
   })
   t.context = { mf }
 })

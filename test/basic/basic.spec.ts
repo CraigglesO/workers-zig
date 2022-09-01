@@ -19,6 +19,7 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
+    scriptPath: "dist/worker.mjs",
   })
   t.context = { mf }
 })

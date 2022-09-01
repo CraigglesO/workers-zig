@@ -20,6 +20,7 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     buildCommand: undefined,
     modules: true,
     r2Buckets: ['TEST_BUCKET'],
+    scriptPath: "dist/worker.mjs",
   })
   t.context = { mf }
 })

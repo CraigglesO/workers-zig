@@ -20,6 +20,7 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     buildCommand: undefined,
     modules: true,
     kvNamespaces: ['TEST_NAMESPACE'],
+    scriptPath: "dist/worker.mjs",
   })
   t.context = { mf }
 })
