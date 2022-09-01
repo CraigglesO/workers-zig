@@ -7,7 +7,7 @@
 Why Zig?
 * Zig is a language that is designed to be a small, fast, and portable.
 * The language already supports WASM and WASI.
-* Small builds are easy to achieve. To expound on this, the basic example provided here is `5.0Kb` of WASM code and `5.5Kb` javascript code.
+* Small builds are easy to achieve. To expound on this, the basic example provided is `5.0Kb` of WASM code and `5.5Kb` javascript code.
 * I wanted a tool that made it easy for both WASM and JS code to work in tandem.
 * I didn't like that rust wasm bindings would grow the more code you wrote. I came up with a strategy that covers 90% use cases, JS glue doesn't grow, and you can add the 10% as needed.
 * I prefer [**Zig's memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
@@ -26,14 +26,14 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 - ✨ Cache bindings
 - 📦 KV bindings
 - 🪣 R2 bindings
-- 🔐 Web-Crypto bindings - partially complete
+- 💾 D1 bindings
+- 🔐 Web-Crypto bindings [partially complete]
 - 💪 Uses TypeScript
 
 ## Features coming soon
 
 - 🗿 WASI support
 - 📌 Durable Objects bindings
-- 💾 D1 bindings
 - ✉️ WebSockets bindings
 - once CF lands dynamic imports: Only load wasm when needed.
 
