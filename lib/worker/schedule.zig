@@ -17,7 +17,7 @@ const object = @import("../bindings/object.zig");
 const getObjectValue = object.getObjectValue;
 const getObjectValueNum = object.getObjectValueNum;
 
-pub const ScheduleFn = fn handle(*ScheduledContext) void;
+pub const ScheduleFn = fn (*ScheduledContext) void;
 
 pub const ScheduledEvent = struct {
   id: u32,

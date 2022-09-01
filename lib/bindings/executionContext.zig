@@ -2,7 +2,7 @@ const std = @import("std");
 const Function = @import("function.zig").Function;
 const jsFree = @import("common.zig").jsFree;
 
-pub const WaitUntilFn = fn wait() callconv(.Async) void;
+pub const WaitUntilFn = fn () callconv(.Async) void;
 
 // returns a pointer to the resolve function
 pub extern fn jsWaitUntil (ctxPtr: u32) u32;

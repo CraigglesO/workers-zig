@@ -12,7 +12,7 @@ kv_namespaces = [
 ]
 
 r2_buckets = [
-  { binding = 'TEST_BUCKET', bucket_name = 'test-bucket', preview_bucket_name = 'dev-test' }
+  { binding = "TEST_BUCKET", bucket_name = "test-bucket", preview_bucket_name = "dev-test" }
 ]
 
 d1_databases = [
