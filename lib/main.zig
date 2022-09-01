@@ -35,6 +35,7 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 
 // ? PART 2
 // * R2 tests: R2ListOptions, R2PutOptions, R2GetOptions, httpmetadata/custom + write->headers check
+// * D1 tests: check next()s are working
 // * req/res tests
 // * new method of managing js heap so that after a request the heap is gaurenteed cleaned up
 // * finish crypto
@@ -44,5 +45,4 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 // * streams (all the rest)
 // * HEADERS + ITERATOR
 // * finish CF
-// * D1
 // * DOs

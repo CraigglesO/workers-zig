@@ -36,6 +36,7 @@ jspm_packages/
 
 # build
 /dist
+/distESM
 
 # local
 /wrangler-local-state
