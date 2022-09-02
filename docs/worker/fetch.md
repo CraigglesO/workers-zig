@@ -2,7 +2,7 @@
 
 [Learn more via the developer docs](https://developers.cloudflare.com/workers/runtime-apis/fetch-event/)
 
-## **Examples**:
+## **Example**:
 
 ## ZIG
 

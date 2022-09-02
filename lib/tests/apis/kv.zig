@@ -164,7 +164,7 @@ pub fn kvTextWithExpireTtlHandler (ctx: *FetchContext) callconv(.Async) void {
     headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
-        .{ .none = {} },
+        .none,
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();
@@ -191,7 +191,7 @@ pub fn kvTextWithExpireHandler (ctx: *FetchContext) callconv(.Async) void {
     headers.setText("Content-Type", "text/plain");
     // response
     const res = Response.new(
-        .{ .none = {} },
+        .none,
         .{ .status = 200, .statusText = "ok", .headers = &headers }
     );
     defer res.free();

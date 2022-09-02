@@ -14,7 +14,7 @@ const Cache = worker.Cache;
 pub fn new (options: CacheOptions) Cache
 ```
 
-[CacheOptions](#lib/apis/cache.zig#24)
+[CacheOptions](https://github.com/CraigglesO/workers-zig/blob/master/lib/apis/cache.zig#L24)
 
 ## put
 ```zig
@@ -25,6 +25,9 @@ pub fn put (
 ) void
 ```
 
+[RequestInfo](https://github.com/CraigglesO/workers-zig/blob/master/lib/bindings/request.zig#L79)
+[Response](https://github.com/CraigglesO/workers-zig/blob/master/lib/bindings/response.zig#L63)
+
 ## match
 ```zig
 pub fn match (
@@ -33,6 +36,9 @@ pub fn match (
   options: CacheQueryOptions
 ) ?Response
 ```
+
+[RequestInfo](https://github.com/CraigglesO/workers-zig/blob/master/lib/bindings/request.zig#L79)
+[CacheQueryOptions](https://github.com/CraigglesO/workers-zig/blob/master/lib/apis/cache.zig#L46)
 
 ## delete
 ```zig
@@ -43,6 +49,9 @@ pub fn delete (
 ) bool
 ```
 
+[RequestInfo](https://github.com/CraigglesO/workers-zig/blob/master/lib/bindings/request.zig#L79)
+[CacheQueryOptions](https://github.com/CraigglesO/workers-zig/blob/master/lib/apis/cache.zig#L46)
+
 ---
 
 ## example
@@ -51,7 +60,7 @@ pub fn delete (
 pub fn cacheTextHandler (ctx: *FetchContext) callconv(.Async) void {
     const url = "http://localhost/cacheTest";
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // store the request with cache control headers
     const cacheHeaders = Headers.new();

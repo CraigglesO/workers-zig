@@ -10,7 +10,7 @@ const Method = worker.Method;
 pub fn cacheTextHandler (ctx: *FetchContext) callconv(.Async) void {
     const url = "http://localhost/cacheTest";
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
@@ -34,7 +34,7 @@ pub fn cacheStringHandler (ctx: *FetchContext) callconv(.Async) void {
     const string = String.new("http://localhost/cacheTest");
     defer string.free();
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
@@ -80,7 +80,7 @@ pub fn cacheUniqueHandler (ctx: *FetchContext) callconv(.Async) void {
 pub fn cacheDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     const url = "http://localhost/cacheTest";
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // store the request with cache control headers
     const cacheHeaders = Headers.new();
@@ -107,7 +107,7 @@ pub fn cacheDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
 pub fn cacheIgnoreTextHandler (ctx: *FetchContext) callconv(.Async) void {
     const url = "http://localhost/cacheTest";
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // prep request
     const matchReq = Request.new(
@@ -136,7 +136,7 @@ pub fn cacheIgnoreTextHandler (ctx: *FetchContext) callconv(.Async) void {
 pub fn cacheIgnoreDeleteHandler (ctx: *FetchContext) callconv(.Async) void {
     const url = "http://localhost/cacheTest";
     // get the kvinstance from env
-    const cache = Cache.new(.{ .none = {} });
+    const cache = Cache.new(.none);
     defer cache.free();
     // prep request
     const matchReq = Request.new(
