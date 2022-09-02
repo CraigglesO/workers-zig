@@ -84,6 +84,30 @@ git submodule add https://github.com/CraigglesO/workers-zig
 
 ### Step 4: Setup a **build.zig** script
 
+```zig
+const std = @import("std");
+const Builder = std.build.Builder;
+
+pub fn build(b: *Builder) void {
+    b.is_release = true;
+    b.cache_root = "cache";
+    b.global_cache_root = "cache";
+    b.use_stage1 = true;
+
+    const wasm_build = b.addSharedLibrary("zig", "lib/main.zig", .unversioned);
+    wasm_build.setOutputDir("dist");
+    wasm_build.setTarget(std.zig.CrossTarget {
+        .cpu_arch = .wasm32,
+        .os_tag = .freestanding,
+    });
+    wasm_build.build_mode = std.builtin.Mode.ReleaseSmall;
+    wasm_build.strip = true;
+    wasm_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
+    wasm_build.addPackagePath("workers-zig", "workers-zig/lib/main.zig");
+    wasm_build.install();
+}
+```
+
 ### Step 5: Recommended wrangler configuration
 
 ```toml
