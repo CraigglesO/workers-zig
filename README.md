@@ -13,13 +13,13 @@ Why Zig?
 * I prefer [**Zig's memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
 
 
-Be sure to read the [Documentation](#docs) for guidance on usage.
+Be sure to read the [Documentation](https://github.com/CraigglesO/workers-zig/tree/master/docs) for guidance on usage.
 
 ## Features
 
 - 🔗 Zero dependencies
 - 🤝 Use in tandem with Javascript or 100% Zig WebAssembly
-- 🎮 JS bindings with support to write your own - [List of supported bindings here](#docs/bindings)
+- 🎮 JS bindings with support to write your own - [List of supported bindings here](https://github.com/CraigglesO/workers-zig/tree/master/docs/bindings)
 - 📨 Fetch bindings
 - ⏰ Scheduled bindings
 - 🔑 Supports Variables and Secrets from `env`
