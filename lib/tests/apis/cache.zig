@@ -8,7 +8,7 @@ const Cache = worker.Cache;
 const Method = worker.Method;
 
 pub fn cacheTextHandler (ctx: *FetchContext) callconv(.Async) void {
-  const url = "http://localhost/cacheTest";
+    const url = "http://localhost/cacheTest";
     // get the kvinstance from env
     const cache = Cache.new(.{ .none = {} });
     defer cache.free();
@@ -55,7 +55,7 @@ pub fn cacheStringHandler (ctx: *FetchContext) callconv(.Async) void {
 }
 
 pub fn cacheUniqueHandler (ctx: *FetchContext) callconv(.Async) void {
-  const url = "http://localhost/cacheTest";
+    const url = "http://localhost/cacheTest";
     // get the kvinstance from env
     const cache = Cache.new(.{ .text = "newcache" });
     defer cache.free();

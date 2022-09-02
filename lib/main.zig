@@ -30,7 +30,6 @@ pub export fn wasmResume (frame: *anyopaque) callconv(.C) void {
 
 // ? PART 1
 // * DOCS
-// * build skeleton
 // * share
 
 // ? PART 2

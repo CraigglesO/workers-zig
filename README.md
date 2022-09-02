@@ -7,7 +7,7 @@
 Why Zig?
 * Zig is a language that is designed to be a small, fast, and portable.
 * The language already supports WASM and WASI.
-* Small builds are easy to achieve. To expound on this, the basic example provided is `5.0Kb` of WASM code and `5.5Kb` javascript code.
+* Small builds are easy to achieve. To expound on this, the basic example provided is `5.8Kb` of WASM code and `6.8Kb` javascript code.
 * I wanted a tool that made it easy for both WASM and JS code to work in tandem.
 * I didn't like that rust wasm bindings would grow the more code you wrote. I came up with a strategy that covers 90% use cases, JS glue doesn't grow, and you can add the 10% as needed.
 * I prefer [**Zig's memory model**](https://www.scattered-thoughts.net/writing/how-safe-is-zig/) over Rust.
@@ -43,14 +43,24 @@ Be sure to read the [Documentation](#docs) for guidance on usage.
 
 [Follow the instructions to install Zig](https://ziglang.org/learn/getting-started/)
 
-Release used: **0.10.0-dev.3685+dae7aeb33**
+Release used: **0.10.0-dev.3838+77f31ebbb**
 
 ### Step 2a: Use the skeleton project provided
 
 [Follow the steps provided by the skeleton project](https://github.com/CraigglesO/worker-zig-template)
 
 ```bash
+# in one go
 git clone --recurse-submodules -j8 git@github.com:CraigglesO/worker-zig-template.git
+
+# OR
+
+# clone
+git clone git@github.com:CraigglesO/worker-zig-template.git
+# enter
+cd worker-zig-template
+# Pull in the submodule
+git submodule update --init --recursive
 ```
 
 ### Step 2b: Install the workers-zig package
@@ -64,8 +74,6 @@ yarn add workers-zig
 pnpm add workers-zig
 # BUN
 bun add workers-zig
-# Deno?
-echo "LOL too much effort."
 ```
 
 ### Step 3: Add workers-zig as a submodule to your project
@@ -79,114 +87,23 @@ git submodule add https://github.com/CraigglesO/workers-zig
 ### Step 5: Recommended wrangler configuration
 
 ```toml
+name = "zig-worker-template"
+main = "dist/worker.mjs"
+compatibility_date = "2022-07-29"
+usage_model = "bundled" # or unbound
+account_id = ""
+
 [build]
 command = "zig build && npm run esbuild"
 watch_dir = [
   "src",
   "lib"
 ]
-```
 
-## Example
-
-### Fetch
-
-#### **Zig**
-
-```zig
-// NOTE:
-// https://github.com/ziglang/zig/issues/3160
-// until @asyncCall WASM support is implemented we use a double-up function
-export fn basicFetch(ctxID: u32) void {
-    // build the ctx
-    const ctx = Context.init(ctxID) catch {
-        // TODO: throw a js error
-        return undefined;
-    };
-    // build / keep a frame alive
-    const frame = allocator.create(@Frame(basicHandler)) catch {
-        // TODO: throw a js error
-        return undefined;
-    };
-    frame.* = async basicHandler(ctx);
-    // tell the context about the frame for later destruction
-    ctx.frame.* = frame;
-}
-fn basicHandler(ctx: *Context) callconv(.Async) void {
-    // get body from request
-    // const text = ctx.req.text() orelse "failed";
-    const text = ctx.req.text() orelse return ctx.throw(500, "Failed to get body.");
-    defer allocator.free(text);
-    // headers
-    const headers = Headers.new();
-    defer headers.free();
-    headers.set("Content-Type", "text/plain");
-    // body
-    const body = String.new(text);
-    defer body.free();
-    // response
-    const res = Response.new(
-        .{ .string = &body },
-        .{ .status = 200, .statusText = "ok", .headers = &headers }
-    );
-    defer res.free();
-
-    ctx.send(&res);
-}
-
-export fn add(a: u32, b: u32) u32 {
-    return a + b;
-}
-
-fn asyncAdd(resolvePtr: u32, a: u32, b: u32) callconv(.Async) u32 {
-    return a + b;
-}
-```
-
-#### **JS/TS Option 1 - Via fetch:**
-
-```ts
-import { zigFetch } from 'workers-zig'
-
-export interface Env {}
-
-export default {
-  fetch: zigFetch<Env>('basicFetch')
-}
-```
-
-#### **JS/TS Option 2 - As a route:**
-
-```ts
-import { Router } from 'itty-router'
-import { zigFetch } from 'workers-zig'
-
-export interface Env {}
-
-const router = Router()
-router.get('/', () => new Response('Hello from JS!'))
-router.get('/basic', zigFetch<Env>('basicFetch'))
-
-export default {
-  fetch: router.handle
-}
-```
-
-#### **JS/TS Option 3 - as a sub function:**
-
-```ts
-import { Router } from 'itty-router'
-import { zigFunction, zigAsyncFunction } from 'workers-zig'
-
-const router = Router()
-router.get('/', async (req: Request) => {
-  const { a, b } = req.json()
-  const answer = await zigFunction('add', a, b)
-  // use the zigAsyncFunction if your zig function is async
-  new Response(`The answer is: ${answer}`)
-})
-
-export default {
-  fetch: router.handle
-}
+[[build.upload.rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+[[build.upload.rules]]
+type = "ESModule"
+globs = ["**/*.mjs"]
 ```
