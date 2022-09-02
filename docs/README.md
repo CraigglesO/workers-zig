@@ -2,4 +2,4 @@
 
 ## Getting started
 
-Read the (FetchEvent docs)[#worker/fetch.md] or (ScheduledEvent docs)[#worker/schedule.md]
+Read the [FetchEvent docs](https://github.com/CraigglesO/workers-zig/blob/master/docs/worker/fetch.md) or [ScheduledEvent docs](https://github.com/CraigglesO/workers-zig/blob/master/docs/worker/schedule.md)
