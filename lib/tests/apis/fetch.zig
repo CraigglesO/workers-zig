@@ -11,7 +11,7 @@ const Headers = worker.Headers;
 
 pub fn fetchHandler (ctx: *FetchContext) callconv(.Async) void {
     // fetch from local
-    const localRes = fetch(.{ .text = "http://localhost:8787/kv/text" }, null);
+    const localRes = fetch(.{ .text = "http://127.0.0.1:8787/kv/text" }, null);
     defer localRes.free();
 
     ctx.send(&localRes);

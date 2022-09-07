@@ -41,6 +41,8 @@ fn _fetchEvent (ctx: *FetchContext) callconv(.Async) void {
   // Try routes
   // ** BASIC **
   if (eql(u8, "basic", path)) return basicHandler(ctx);
+  // ** CRYPTO **
+  if (eql(u8, "argonHash", path)) return argon.argonHashHandler(ctx);
   // ** CACHE **
   if (eql(u8, "cacheText", path)) return cache.cacheTextHandler(ctx);
   if (eql(u8, "cacheString", path)) return cache.cacheStringHandler(ctx);
