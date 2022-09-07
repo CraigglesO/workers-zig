@@ -5,11 +5,9 @@ const worker = @import("workers-zig");
 const String = worker.String;
 const FetchContext = worker.FetchContext;
 const ScheduledContext = worker.ScheduledContext;
-
 const Object = worker.Object;
 
 const basicHandler = @import("tests/basic.zig").basicHandler;
-const argon = @import("tests/crypto/argon.zig");
 const cache = @import("tests/apis/cache.zig");
 const fetch = @import("tests/apis/fetch.zig");
 const kv = @import("tests/apis/kv.zig");

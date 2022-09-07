@@ -48,11 +48,13 @@
   "scripts": {
     "dev": "wrangler dev",
     "local": "wrangler dev --local --experimental-enable-local-persistence --ip 127.0.0.1 --port 8789",
-    "build:esm": "node esbuild.mjs",
+    "build:wasm": "node esbuild.mjs",
+    "build:wasi": "node esbuildWasi.mjs",
     "build:zig": "zig build",
     "build:module": "rm -rf distESM && mkdir distESM && tsc --build tsconfig.module.json",
     "wrangler:publish": "wrangler publish",
-    "test": "zig build && node esbuild.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/**/*.spec.ts"
+    "test": "zig build && node esbuild.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/wasm/**/*.spec.ts",
+    "test:wasi": "zig build && node esbuildWasi.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/wasi/**/*.spec.ts"
   },
   "ava": {
     "extensions": {
@@ -75,5 +77,9 @@
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4",
     "wrangler": "2.0.26"
+  },
+  "dependencies": {
+    "@cloudflare/workers-wasi": "^0.0.5",
+    "wasi": "^0.0.6"
   }
 }

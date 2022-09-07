@@ -5,13 +5,14 @@ import esbuild from 'esbuild'
 esbuild
   .buildSync({
     entryPoints: [
-      './test/wasm.ts'
+      './test/wasi.ts'
     ],
     format: 'esm',
     sourcemap: true,
     treeShaking: true,
     bundle: true,
     minify: true,
-    outfile: './dist/worker.mjs',
+    outfile: './dist/workerWASI.mjs',
     external: ['*.wasm']
   })
+

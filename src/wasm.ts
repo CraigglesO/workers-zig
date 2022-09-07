@@ -1,5 +1,7 @@
 import Heap from './heap'
 import * as envFunctions from './env'
+// @ts-expect-error: external import
+import __WORKER_ZIG_WASM from './tests.wasm'
 
 export const textDecoder = new TextDecoder()
 export const textEncoder = new TextEncoder()

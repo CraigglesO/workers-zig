@@ -19,36 +19,30 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
-    scriptPath: "dist/worker.mjs",
+    scriptPath: "dist/workerWASI.mjs",
   })
   t.context = { mf }
-})
-
-test.afterEach(async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
-  // grab exports
-  const { zigHeap } = await mf.getModuleExports()
-  // Check that the heap is empty
-  t.deepEqual(zigHeap(), [
-    [1, null],
-    [2, undefined],
-    [3, true],
-    [4, false],
-    [5, Infinity],
-    [6, NaN] // NaN resolves to null
-  ])
 })
 
 test("basic example", async (t: ExecutionContext<Context>) => {
   // Get the Miniflare instance
   const { mf } = t.context
   // Dispatch a fetch event to our worker
-  const res = await mf.dispatchFetch("http://localhost:8787/argon-hash", {
+  const hashRes = await mf.dispatchFetch("http://localhost:8787/argon-hash", {
     method: 'POST',
-    body: 'testPassword'
+    body: JSON.stringify(['testPassword'])
   })
+  const hash = await hashRes.text()
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'Hello from Zig')
+  t.is(hashRes.status, 200)
+  t.is(typeof hash, 'string')
+  t.is(hash.length, 87)
+
+  const verifyRes = await mf.dispatchFetch("http://localhost:8787/argon-verify", {
+    method: 'POST',
+    body: JSON.stringify(['testPassword', hash])
+  })
+  const verifiedString = await verifyRes.text()
+  t.is(verifyRes.status, 200)
+  t.is(verifiedString, 'pass')
 })

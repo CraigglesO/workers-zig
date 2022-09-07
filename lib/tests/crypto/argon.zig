@@ -4,45 +4,38 @@ const strHash = argon2.strHash;
 const strVerify = argon2.strVerify;
 const allocator = std.heap.page_allocator;
 
-const worker = @import("workers-zig");
-const FetchContext = worker.FetchContext;
-const Response = worker.Response;
-const String = worker.String;
-const Headers = worker.Headers;
+const salt: [:0]const u8 = "randomsalt";
 
-const salt = "somesalt";
-
-pub fn argonHashHandler (ctx: *FetchContext) callconv(.Async) void {
-    // get body from request
-    const password = ctx.req.text() orelse return ctx.throw(500, "Failed to get body.");
-    defer allocator.free(password);
-
+pub fn argonHashHandler (args: [][:0]const u8) []const u8 {
+    var password = args[0];
     // hash the password
     var buf: [128]u8 = undefined;
+    const passSalt = std.mem.concat(allocator, u8, &.{ password, salt }) catch "";
     const hash = strHash(
-        password,
+        passSalt,
         .{
             .allocator = allocator,
-            .params = .{ .t = 3, .m = 32, .p = 1, .secret = salt },
+            .params = .{ .t = 100, .m = 64, .p = 1 },
             .mode = argon2.Mode.argon2i,
         },
         &buf,
     ) catch "";
 
-    // headers
-    const headers = Headers.new();
-    defer headers.free();
-    headers.setText("Content-Type", "text/plain");
-    // body
-    const body = String.new(hash);
-    defer body.free();
-    // response
-    const res = Response.new(
-        .{ .string = &body },
-        .{ .status = 200, .statusText = "ok", .headers = &headers }
-    );
-    defer res.free();
+    // strip the first 29 description bytes ('$argon2i$v=19$m=64,t=100,p=1$')
+    const slice = hash[29..];
 
-    ctx.send(&res);
+    return slice;
 }
-// try strVerify(hash, password, .{ .allocator = allocator });
+
+pub fn argonVerifyHandler (args: [][:0]const u8) []const u8 {
+    var password = args[0];
+    var hash = args[1];
+    // build password
+    var passSalt = std.mem.concat(allocator, u8, &.{ password, salt }) catch "";
+    // build hash
+    var front = "$argon2i$v=19$m=64,t=100,p=1$";
+    var frontHash = std.mem.concat(allocator, u8, &.{ front, hash }) catch "";
+    // verify
+    strVerify(frontHash, passSalt, .{ .allocator = allocator }) catch return "fail";
+    return "pass";
+}

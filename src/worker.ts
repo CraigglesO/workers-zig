@@ -19,7 +19,7 @@ export type ZigFunction = (id: number) => number
 
 export type ZigUserFunction = (...args: any[]) => any
 
-export class ZigWorker extends WASM {
+export default class ZigWorker extends WASM {
   async fetch (context: FetchContext): Promise<Response> {
     // pull in the heap
     const { heap } = this
@@ -74,4 +74,3 @@ export class ZigWorker extends WASM {
   }
 }
 
-export default new ZigWorker()
