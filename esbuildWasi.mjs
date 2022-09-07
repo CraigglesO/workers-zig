@@ -15,4 +15,3 @@ esbuild
     outfile: './dist/workerWASI.mjs',
     external: ['*.wasm']
   })
-

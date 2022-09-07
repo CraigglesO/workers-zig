@@ -1,15 +1,13 @@
-import avaTest, { TestFn, ExecutionContext } from 'ava'
+import { beforeEach, afterEach, it, assert } from 'vitest'
 import { Miniflare } from 'miniflare'
 
-export interface Context {
+interface LocalTestContext {
   mf: Miniflare
 }
 
-const test = avaTest as TestFn<Context>
-
-test.beforeEach((t: ExecutionContext<Context>) => {
+beforeEach<LocalTestContext>(async (ctx) => {
   // Create a new Miniflare environment for each test
-  const mf = new Miniflare({
+  ctx.mf = new Miniflare({
     // Autoload configuration from `.env`, `package.json` and `wrangler.toml`
     envPath: true,
     packagePath: true,
@@ -23,16 +21,13 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     kvNamespaces: ['TEST_NAMESPACE'],
     scriptPath: "dist/worker.mjs",
   })
-  t.context = { mf }
 })
 
-test.afterEach(async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+afterEach<LocalTestContext>(async ({ mf }) => {
   // grab exports
   const { zigHeap } = await mf.getModuleExports()
   // Check that the heap is empty
-  t.deepEqual(zigHeap(), [
+  assert.deepEqual(zigHeap(), [
     [1, null],
     [2, undefined],
     [3, true],
@@ -42,9 +37,7 @@ test.afterEach(async (t: ExecutionContext<Context>) => {
   ])
 })
 
-test('schedule: test all event properties -> check returned values', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('schedule: test all event properties -> check returned values', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const date = Date.now()
   await mf.dispatchScheduled(date, '30 * * * *')
@@ -52,7 +45,7 @@ test('schedule: test all event properties -> check returned values', async (t: E
   const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
   const obj = await TEST_NAMESPACE.get('obj', { type: 'json' })
   // Check the body was returned
-  t.deepEqual(obj, {
+  assert.deepEqual(obj, {
     cron: '30 * * * *',
     scheduledTime: date
   })

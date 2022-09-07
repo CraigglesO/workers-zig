@@ -1,15 +1,13 @@
-import avaTest, { TestFn, ExecutionContext } from 'ava'
+import { beforeEach, afterEach, it, assert } from 'vitest'
 import { Miniflare } from 'd1testflare'
 
-export interface Context {
+interface LocalTestContext {
   mf: Miniflare
 }
 
-const test = avaTest as TestFn<Context>
-
-test.beforeEach(async (t: ExecutionContext<Context>) => {
+beforeEach<LocalTestContext>(async (ctx) => {
   // Create a new Miniflare environment for each test
-  const mf = new Miniflare({
+  const mf = ctx.mf = new Miniflare({
     envPath: true,
     packagePath: true,
     wranglerConfigPath: true,
@@ -27,62 +25,54 @@ test.beforeEach(async (t: ExecutionContext<Context>) => {
     stmt.bind(11, 'Bs Beverages', 'Victoria Ashworth'),
     stmt.bind(13, 'Bs Beverages', 'Random Name'),
   ]).catch(err => console.error(err))
-
-  t.context = { mf }
 })
 
-test.afterEach(async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+afterEach<LocalTestContext>(async ({ mf }) => {
   // grab exports
   const { zigHeap } = await mf.getModuleExports()
   // Check that the heap is empty
-  t.deepEqual(zigHeap(), [
+  assert.deepEqual(zigHeap(), [
     [1, null],
     [2, undefined],
     [3, true],
     [4, false],
     [5, Infinity],
-    [6, NaN]
+    [6, NaN] // NaN resolves to null
   ])
 })
 
-test('d1: first: return result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('d1: first: return result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/d1/first')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(await res.json(), { CompanyName: 'Alfreds Futterkiste' })
+  assert.equal(res.status, 200)
+  assert.deepEqual(await res.json(), { CompanyName: 'Alfreds Futterkiste' })
 })
 
-test('d1: all: return result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('d1: all: return result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/d1/all')
   const body: any = await res.json()
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(body.results, [{ CompanyName: 'Alfreds Futterkiste' }])
-  t.deepEqual(body.lastRowId, null)
-  t.deepEqual(body.changes, null)
-  t.deepEqual(body.success, true)
-  t.deepEqual(body.served_by, 'x-miniflare.db3')
-  t.is(typeof body.duration, 'number')
+  assert.equal(res.status, 200)
+  assert.deepEqual(body.results, [{ CompanyName: 'Alfreds Futterkiste' }])
+  assert.deepEqual(body.lastRowId, null)
+  assert.deepEqual(body.changes, null)
+  assert.deepEqual(body.success, true)
+  assert.deepEqual(body.served_by, 'x-miniflare.db3')
+  assert.equal(typeof body.duration, 'number')
 })
 
 // NOTE: Currently the return for raw is bugged?
-// test('d1: raw: return result', async (t: ExecutionContext<Context>) => {
+// it<LocalTestContext>('d1: raw: return result', async ({ mf }) => {
 //   // Get the Miniflare instance
 //   const { mf } = t.context
 //   // Dispatch a fetch event to our worker
 //   const res = await mf.dispatchFetch('http://localhost:8787/d1/raw')
 //   const body: any = await res.json()
 //   // Check the body was returned
-//   t.is(res.status, 200)
-//   t.deepEqual(body, ['Alfreds Futterkiste'])
+//   assert.equal(res.status, 200)
+//   assert.deepEqual(body, ['Alfreds Futterkiste'])
 
 //   // t.true(true)
 //   // const db = await mf.getD1Database('TEST_DB')
@@ -91,32 +81,28 @@ test('d1: all: return result', async (t: ExecutionContext<Context>) => {
 //   // console.log(raw)
 // })
 
-test('d1: run: return result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('d1: run: return result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/d1/run')
   // Check the body was returned
-  t.is(res.status, 200)
+  assert.equal(res.status, 200)
   
   const db = await mf.getD1Database('TEST_DB')
   const stmt = db.prepare('SELECT * FROM Customers WHERE CustomerID = ?')
   const dbRes = await stmt.bind(69).first()
-  t.deepEqual(dbRes, { CustomerID: 69, CompanyName: 'S2Maps', ContactName: 'CTO' });
+  assert.deepEqual(dbRes, { CustomerID: 69, CompanyName: 'S2Maps', ContactName: 'CTO' });
 })
 
-test('d1: batch: return result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('d1: batch: return result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/d1/batch')
   // Check the body was returned
-  t.is(res.status, 200)
+  assert.equal(res.status, 200)
   
   const db = await mf.getD1Database('TEST_DB')
   const stmt = db.prepare('SELECT * FROM Customers')
   const dbRes = await stmt.all()
-  t.deepEqual(dbRes.results, [
+  assert.deepEqual(dbRes.results, [
     { CustomerID: 1, CompanyName: 'Alfreds Futterkiste', ContactName: 'Maria Anders' },
     { CustomerID: 11, CompanyName: 'Bs Beverages', ContactName: 'Victoria Ashworth' },
     { CustomerID: 13, CompanyName: 'Bs Beverages', ContactName: 'Random Name' },
@@ -126,14 +112,12 @@ test('d1: batch: return result', async (t: ExecutionContext<Context>) => {
   ])
 })
 
-test('d1: exec: return result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('d1: exec: return result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/d1/exec')
   const body: any = await res.json();
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(body.count, 1)
-  t.is(typeof body.duration, 'number')
+  assert.equal(res.status, 200)
+  assert.equal(body.count, 1)
+  assert.equal(typeof body.duration, 'number')
 })

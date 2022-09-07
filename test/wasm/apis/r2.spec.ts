@@ -1,132 +1,111 @@
-import avaTest, { TestFn, ExecutionContext } from 'ava'
+import { beforeEach, afterEach, it, assert } from 'vitest'
 import { Miniflare } from 'miniflare'
 
-export interface Context {
+interface LocalTestContext {
   mf: Miniflare
 }
 
-const test = avaTest as TestFn<Context>
-
-test.beforeEach((t: ExecutionContext<Context>) => {
-  // Create a new Miniflare environment for each test
-  const mf = new Miniflare({
+beforeEach<LocalTestContext>(async (ctx) => {
+  // Create a new Miniflare environment for each it<LocalTestContext>
+  ctx.mf = new Miniflare({
     // Autoload configuration from `.env`, `package.json` and `wrangler.toml`
     envPath: true,
     packagePath: true,
     wranglerConfigPath: true,
-    // We don't want to rebuild our worker for each test, we're already doing
-    // it once before we run all tests in package.json, so disable it here.
+    // We don't want to rebuild our worker for each it<LocalTestContext>, we're already doing
+    // it once before we run all it<LocalTestContext>s in package.json, so disable it here.
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
     r2Buckets: ['TEST_BUCKET'],
     scriptPath: "dist/worker.mjs",
   })
-  t.context = { mf }
 })
 
-test.afterEach(async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+afterEach<LocalTestContext>(async ({ mf }) => {
   // grab exports
   const { zigHeap } = await mf.getModuleExports()
   // Check that the heap is empty
-  t.deepEqual(zigHeap(), [
+  assert.deepEqual(zigHeap(), [
     [1, null],
     [2, undefined],
     [3, true],
     [4, false],
     [5, Infinity],
-    [6, NaN]
+    [6, NaN] // NaN resolves to null
   ])
 })
 
-test('r2: stream: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: stream: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/stream')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'value')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'value')
 })
 
-test('r2: text: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: text: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/text')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'value')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'value')
 })
 
-test('r2: string: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: string: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/string')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'value')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'value')
 })
 
-test('r2: arrayBuffer: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: arrayBuffer: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/array-buffer')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
+  assert.equal(res.status, 200)
+  assert.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
 })
 
-test('r2: bytes: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: bytes: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/bytes')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
+  assert.equal(res.status, 200)
+  assert.deepEqual(new Uint8Array(await res.arrayBuffer()), new Uint8Array([0, 1, 2, 3]))
 })
 
-test('r2: object: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: object: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/object')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(await res.json(), { a: 1, b: 'test' })
+  assert.equal(res.status, 200)
+  assert.deepEqual(await res.json(), { a: 1, b: 'test' })
 })
 
-test('r2: json: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: json: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/json')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(await res.json(), { a: 1, b: 'test' })
+  assert.equal(res.status, 200)
+  assert.deepEqual(await res.json(), { a: 1, b: 'test' })
 })
 
-test('r2: head: put -> head -> return head result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: head: put -> head -> return head result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/head')
   const obj: R2Object = await res.json()
   const copy = { ...obj }
   
   // Check the body was returned
-  t.is(res.status, 200)
-  t.truthy(copy.uploaded)
+  assert.equal(res.status, 200)
+  assert.isNotNull(copy.uploaded)
   const date = new Date()
   copy.uploaded = date
-  t.truthy(copy.version)
+  assert.isNotNull(copy.version)
   copy.version = ''
-  t.deepEqual(copy, {
+  assert.deepEqual(copy, {
     customMetadata: {},
     etag: '034fd23a497ff794f10bd7a2bf6abff9',
     httpEtag: '"034fd23a497ff794f10bd7a2bf6abff9"',
@@ -138,19 +117,15 @@ test('r2: head: put -> head -> return head result', async (t: ExecutionContext<C
   })
 })
 
-test('r2: delete: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: delete: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/delete')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'value deleted')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'value deleted')
 })
 
-test('r2: list: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: list: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/list')
   const obj: any = await res.json()
@@ -161,8 +136,8 @@ test('r2: list: put -> get -> return get result', async (t: ExecutionContext<Con
     return obj
   })
   // Check the body was returned
-  t.is(res.status, 200)
-  t.deepEqual(clone, {
+  assert.equal(res.status, 200)
+  assert.deepEqual(clone, {
     cursor: '',
     delimitedPrefixes: [],
     truncated: false,
@@ -211,24 +186,22 @@ test('r2: list: put -> get -> return get result', async (t: ExecutionContext<Con
   })
 })
 
-test('r2: r2object: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: r2object: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/r2object')
   const obj: R2Object = await res.json()
   const copy = { ...obj }
   
   // Check the body was returned
-  t.is(res.status, 200)
-  t.truthy(copy.uploaded)
-  t.true(typeof copy.uploaded === 'string')
+  assert.equal(res.status, 200)
+  assert.isNotNull(copy.uploaded)
+  assert.isTrue(typeof copy.uploaded === 'string')
   const date = new Date()
   copy.uploaded = date
-  t.truthy(copy.version)
-  t.true(typeof copy.version === 'string')
+  assert.isNotNull(copy.version)
+  assert.isTrue(typeof copy.version === 'string')
   copy.version = ''
-  t.deepEqual(copy, {
+  assert.deepEqual(copy, {
     customMetadata: {},
     etag: '2063c1608d6e0baf80249c42e2be5804',
     httpEtag: '"2063c1608d6e0baf80249c42e2be5804"',
@@ -240,24 +213,22 @@ test('r2: r2object: put -> get -> return get result', async (t: ExecutionContext
   })
 })
 
-test('r2: r2objectBody: put -> get -> return get result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('r2: r2objectBody: put -> get -> return get result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/r2/r2object-body')
   const obj: R2Object = await res.json()
   const copy = { ...obj }
   
   // Check the body was returned
-  t.is(res.status, 200)
-  t.truthy(copy.uploaded)
-  t.true(typeof copy.uploaded === 'string')
+  assert.equal(res.status, 200)
+  assert.isNotNull(copy.uploaded)
+  assert.isTrue(typeof copy.uploaded === 'string')
   const date = new Date()
   copy.uploaded = date
-  t.truthy(copy.version)
-  t.true(typeof copy.version === 'string')
+  assert.isNotNull(copy.version)
+  assert.isTrue(typeof copy.version === 'string')
   copy.version = ''
-  t.deepEqual(copy, {
+  assert.deepEqual(copy, {
     customMetadata: {},
     etag: '2063c1608d6e0baf80249c42e2be5804',
     httpEtag: '"2063c1608d6e0baf80249c42e2be5804"',

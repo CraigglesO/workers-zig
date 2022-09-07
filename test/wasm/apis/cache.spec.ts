@@ -1,15 +1,13 @@
-import avaTest, { TestFn, ExecutionContext } from 'ava'
+import { beforeEach, afterEach, it, assert } from 'vitest'
 import { Miniflare } from 'miniflare'
 
-export interface Context {
+interface LocalTestContext {
   mf: Miniflare
 }
 
-const test = avaTest as TestFn<Context>
-
-test.beforeEach((t: ExecutionContext<Context>) => {
+beforeEach<LocalTestContext>(async (ctx) => {
   // Create a new Miniflare environment for each test
-  const mf = new Miniflare({
+  ctx.mf = new Miniflare({
     // Autoload configuration from `.env`, `package.json` and `wrangler.toml`
     envPath: true,
     packagePath: true,
@@ -22,86 +20,71 @@ test.beforeEach((t: ExecutionContext<Context>) => {
     kvNamespaces: ['TEST_NAMESPACE'],
     scriptPath: "dist/worker.mjs",
   })
-  t.context = { mf }
 })
 
-test.afterEach(async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+afterEach<LocalTestContext>(async ({ mf }) => {
   // grab exports
   const { zigHeap } = await mf.getModuleExports()
   // Check that the heap is empty
-  t.deepEqual(zigHeap(), [
+  assert.deepEqual(zigHeap(), [
     [1, null],
     [2, undefined],
     [3, true],
     [4, false],
     [5, Infinity],
-    [6, NaN]
+    [6, NaN] // NaN resolves to null
   ])
 })
 
-test('cache: text: put -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: text: put -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/text')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'cached response')
 })
 
-test('cache: string: put -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: string: put -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/string')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'cached response')
 })
 
-test('cache: unique: put -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: unique: put -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/unique')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'cached response')
   // check cache is comming from updated cache source
   const caches = await mf.getCaches()
   const cache = await caches.open('newcache')
   const checkCache = await cache.match('http://localhost/cacheTest')
-  t.is(await checkCache?.text(), 'cached response')
+  assert.equal(await checkCache?.text(), 'cached response')
 })
 
-test('cache: delete: put -> delete -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: delete: put -> delete -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/delete')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'deleted cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'deleted cached response')
 })
 
-test('cache: text: ignoreMethod: put -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: text: ignoreMethod: put -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/ignore/text')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'cached response')
 })
 
-test('cache: delete: ignoreMethod: put -> delete -> match -> return match result', async (t: ExecutionContext<Context>) => {
-  // Get the Miniflare instance
-  const { mf } = t.context
+it<LocalTestContext>('cache: delete: ignoreMethod: put -> delete -> match -> return match result', async ({ mf }) => {
   // Dispatch a fetch event to our worker
   const res = await mf.dispatchFetch('http://localhost:8787/cache/ignore/delete')
   // Check the body was returned
-  t.is(res.status, 200)
-  t.is(await res.text(), 'deleted cached response')
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), 'deleted cached response')
 })

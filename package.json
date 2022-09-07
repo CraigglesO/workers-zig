@@ -53,33 +53,19 @@
     "build:zig": "zig build",
     "build:module": "rm -rf distESM && mkdir distESM && tsc --build tsconfig.module.json",
     "wrangler:publish": "wrangler publish",
-    "test": "zig build && node esbuild.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/wasm/**/*.spec.ts",
-    "test:wasi": "zig build && node esbuildWasi.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" ava --verbose ./test/wasi/**/*.spec.ts"
-  },
-  "ava": {
-    "extensions": {
-      "ts": "module"
-    },
-    "nodeArguments": [
-      "--loader=ts-node/esm"
-    ]
+    "test": "zig build && node esbuild.mjs && node esbuildWasi.mjs && NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" vitest run"
   },
   "devDependencies": {
-    "@ava/typescript": "^3.0.1",
     "@cloudflare/workers-types": "^3.14.1",
-    "@types/node": "^18.7.10",
-    "ava": "^4.3.1",
     "d1testflare": "^2.7.5",
     "esbuild": "^0.14.53",
-    "hono": "^2.0.8",
     "itty-router": "^2.6.1",
     "miniflare": "^2.7.1",
-    "ts-node": "^10.9.1",
     "typescript": "^4.7.4",
+    "vitest": "^0.23.1",
     "wrangler": "2.0.26"
   },
   "dependencies": {
-    "@cloudflare/workers-wasi": "^0.0.5",
-    "wasi": "^0.0.6"
+    "@cloudflare/workers-wasi": "^0.0.5"
   }
 }
