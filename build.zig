@@ -26,11 +26,12 @@ pub fn build(b: *Builder) void {
     wasm_build.install();
 
     // build tests for freestanding wasm
-    const tests_build = b.addSharedLibrary("tests", "lib/tests.zig", .unversioned);
+    const tests_build = b.addSharedLibrary("zigWASM", "lib/tests.zig", .unversioned);
     tests_build.setTarget(std.zig.CrossTarget {
         .cpu_arch = .wasm32,
         .os_tag = .freestanding,
     });
+    // tests_build.setOutputDir("wasm");
     tests_build.build_mode = std.builtin.Mode.ReleaseSmall;
     tests_build.strip = true;
     tests_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
@@ -38,11 +39,12 @@ pub fn build(b: *Builder) void {
     tests_build.install();
 
     // build tests for wasi wasm
-    const tests_wasi_build = b.addSharedLibrary("tests_wasi", "lib/testsWASI.zig", .unversioned);
+    const tests_wasi_build = b.addSharedLibrary("zigWASI", "lib/testsWASI.zig", .unversioned);
     tests_wasi_build.setTarget(std.zig.CrossTarget {
         .cpu_arch = .wasm32,
         .os_tag = .wasi,
     });
+    // tests_wasi_build.setOutputDir("wasm");
     tests_wasi_build.build_mode = std.builtin.Mode.ReleaseSmall;
     tests_wasi_build.strip = true;
     tests_wasi_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;

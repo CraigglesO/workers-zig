@@ -1,7 +1,7 @@
 import Heap from './heap'
 import * as envFunctions from './env'
-// @ts-expect-error: external import
-import __WORKER_ZIG_WASM from './__worker_zig_wasm.wasm'
+// @ts-expect-error: Needs to be accessed by parent modules
+import WORKER_ZIG_WASM from './zigWASM.wasm'
 
 export const textDecoder = new TextDecoder()
 export const textEncoder = new TextEncoder()
@@ -28,7 +28,7 @@ export default class WASM {
   async _buildWASM () {
     if (this.instance !== undefined) return
     // @ts-ignore
-    this.instance = new WebAssembly.Instance(__WORKER_ZIG_WASM, {
+    this.instance = new WebAssembly.Instance(WORKER_ZIG_WASM, {
       env: {
         memoryBase: 0,
         tableBase: 0,

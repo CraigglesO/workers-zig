@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename)
 esbuild
   .buildSync({
     entryPoints: [
-      './test/wasm.ts'
+      './test/index.ts'
     ],
     format: 'esm',
     sourcemap: false,
@@ -23,12 +23,13 @@ esbuild
     bundle: true,
     minify: false,
     outfile: './dist/tmp_worker.mjs',
-    external: ['*.wasm', '@cloudflare/workers-wasi'],
+    external: ['*.wasm'],
   })
 
-// step 2: copy __worker_zig_wasi.wasm and __worker_zig_wasm.wasm to dist
-copyFileSync('./zig-out/lib/tests.wasm', './dist/__worker_zig_wasm.wasm')
-copyFileSync('./zig-out/lib/tests_wasi.wasm', './dist/__worker_zig_wasi.wasm')
+// step 2: copy zigWASM and zigWASI to dist
+copyFileSync('./zig-out/lib/zigWASM.wasm', './dist/zigWASM.wasm')
+copyFileSync('./zig-out/lib/zigWASI.wasm', './dist/zigWASI.wasm')
+copyFileSync('./memfs.wasm', './dist/memfs.wasm')
 
 // step 3: final build
 esbuild
@@ -51,13 +52,14 @@ esbuild
   .then(() => {
     // cleanup tmp files
     unlinkSync('./dist/tmp_worker.mjs')
-    unlinkSync('./dist/__worker_zig_wasm.wasm')
-    unlinkSync('./dist/__worker_zig_wasi.wasm')
+    unlinkSync('./dist/zigWASM.wasm')
+    unlinkSync('./dist/zigWASI.wasm')
+    unlinkSync('./dist/memfs.wasm')
   })
   .then(() => {
     stepFour()
   })
-  .catch(() => process.exit(1))
+  .catch((err) => { console.log(err); process.exit(1) })
 
 // step 4: read line-by-line. If line includes a .wasm file, convert to import
 function stepFour () {

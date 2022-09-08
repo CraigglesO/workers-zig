@@ -2,7 +2,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 import { Router } from 'itty-router'
-import { zigFetch, zigSchedule, getZigWorker } from '../src/index'
+import { zigFetch, zigWasiFetch, zigSchedule, getZigWorker } from '../src/index'
 
 const router = Router()
 // js route
@@ -11,6 +11,9 @@ router.get('/', () => new Response('Hello from JS!'))
 router.post('/basic', zigFetch<Env>('basic'))
 // **FETCH**
 router.get('/fetch', zigFetch<Env>('fetch'))
+// **CRYPTO**
+router.post('/argon-hash', zigWasiFetch<Env>('argonHash'))
+router.post('/argon-verify', zigWasiFetch<Env>('argonVerify'))
 // **CACHE**
 router.get('/cache/text', zigFetch<Env>('cacheText'))
 router.get('/cache/string', zigFetch<Env>('cacheString'))

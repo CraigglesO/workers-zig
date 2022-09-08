@@ -16,7 +16,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
-    scriptPath: "dist/workerWASI.mjs",
+    scriptPath: "dist/worker.mjs",
   })
 })
 

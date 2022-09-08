@@ -2,19 +2,16 @@ lockfileVersion: 5.4
 
 specifiers:
   '@cloudflare/workers-types': ^3.14.1
-  '@cloudflare/workers-wasi': ^0.0.5
   d1testflare: ^2.7.5
   esbuild: ^0.14.53
   esbuild-plugin-wat: ^0.2.7
   itty-router: ^2.6.1
   miniflare: ^2.7.1
+  rollup: ^2.79.0
   typescript: ^4.7.4
   uglify-js: ^3.17.0
   vitest: ^0.23.1
   wrangler: 2.0.26
-
-dependencies:
-  '@cloudflare/workers-wasi': 0.0.5
 
 devDependencies:
   '@cloudflare/workers-types': 3.14.1
@@ -23,6 +20,7 @@ devDependencies:
   esbuild-plugin-wat: 0.2.7
   itty-router: 2.6.1
   miniflare: 2.7.1
+  rollup: 2.79.0
   typescript: 4.7.4
   uglify-js: 3.17.0
   vitest: 0.23.1
@@ -39,10 +37,6 @@ packages:
   /@cloudflare/workers-types/3.14.1:
     resolution: {integrity: sha512-B1/plF62pt+H2IJHvApK8fdOJAVsvojvacuac8x8s+JIyqbropMyqNqHTKLm3YD8ZFLGwYeFTudU+PQ7vGvBdA==}
     dev: true
-
-  /@cloudflare/workers-wasi/0.0.5:
-    resolution: {integrity: sha512-Gxu2tt2YY8tRgN7vfY8mSW0Md5wUj5+gb5eYrqsGRM+qJn9jx+ButL6BteLluDe5vlEkxQ69LagEMHjE58O7iQ==}
-    dev: false
 
   /@d1testflare/cache/2.7.1:
     resolution: {integrity: sha512-zEDDwbHYMhchRjM+1p7JS9JuR/VJkTKZEv1/UikP6sYHGsRf8OrJbPKbkixCRkpdmPv5aNQQcKoonXMejFyWRA==}
@@ -1728,6 +1722,14 @@ packages:
 
   /rollup/2.78.1:
     resolution: {integrity: sha512-VeeCgtGi4P+o9hIg+xz4qQpRl6R401LWEXBmxYKOV4zlF82lyhgh2hTZnheFUbANE8l2A41F458iwj2vEYaXJg==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
+  /rollup/2.79.0:
+    resolution: {integrity: sha512-x4KsrCgwQ7ZJPcFA/SUu6QVcYlO7uRLfLAy0DSA4NS2eG8japdbpM50ToH7z4iObodRYOJ0soneF0iaQRJ6zhA==}
     engines: {node: '>=10.0.0'}
     hasBin: true
     optionalDependencies:

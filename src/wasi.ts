@@ -1,6 +1,6 @@
-import { WASI } from '@cloudflare/workers-wasi'
-// @ts-expect-error: external import
-import __WORKER_ZIG_WASI from './__worker_zig_wasi.wasm'
+import { WASI } from './wasi/index'
+// @ts-expect-error: Needs to be accessed by parent modules
+import WORKER_ZIG_WASI from './zigWASI.wasm'
 
 import type { FetchContext } from './worker'
 
@@ -17,7 +17,7 @@ export async function wasiFetch (fetchCtx: FetchContext) {
   })
 
   // Instantiate our WASM with our demo module and our configured WASI import.
-  const instance = new WebAssembly.Instance(__WORKER_ZIG_WASI, {
+  const instance = new WebAssembly.Instance(WORKER_ZIG_WASI, {
     wasi_snapshot_preview1: wasi.wasiImport,
   })
 
