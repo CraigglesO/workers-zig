@@ -12,5 +12,5 @@ router.post('/argon-hash', zigWasiFetch<Env>('argonHash'))
 router.post('/argon-verify', zigWasiFetch<Env>('argonVerify'))
 
 export default {
-  fetch: router.handle,
+  fetch: router.handle
 }

@@ -14,7 +14,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     buildCommand: undefined,
     modules: true,
     d1Databases: ['TEST_DB'],
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
   // prep the db
   const db = await mf.getD1Database('TEST_DB')

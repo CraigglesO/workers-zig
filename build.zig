@@ -18,7 +18,6 @@ pub fn build(b: *Builder) void {
 
     // ensure main is building
     const wasm_build = b.addSharedLibrary("zig", "lib/main.zig", .unversioned);
-    wasm_build.setOutputDir("dist");
     wasm_build.setTarget(std.zig.CrossTarget {
         .cpu_arch = .wasm32,
         .os_tag = .freestanding,
@@ -28,26 +27,24 @@ pub fn build(b: *Builder) void {
 
     // build tests for freestanding wasm
     const tests_build = b.addSharedLibrary("tests", "lib/tests.zig", .unversioned);
-    tests_build.setOutputDir("dist");
     tests_build.setTarget(std.zig.CrossTarget {
         .cpu_arch = .wasm32,
         .os_tag = .freestanding,
     });
-    tests_build.build_mode = std.builtin.Mode.ReleaseFast;
-    tests_build.strip = false;
+    tests_build.build_mode = std.builtin.Mode.ReleaseSmall;
+    tests_build.strip = true;
     tests_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
     tests_build.addPackagePath("workers-zig", "lib/main.zig");
     tests_build.install();
 
     // build tests for wasi wasm
     const tests_wasi_build = b.addSharedLibrary("tests_wasi", "lib/testsWASI.zig", .unversioned);
-    tests_wasi_build.setOutputDir("dist");
     tests_wasi_build.setTarget(std.zig.CrossTarget {
         .cpu_arch = .wasm32,
         .os_tag = .wasi,
     });
-    tests_wasi_build.build_mode = std.builtin.Mode.ReleaseFast;
-    tests_wasi_build.strip = false;
+    tests_wasi_build.build_mode = std.builtin.Mode.ReleaseSmall;
+    tests_wasi_build.strip = true;
     tests_wasi_build.linkage = std.build.LibExeObjStep.Linkage.dynamic;
     tests_wasi_build.addPackagePath("workers-zig", "lib/main.zig");
     tests_wasi_build.install();

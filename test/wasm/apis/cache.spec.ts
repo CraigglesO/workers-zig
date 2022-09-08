@@ -18,7 +18,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     buildCommand: undefined,
     modules: true,
     kvNamespaces: ['TEST_NAMESPACE'],
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
 })
 

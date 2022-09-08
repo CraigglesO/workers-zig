@@ -5,9 +5,11 @@ specifiers:
   '@cloudflare/workers-wasi': ^0.0.5
   d1testflare: ^2.7.5
   esbuild: ^0.14.53
+  esbuild-plugin-wat: ^0.2.7
   itty-router: ^2.6.1
   miniflare: ^2.7.1
   typescript: ^4.7.4
+  uglify-js: ^3.17.0
   vitest: ^0.23.1
   wrangler: 2.0.26
 
@@ -18,9 +20,11 @@ devDependencies:
   '@cloudflare/workers-types': 3.14.1
   d1testflare: 2.7.5
   esbuild: 0.14.53
+  esbuild-plugin-wat: 0.2.7
   itty-router: 2.6.1
   miniflare: 2.7.1
   typescript: 4.7.4
+  uglify-js: 3.17.0
   vitest: 0.23.1
   wrangler: 2.0.26
 
@@ -420,6 +424,14 @@ packages:
     resolution: {integrity: sha512-TgfOX+mGY/NyNxJLIbDWrO9DjGoVSW9+aB8H2yy1fy32jsvxijhmyJI9fDFgvz3YP4lvJaq9DzdR/M1bOgVc9g==}
     dev: true
 
+  /@xtuc/ieee754/1.2.0:
+    resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
+    dev: true
+
+  /@xtuc/long/4.2.2:
+    resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
+    dev: true
+
   /acorn/8.8.0:
     resolution: {integrity: sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w==}
     engines: {node: '>=0.4.0'}
@@ -453,6 +465,11 @@ packages:
   /binary-extensions/2.2.0:
     resolution: {integrity: sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==}
     engines: {node: '>=8'}
+    dev: true
+
+  /binaryen/110.0.0:
+    resolution: {integrity: sha512-b1rQFvnjNIfuW0UYSBgwLIrKD9PaG0iEzWXyoWLBFp/HRdvgD+7LGUnxG+/yKz1+tyiTdRm/lFRxsmYXaULIUg==}
+    hasBin: true
     dev: true
 
   /bindings/1.5.0:
@@ -532,6 +549,10 @@ packages:
 
   /chownr/1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    dev: true
+
+  /commondir/1.0.1:
+    resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
     dev: true
 
   /cookie/0.4.2:
@@ -629,6 +650,10 @@ packages:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
     dependencies:
       once: 1.4.0
+    dev: true
+
+  /es-module-lexer/0.4.1:
+    resolution: {integrity: sha512-ooYciCUtfw6/d2w56UVeqHPcoCFAiJdz5XOkYpv/Txl1HMUozpXjz/2RIQgqwKdXNDPSF1W7mJCFse3G+HDyAA==}
     dev: true
 
   /esbuild-android-64/0.14.51:
@@ -1063,6 +1088,21 @@ packages:
     dev: true
     optional: true
 
+  /esbuild-plugin-wat/0.2.7:
+    resolution: {integrity: sha512-Hb2BJHezVrKDu3zY/gAKdLa5j3l8ybgi7UDgxFHwpxjMRqmMgceBa1FIQLZovfh5bhbl1u0n4MMnhRS0yM1BNg==}
+    hasBin: true
+    dependencies:
+      '@webassemblyjs/ast': '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-ast.tgz'
+      '@webassemblyjs/wasm-parser': '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wasm-parser.tgz'
+      '@webassemblyjs/wast-parser': '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-parser.tgz'
+      '@webassemblyjs/wast-printer': '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-printer.tgz'
+      binaryen: 110.0.0
+      find-cache-dir: 3.3.2
+      minimist: 1.2.6
+      parse-imports: 1.1.0
+      wabt: 1.0.29
+    dev: true
+
   /esbuild-sunos-64/0.14.51:
     resolution: {integrity: sha512-HoHaCswHxLEYN8eBTtyO0bFEWvA3Kdb++hSQ/lLG7TyKF69TeSG0RNoBRAs45x/oCeWaTDntEZlYwAfQlhEtJA==}
     engines: {node: '>=12'}
@@ -1282,6 +1322,23 @@ packages:
       to-regex-range: 5.0.1
     dev: true
 
+  /find-cache-dir/3.3.2:
+    resolution: {integrity: sha512-wXZV5emFEjrridIgED11OoUKLxiYjAcqot/NJdAkOhlJ+vGzwhOAfcG5OX1jP+S0PcjEn8bdMJv+g2jwQ3Onig==}
+    engines: {node: '>=8'}
+    dependencies:
+      commondir: 1.0.1
+      make-dir: 3.1.0
+      pkg-dir: 4.2.0
+    dev: true
+
+  /find-up/4.1.0:
+    resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
+    engines: {node: '>=8'}
+    dependencies:
+      locate-path: 5.0.0
+      path-exists: 4.0.0
+    dev: true
+
   /fs-constants/1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
     dev: true
@@ -1384,6 +1441,13 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
+  /locate-path/5.0.0:
+    resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
+    engines: {node: '>=8'}
+    dependencies:
+      p-locate: 4.1.0
+    dev: true
+
   /loupe/2.3.4:
     resolution: {integrity: sha512-OvKfgCC2Ndby6aSTREl5aCCPTNIzlDfQZvZxNUrBrihDhL3xcrYegTblhmEiCrg2kKQz4XsFIaemE5BF4ybSaQ==}
     dependencies:
@@ -1401,6 +1465,13 @@ packages:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
     dependencies:
       sourcemap-codec: 1.4.8
+    dev: true
+
+  /make-dir/3.1.0:
+    resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
+    engines: {node: '>=8'}
+    dependencies:
+      semver: 6.3.0
     dev: true
 
   /mime/3.0.0:
@@ -1504,6 +1575,38 @@ packages:
       wrappy: 1.0.2
     dev: true
 
+  /p-limit/2.3.0:
+    resolution: {integrity: sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==}
+    engines: {node: '>=6'}
+    dependencies:
+      p-try: 2.2.0
+    dev: true
+
+  /p-locate/4.1.0:
+    resolution: {integrity: sha512-R79ZZ/0wAxKGu3oYMlz8jy/kbhsNrS7SKZ7PxEHBgJ5+F2mtFW2fK2cOtBh1cHYkQsbzFV7I+EoRKe6Yt0oK7A==}
+    engines: {node: '>=8'}
+    dependencies:
+      p-limit: 2.3.0
+    dev: true
+
+  /p-try/2.2.0:
+    resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
+    engines: {node: '>=6'}
+    dev: true
+
+  /parse-imports/1.1.0:
+    resolution: {integrity: sha512-ov3Rc9e3wX9+BLR7nFx08+ThdLJfzi8ZXQrqZXfmuxdL+JCCN24m2uuBFBoaa/yyiZ9s8HjcHGDKSXJbKAyDQA==}
+    engines: {node: '>= 12.17'}
+    dependencies:
+      es-module-lexer: 0.4.1
+      slashes: 2.0.2
+    dev: true
+
+  /path-exists/4.0.0:
+    resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
+    engines: {node: '>=8'}
+    dev: true
+
   /path-parse/1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
     dev: true
@@ -1523,6 +1626,13 @@ packages:
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+    dev: true
+
+  /pkg-dir/4.2.0:
+    resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
+    engines: {node: '>=8'}
+    dependencies:
+      find-up: 4.1.0
     dev: true
 
   /postcss/8.4.16:
@@ -1640,6 +1750,11 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /semver/6.3.0:
+    resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
+    hasBin: true
+    dev: true
+
   /semver/7.3.7:
     resolution: {integrity: sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==}
     engines: {node: '>=10'}
@@ -1662,6 +1777,10 @@ packages:
       decompress-response: 6.0.0
       once: 1.4.0
       simple-concat: 1.0.1
+    dev: true
+
+  /slashes/2.0.2:
+    resolution: {integrity: sha512-68p+QkFAQQRetIUzNXAdktNJr8AYLxJukjBegYQz8F7VATsBJG621UYtY/vS2j9jerxdJ1k6Tc25K4DXEw1d5w==}
     dev: true
 
   /source-map-js/1.0.2:
@@ -1779,6 +1898,12 @@ packages:
     hasBin: true
     dev: true
 
+  /uglify-js/3.17.0:
+    resolution: {integrity: sha512-aTeNPVmgIMPpm1cxXr2Q/nEbvkmV8yq66F3om7X3P/cvOXQ0TMQ64Wk63iyT1gPlmdmGzjGpyLh1f3y8MZWXGg==}
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+    dev: true
+
   /undici/5.9.1:
     resolution: {integrity: sha512-6fB3a+SNnWEm4CJbgo0/CWR8RGcOCQP68SF4X0mxtYTq2VNN8T88NYrWVBAeSX+zb7bny2dx2iYhP3XHi00omg==}
     engines: {node: '>=12.18'}
@@ -1860,6 +1985,11 @@ packages:
       - terser
     dev: true
 
+  /wabt/1.0.29:
+    resolution: {integrity: sha512-taUwem3bYn5ZrDYSNqJ2lIAXA3t0Xon7rLjRa8PZ21h8vp0IP5SKyozcWFhv8PPC07KJkGWpDuSCnzSdJ01YsA==}
+    hasBin: true
+    dev: true
+
   /wrangler/2.0.26:
     resolution: {integrity: sha512-r0uuk8Iu0iDmADG5l2DuN1++bis8giGSqjvXroiltd6jXd1xHgLhiAOowLpDK48CM9e6AYNVZ/0QF3XGCRUq/w==}
     engines: {node: '>=16.7.0'}
@@ -1919,4 +2049,130 @@ packages:
       cookie: 0.4.2
       mustache: 4.2.0
       stack-trace: 0.0.10
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz}
+    name: '@webassemblyjs/ast'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/helper-numbers': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-numbers.tgz'
+      '@webassemblyjs/helper-wasm-bytecode': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-wasm-bytecode.tgz'
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-floating-point-hex-parser.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-floating-point-hex-parser.tgz}
+    name: '@webassemblyjs/floating-point-hex-parser'
+    version: 1.11.1
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-api-error.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-api-error.tgz}
+    name: '@webassemblyjs/helper-api-error'
+    version: 1.11.1
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-code-frame.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-code-frame.tgz}
+    name: '@webassemblyjs/helper-code-frame'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/wast-printer': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-wast-printer.tgz'
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-fsm.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-fsm.tgz}
+    name: '@webassemblyjs/helper-fsm'
+    version: 1.11.1
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-numbers.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-numbers.tgz}
+    name: '@webassemblyjs/helper-numbers'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/floating-point-hex-parser': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-floating-point-hex-parser.tgz'
+      '@webassemblyjs/helper-api-error': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-api-error.tgz'
+      '@xtuc/long': 4.2.2
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-wasm-bytecode.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-wasm-bytecode.tgz}
+    name: '@webassemblyjs/helper-wasm-bytecode'
+    version: 1.11.1
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ieee754.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ieee754.tgz}
+    name: '@webassemblyjs/ieee754'
+    version: 1.11.1
+    dependencies:
+      '@xtuc/ieee754': 1.2.0
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-leb128.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-leb128.tgz}
+    name: '@webassemblyjs/leb128'
+    version: 1.11.1
+    dependencies:
+      '@xtuc/long': 4.2.2
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-utf8.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-utf8.tgz}
+    name: '@webassemblyjs/utf8'
+    version: 1.11.1
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-wast-printer.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-wast-printer.tgz}
+    name: '@webassemblyjs/wast-printer'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/ast': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz'
+      '@xtuc/long': 4.2.2
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-ast.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-ast.tgz}
+    name: '@webassemblyjs/ast'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/helper-numbers': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-numbers.tgz'
+      '@webassemblyjs/helper-wasm-bytecode': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-wasm-bytecode.tgz'
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wasm-parser.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wasm-parser.tgz}
+    name: '@webassemblyjs/wasm-parser'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/ast': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz'
+      '@webassemblyjs/helper-api-error': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-api-error.tgz'
+      '@webassemblyjs/helper-wasm-bytecode': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-wasm-bytecode.tgz'
+      '@webassemblyjs/ieee754': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ieee754.tgz'
+      '@webassemblyjs/leb128': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-leb128.tgz'
+      '@webassemblyjs/utf8': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-utf8.tgz'
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-parser.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-parser.tgz}
+    name: '@webassemblyjs/wast-parser'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/ast': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz'
+      '@webassemblyjs/floating-point-hex-parser': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-floating-point-hex-parser.tgz'
+      '@webassemblyjs/helper-api-error': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-api-error.tgz'
+      '@webassemblyjs/helper-code-frame': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-code-frame.tgz'
+      '@webassemblyjs/helper-fsm': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-helper-fsm.tgz'
+      '@xtuc/long': 4.2.2
+    dev: true
+
+  '@github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-printer.tgz':
+    resolution: {tarball: https://github.com/mitschabaude/webassemblyjs/releases/latest/download/webassemblyjs-wast-printer.tgz}
+    name: '@webassemblyjs/wast-printer'
+    version: 1.11.1
+    dependencies:
+      '@webassemblyjs/ast': '@github.com/mitschabaude/webassemblyjs/releases/download/v1.11.1-3/webassemblyjs-ast.tgz'
+      '@xtuc/long': 4.2.2
     dev: true

@@ -18,7 +18,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     buildCommand: undefined,
     modules: true,
     r2Buckets: ['TEST_BUCKET'],
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
 })
 

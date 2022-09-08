@@ -17,7 +17,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     modules: true,
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
 })
 
@@ -35,9 +35,9 @@ afterEach<LocalTestContext>(async ({ mf }) => {
   ])
 })
 
-it<LocalTestContext>("basic example", async ({ mf }) => {
+it<LocalTestContext>('basic example', async ({ mf }) => {
   // Dispatch a fetch event to our worker
-  const res = await mf.dispatchFetch("http://localhost:8787/basic", {
+  const res = await mf.dispatchFetch('http://localhost:8787/basic', {
     method: 'POST',
     body: 'Hello from Zig'
   })

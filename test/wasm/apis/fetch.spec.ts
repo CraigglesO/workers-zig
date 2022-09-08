@@ -8,8 +8,8 @@ interface LocalTestContext {
 beforeEach<LocalTestContext>(async (ctx) => {
   // Create a new Miniflare environment for each test
   ctx.mf = new Miniflare({
-    name: "worker",
-    serviceBindings: { WORKER: "worker" },
+    name: 'worker',
+    serviceBindings: { WORKER: 'worker' },
     // Autoload configuration from `.env`, `package.json` and `wrangler.toml`
     envPath: true,
     packagePath: true,
@@ -20,8 +20,8 @@ beforeEach<LocalTestContext>(async (ctx) => {
     buildCommand: undefined,
     modules: true,
     kvNamespaces: ['TEST_NAMESPACE'],
-    scriptPath: "dist/worker.mjs",
-    host: "127.0.0.1",
+    scriptPath: 'dist/worker.mjs',
+    host: '127.0.0.1',
     port: 8787,
   })
 })

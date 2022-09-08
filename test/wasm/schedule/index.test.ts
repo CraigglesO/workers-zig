@@ -19,7 +19,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     modules: true,
     crons: ['30 * * * *'],
     kvNamespaces: ['TEST_NAMESPACE'],
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
 })
 
@@ -42,7 +42,7 @@ it<LocalTestContext>('schedule: test all event properties -> check returned valu
   const date = Date.now()
   await mf.dispatchScheduled(date, '30 * * * *')
   // grab the kv
-  const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
+  const TEST_NAMESPACE = await mf.getKVNamespace('TEST_NAMESPACE')
   const obj = await TEST_NAMESPACE.get('obj', { type: 'json' })
   // Check the body was returned
   assert.deepEqual(obj, {

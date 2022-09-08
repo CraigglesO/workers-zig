@@ -18,7 +18,7 @@ beforeEach<LocalTestContext>(async (ctx) => {
     buildCommand: undefined,
     modules: true,
     kvNamespaces: ['TEST_NAMESPACE'],
-    scriptPath: "dist/worker.mjs",
+    scriptPath: 'dist/worker.mjs',
   })
 })
 
@@ -74,7 +74,7 @@ it<LocalTestContext>('kv: text: put+expirationTtl -> check that data was stored 
   // Check the body was returned
   assert.equal(res.status, 200)
   // grab the KV and check the data
-  const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
+  const TEST_NAMESPACE = await mf.getKVNamespace('TEST_NAMESPACE')
   const list = await TEST_NAMESPACE.list()
   const firstKey = list.keys[0]
   assert.isTrue((firstKey.expiration ?? 0) > (Date.now() / 1000))
@@ -93,7 +93,7 @@ it<LocalTestContext>('kv: text: put+expiration -> check that data was stored wit
   // Check the body was returned
   assert.equal(res.status, 200)
   // grab the KV and check the data
-  const TEST_NAMESPACE = await mf.getKVNamespace("TEST_NAMESPACE")
+  const TEST_NAMESPACE = await mf.getKVNamespace('TEST_NAMESPACE')
   const list = await TEST_NAMESPACE.list()
   const firstKey = list.keys[0]
   assert.isTrue(firstKey.expiration == date)

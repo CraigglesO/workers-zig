@@ -1,6 +1,6 @@
 import { WASI } from '@cloudflare/workers-wasi'
 // @ts-expect-error: external import
-import __WORKER_ZIG_WASI from './tests_wasi.wasm'
+import __WORKER_ZIG_WASI from './__worker_zig_wasi.wasm'
 
 import type { FetchContext } from './worker'
 
