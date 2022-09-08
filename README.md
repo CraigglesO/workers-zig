@@ -18,6 +18,7 @@ Be sure to read the [Documentation](https://github.com/CraigglesO/workers-zig/tr
 ## Features
 
 - 🔗 Zero dependencies
+- 🗿 WASI support
 - 🤝 Use in tandem with Javascript or 100% Zig WebAssembly
 - 🎮 JS bindings with support to write your own - [List of supported bindings here](https://github.com/CraigglesO/workers-zig/tree/master/docs/bindings)
 - 📨 Fetch bindings
@@ -32,7 +33,6 @@ Be sure to read the [Documentation](https://github.com/CraigglesO/workers-zig/tr
 
 ## Features coming soon
 
-- 🗿 WASI support
 - 📌 Durable Objects bindings
 - ✉️ WebSockets bindings
 - once CF lands dynamic imports: Only load wasm when needed.
